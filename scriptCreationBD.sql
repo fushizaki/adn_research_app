@@ -1,0 +1,105 @@
+DROP TABLE IF EXISTS PLANIFIER;
+DROP TABLE IF EXISTS DETENIR;
+DROP TABLE IF EXISTS PLATEFORME;
+DROP TABLE IF EXISTS PARTICIPER;
+DROP TABLE IF EXISTS SEJOURNER;
+DROP TABLE IF EXISTS RAPPORTER;
+DROP TABLE IF EXISTS CAMPAGNE;
+DROP TABLE IF EXISTS LIEU;
+DROP TABLE IF EXISTS APPARTENIR;
+DROP TABLE IF EXISTS ECHANTILLON;
+DROP TABLE IF EXISTS ESPECE;
+
+
+CREATE DATABASE IF NOT EXISTSJurassique;
+use Jurassique;
+
+
+CREATE TABLE CAMPAGNE(
+    PRIMARY KEY(idCampagne),
+    idCampagne int NOT NULL AUTO_INCREMENT,
+    date_debut date NOT NULL,
+    duree int NOT NULL
+);
+
+CREATE TABLE PERSONNE(
+    PRIMARY KEY(idPersonne) NOT NULL,
+    idPersonne int NOT NULL ,
+    nom varchar(30),
+    prenom varchar(30)
+);
+
+CREATE TABLE PARTICIPER(
+    PRIMARY KEY (idCampagne, idPersonne),
+    idCampagne int,
+    idPersonne int
+);
+
+CREATE TABLE HABILITATION(
+    PRIMARY KEY(idHabilitation),
+    idHabilitation int NOT NULL AUTO_INCREMENT,
+    nom_habilitation varchar(30),
+    description_hab varchar(30)
+);
+
+
+CREATE TABLE PLATEFORME(
+    PRIMARY KEY(idPlateforme),
+    idPlateforme int NOT NULL AUTO_INCREMENT,
+    nom varchar(48),
+    min_nb_personne int NOT NULL,
+    cout_journalier float(6,2) NOT NULL,
+    intervalle_maintenance int
+);
+
+CREATE TABLE DETENIR(
+    PRIMARY KEY(idHabilitation, idPlateforme)
+    idHabilitation int,
+    idPlateforme int
+
+);
+
+CREATE TABLE PLANNIFIER(
+    PRIMARY KEY(idPlateforme, idCampagne),
+    idPlatforme int,
+    idCampagne int
+);
+
+CREATE TABLE LIEU(
+    PRIMARY KEY(idLieu) NOT NULL,
+    idLieu int AUTO_INCREMENT,
+    nomLieu varchar(48)
+);
+
+CREATE TABLE SEJOURNER(
+    PRIMARY KEY(idCampagne, idLieu),
+    idCampagne int,AUTO_INCREMENT
+    idLieu int    
+);
+
+CREATE TABLE ECHANTILLON (
+    PRIMARY KEY(idEchant),
+    idEchant int NOT NULL AUTO_INCREMENT,
+    seq_nucleotides varchar (500) NOT NULL,
+    commentaires_echant varchar(500)
+);
+
+
+CREATE TABLE ESPECE(
+    PRIMARY KEY(idEspece),
+    idEspece int NOT NULL AUTO_INCREMENT,
+    nom_espece varchar(48),
+    caracteristiques_esp varchar(48)
+);
+
+CREATE TABLE APPARTENIR(
+    PRIMARY KEY(idEspece, idEchant)
+    idEspece int NOT NULL AUTO_INCREMENT,
+    idEchant int NOT NULL AUTO_INCREMENT
+);
+
+
+
+ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchant) REFERENCES ECHANTILLON(idEchant);
+ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEspece) REFERENCES ESPECE(idEspece);
+
