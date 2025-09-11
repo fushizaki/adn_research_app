@@ -98,7 +98,8 @@ CREATE TABLE APPARTENIR(
     idEchant int
 );
 
-CREATE TABLE PRIMARY KEY(idPersonne, idHabilitation),
+CREATE TABLE HABILITER(
+    PRIMARY KEY(idPersonne, idHabilitation),
     idPersonne int,
     idHabilitation int
 );
@@ -122,10 +123,6 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE(idPersonn
 ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(idHabilitation);
 ALTER TABLE DETENIR ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(idHabilitation);
 ALTER TABLE DETENIR ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME(idPlateforme);
-
-
-
-
 
 
 -- Insertion pour la BDD générer a l'aide de l'IA
