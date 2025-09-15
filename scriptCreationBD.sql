@@ -346,9 +346,8 @@ INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES
 (5, 10);
 
 DELIMITER |
-
 CREATE TRIGGER verif_intervalle_maintenance
-BEFORE INSERT ON PLANIFIER
+BEFORE INSERT ON PLANNIFIER
 FOR EACH ROW
 BEGIN
     DECLARE dureeFouille INT;
@@ -366,9 +365,24 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
     END IF;
-END;
-|
-DELIMITER;
+END |
+DELIMITER ;
+
+
+--Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
+delimiter |
+CREATE TRIGGER personnes_libres
+BEFORE INSERT ON PARTICIPER
+FOR EACH ROW
+BEGIN
+    declare date_finN int default 0;
+    declare date_debutC date;
+    declare dureeC int default 0;
+
+    select 
+
+end |
+delimiter;
 
 
 
