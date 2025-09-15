@@ -346,4 +346,51 @@ INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES
 (5, 10);
 
 
+-- OK : Plateforme 3 (habilitations 1 et 3), Campagne 6 participants ont habilitations 1 et 3
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (3, 6);
+
+-- KO : Plateforme 5 (habilitations 1 et 4), Campagne 2 participants (non habilités 4)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (5, 2);
+
+-- OK : Plateforme 7 (habilitations 1, 2, 3), Campagne 3 avec participants habilités 1, 2, 3
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (7, 3);
+
+-- KO : Plateforme 8 (habilitation 4), Campagne 1 (participants pas habilités 4)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (8, 1);
+
+
+-- TRIGGER : S’assurer que les personnes travaillant sur la plateforme sont habilité à le faire
+
+
+DELIMITER |
+
+CREATE TRIGGER verif_habilite_personnes
+BEFORE INSERT ON PLANNIFIER
+FOR EACH ROW
+
+BEGIN
+
+    DECLARE hab_requises int;
+    DECLARE hab_people int;
+
+    SELECT COUNT(*) INTO hab_requises
+    FROM DETENIR 
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    SELECT COUNT(DISTINCT idHabilitation) INTO hab_people
+    FROM PARTICIPER NATURAL JOIN HABILITER
+    WHERE PARTICIPER.idCampagne = NEW.idCampagne 
+    IN(
+        SELECT idHabilitation
+        FROM DETENIR
+        WHERE idPlateforme=NEW.idPlateforme
+    );
+
+    IF (hab_people < hab_requises) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : Les personnes ne possèdent pas les habilitations requises';
+    END IF;
+END|
+
+DELIMITER ;
 
