@@ -345,5 +345,30 @@ INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES
 (4, 10),
 (5, 10);
 
+DELIMITER |
+
+CREATE TRIGGER verif_intervalle_maintenance
+BEFORE INSERT ON PLANIFIER
+FOR EACH ROW
+BEGIN
+    DECLARE dureeFouille INT;
+    DECLARE intervalleMaintenance INT;
+
+    SELECT duree INTO dureeFouille
+    FROM CAMPAGNE
+    WHERE idCampagne = NEW.idCampagne;
+
+    SELECT intervalle_maintenance INTO intervalleMaintenance
+    FROM PLATEFORME
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    IF (intervalleMaintenance - dureeFouille < 0) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
+    END IF;
+END;
+|
+DELIMITER;
+
 
 
