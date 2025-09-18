@@ -392,22 +392,24 @@ BEGIN
     declare date_debutC date;
     declare dureeC int default 0;
     declare date_finC date;
-    declare libre int;
+    declare libre int default 0;
 
     select date_debut, duree into date_debutC, dureeC
-    from CAMPAGNE natural join PARTICIPER
+    from CAMPAGNE
     where idCampagne = new.idCampagne;
 
-    set date_finC = DATE_ADD(date_debutC, INTERVAL duree DAY);
+    set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
 
     select count(*) into libre
     from CAMPAGNE natural join PARTICIPER
-    where idPersonne = new.idPersonne and (date_finC > DATE_ADD(date_debut, INTERVAL duree DAY))
-                                      and  
+    where idPersonne = new.idPersonne and idCampagne != new.idCampagne
+            and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
+            and date_finC > date_debut;
+                                      
 
-    if (libre > 0) THEN
+    if (libre > 0) then
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : La personne travaille déjà sur une autre campagne.';
+        SET MESSAGE_TEXT = 'Erreur : La personne travaille déjà, ou va traivailler sur une sur une autre campagne.';
     end if;
 
 end |
