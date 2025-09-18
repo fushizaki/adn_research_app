@@ -369,20 +369,49 @@ END |
 DELIMITER ;
 
 
+--CREATE TABLE CAMPAGNE(
+--    PRIMARY KEY(idCampagne),
+--    idCampagne int NOT NULL AUTO_INCREMENT,
+--    date_debut date NOT NULL,
+--    duree int NOT NULL
+--);
+--
+--CREATE TABLE PARTICIPER(
+--    PRIMARY KEY (idCampagne, idPersonne),
+--    idCampagne int,
+--    idPersonne int
+--);
+
+
 --Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
 delimiter |
 CREATE TRIGGER personnes_libres
 BEFORE INSERT ON PARTICIPER
 FOR EACH ROW
 BEGIN
-    declare date_finN int default 0;
     declare date_debutC date;
     declare dureeC int default 0;
+    declare date_finC date;
+    declare libre int;
 
-    select 
+    select date_debut, duree into date_debutC, dureeC
+    from CAMPAGNE natural join PARTICIPER
+    where idCampagne = new.idCampagne;
+
+    set date_finC = DATE_ADD(date_debutC, INTERVAL duree DAY);
+
+    select count(*) into libre
+    from CAMPAGNE natural join PARTICIPER
+    where idPersonne = new.idPersonne and (date_finC > DATE_ADD(date_debut, INTERVAL duree DAY))
+                                      and  
+
+    if (libre > 0) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La personne travaille déjà sur une autre campagne.';
+    end if;
 
 end |
-delimiter;
+delimiter ;
 
 
 
