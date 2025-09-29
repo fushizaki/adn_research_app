@@ -345,6 +345,106 @@ INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES
 (4, 10),
 (5, 10);
 
+DELIMITER |
+CREATE TRIGGER verif_intervalle_maintenance
+BEFORE INSERT ON PLANNIFIER
+FOR EACH ROW
+BEGIN
+    DECLARE dureeFouille INT;
+    DECLARE intervalleMaintenance INT;
+
+    SELECT duree INTO dureeFouille
+    FROM CAMPAGNE
+    WHERE idCampagne = NEW.idCampagne;
+
+    SELECT intervalle_maintenance INTO intervalleMaintenance
+    FROM PLATEFORME
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    IF (intervalleMaintenance - dureeFouille < 0) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
+    END IF;
+END |
+DELIMITER ;
+
+
+--CREATE TABLE CAMPAGNE(
+--    PRIMARY KEY(idCampagne),
+--    idCampagne int NOT NULL AUTO_INCREMENT,
+--    date_debut date NOT NULL,
+--    duree int NOT NULL
+--);
+--
+--CREATE TABLE PARTICIPER(
+--    PRIMARY KEY (idCampagne, idPersonne),
+--    idCampagne int,
+--    idPersonne int
+--);
+
+
+--Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
+delimiter |
+CREATE TRIGGER personnes_libres
+BEFORE INSERT ON PARTICIPER
+FOR EACH ROW
+BEGIN
+    declare date_debutC date;
+    declare dureeC int default 0;
+    declare date_finC date;
+    declare libre int default 0;
+
+    select date_debut, duree into date_debutC, dureeC
+    from CAMPAGNE
+    where idCampagne = new.idCampagne;
+
+    set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
+
+    select count(*) into libre
+    from CAMPAGNE natural join PARTICIPER
+    where idPersonne = new.idPersonne and idCampagne != new.idCampagne
+            and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
+            and date_finC > date_debut;
+                                      
+
+    if (libre > 0) then
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La personne travaille déjà, ou va traivailler sur une sur une autre campagne.';
+    end if;
+
+end |
+delimiter ;
+
+-- SCÉNARIO 1 : La nouvelle campagne est entièrement incluse dans l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-20', 10); -- Crée la campagne ID 11
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (11, 2);
+
+
+-- SCÉNARIO 2 : La nouvelle campagne commence avant et se termine pendant l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 15); -- Crée la campagne ID 12
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (12, 2);
+
+
+-- SCÉNARIO 3 : La nouvelle campagne commence pendant et se termine après l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-10', 10); -- Crée la campagne ID 13
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (13, 2);
+
+
+-- SCÉNARIO 4 : La nouvelle campagne englobe complètement l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 40); -- Crée la campagne ID 14
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
+
+
+-- SCÉNARIO 5 : La nouvelle campagne commence juste après la fin de l'ancienne (pas de chevauchement).
+-- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
+-- DEVRAIT RÉUSSIR :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+
 
 DELIMITER |
 
