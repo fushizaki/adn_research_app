@@ -152,7 +152,7 @@ ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE(idPersonne);
 
 
 -- Insertion pour la BDD générer a l'aide de l'IA
-INSERT INTO PERSONNE (nom, prenom) VALUES 
+INSERT into PERSONNE (nom, prenom) VALUES 
 ('Durand', 'Alice'),
 ('Martin', 'Lucas'),
 ('Bernard', 'Emma'),
@@ -174,7 +174,7 @@ INSERT INTO PERSONNE (nom, prenom) VALUES
 ('Faure', 'Enzo'),
 ('Lopez', 'Camille');
 
-INSERT INTO PLATEFORME (nom, min_nb_personne, cout_journalier, intervalle_maintenance) VALUES 
+INSERT into PLATEFORME (nom, min_nb_personne, cout_journalier, intervalle_maintenance) VALUES 
 ('Plateforme Alpha', 3, 150.50, 30),
 ('Plateforme Beta', 2, 120.75, 45),
 ('Plateforme Gamma', 4, 200.00, 21),
@@ -186,7 +186,7 @@ INSERT INTO PLATEFORME (nom, min_nb_personne, cout_journalier, intervalle_mainte
 ('Plateforme Iota', 4, 180.90, 42),
 ('Plateforme Kappa', 3, 165.25, 56);
 
-INSERT INTO LIEU (nomLieu) VALUES 
+INSERT into LIEU (nomLieu) VALUES 
 ('Site de Lourinhã'),
 ('Carrière de Holzmaden'),
 ('Formation Morrison'),
@@ -203,13 +203,13 @@ INSERT INTO LIEU (nomLieu) VALUES
 ('Site de Ghost Ranch'),
 ('Formation Cedar Mountain');
 
-INSERT INTO HABILITATION (nom_habilitation, description_hab) VALUES 
+INSERT into HABILITATION (nom_habilitation, description_hab) VALUES 
 ('électrique', 'Habilitation électrique'),
 ('chimique', 'Habilitation chimique'),
 ('biologique', 'Habilitation biologique'),
 ('radiations', 'Habilitation radiations');
 
-INSERT INTO DETENIR (idHabilitation, idPlateforme) VALUES 
+INSERT into DETENIR (idHabilitation, idPlateforme) VALUES 
 (1, 1), (2, 1),
 (3, 2), (4, 2),
 (1, 3), (3, 3),
@@ -221,7 +221,7 @@ INSERT INTO DETENIR (idHabilitation, idPlateforme) VALUES
 (1, 9), (3, 9),
 (2, 10), (4, 10);
 
-INSERT INTO HABILITER (idPersonne, idHabilitation) VALUES 
+INSERT into HABILITER (idPersonne, idHabilitation) VALUES 
 (1, 1), (1, 2),
 (2, 3), (2, 4),
 (3, 1), (3, 3),
@@ -243,7 +243,7 @@ INSERT INTO HABILITER (idPersonne, idHabilitation) VALUES
 (19, 1), (19, 2),
 (20, 3), (20, 4);
 
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES 
+INSERT into CAMPAGNE (date_debut, duree) VALUES 
 ('2024-01-15', 30),
 ('2024-03-10', 45),
 ('2024-05-20', 21),
@@ -255,7 +255,7 @@ INSERT INTO CAMPAGNE (date_debut, duree) VALUES
 ('2025-06-22', 38),
 ('2025-08-30', 50);
 
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES 
+INSERT into PARTICIPER (idCampagne, idPersonne) VALUES 
 (1, 1), (1, 2), (1, 3), (1, 4),
 (2, 5), (2, 6), (2, 7),
 (3, 8), (3, 9), (3, 10), (3, 11), (3, 12),
@@ -267,7 +267,7 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES
 (9, 4), (9, 8), (9, 12), (9, 16), (9, 20),
 (10, 9), (10, 13), (10, 17), (10, 18), (10, 19);
 
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES 
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES 
 (1, 1), (2, 1),
 (3, 2), (4, 2),
 (5, 3), (6, 3), (7, 3),
@@ -279,7 +279,7 @@ INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES
 (8, 9), (9, 9), (10, 9),
 (1, 10), (2, 10), (3, 10);
 
-INSERT INTO SEJOURNER (idCampagne, idLieu) VALUES 
+INSERT into SEJOURNER (idCampagne, idLieu) VALUES 
 (1, 1), (1, 2),
 (2, 3), (2, 4),
 (3, 5), (3, 6), (3, 7),
@@ -291,7 +291,7 @@ INSERT INTO SEJOURNER (idCampagne, idLieu) VALUES
 (9, 2), (9, 6), (9, 10),
 (10, 3), (10, 7), (10, 11);
 
-INSERT INTO ECHANTILLON (seq_nucleotides, commentaires_echant) VALUES 
+INSERT into ECHANTILLON (seq_nucleotides, commentaires_echant) VALUES 
 ('ATCGATCGATCGATCG', 'Échantillon de dinosaure théropode'),
 ('GCTAGCTAGCTAGCTA', 'Fragment d\'ADN de tricératops'),
 ('TTAATTAATTAATTAA', 'Séquence de ptérosaure'),
@@ -308,7 +308,7 @@ INSERT INTO ECHANTILLON (seq_nucleotides, commentaires_echant) VALUES
 ('GAGAGAGAGAGAGAGA', 'Fragment de compsognathus'),
 ('CTCTCTCTCTCTCTCT', 'Séquence d\'iguanodon');
 
-INSERT INTO ESPECE (nom_espece, caracteristiques_esp) VALUES 
+INSERT into ESPECE (nom_espece, caracteristiques_esp) VALUES 
 ('Tyrannosaurus Rex', 'Grand prédateur bipède'),
 ('Triceratops', 'Herbivore à trois cornes'),
 ('Stegosaurus', 'Herbivore à plaques dorsales'),
@@ -325,7 +325,7 @@ INSERT INTO ESPECE (nom_espece, caracteristiques_esp) VALUES
 ('Iguanodon', 'Herbivore à pouce-éperon'),
 ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
-INSERT INTO APPARTENIR (idEspece, idEchant) VALUES 
+INSERT into APPARTENIR (idEspece, idEchant) VALUES 
 (9, 1),
 (2, 2),
 (8, 3),
@@ -342,7 +342,7 @@ INSERT INTO APPARTENIR (idEspece, idEchant) VALUES
 (13, 14),
 (14, 15);
 
-INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES 
+INSERT into RAPPORTER (idEchant, idCampagne) VALUES 
 (1, 1),
 (2, 1),
 (3, 2),
@@ -404,48 +404,73 @@ DELIMITER ;
 -- CAS 1: Insertion qui devrait REUSSIR (pas de conflit)
 -- Campagne 1: du 2024-01-15 pour 30 jours (jusqu'au 2024-02-14)
 -- Nouvelle campagne: du 2024-03-01 pour 20 jours (après la fin de la campagne 1)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-01', 20);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-03-01', 20);
 -- Cette insertion devrait réussir car pas de chevauchement
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, 11);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 11);
 
 -- CAS 2: Insertion qui devrait ECHOUER (conflit total)
 -- Campagne 2: du 2024-03-10 pour 45 jours (jusqu'au 2024-04-24)
 -- Nouvelle campagne: du 2024-03-15 pour 30 jours (chevauche complètement)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-15', 30);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-03-15', 30);
 -- Cette insertion devrait échouer car la plateforme 3 est déjà utilisée par la campagne 2
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, 12);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (3, 12);
 
 -- CAS 3: Insertion qui devrait ECHOUER (début pendant une campagne existante)
 -- Campagne 4: du 2024-07-05 pour 60 jours (jusqu'au 2024-09-03)
 -- Nouvelle campagne: du 2024-08-01 pour 25 jours (commence pendant la campagne 4)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-08-01', 25);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-08-01', 25);
 -- Cette insertion devrait échouer car la plateforme 8 est déjà utilisée par la campagne 4
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (8, 13);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (8, 13);
 
 -- CAS 4: Insertion qui devrait ECHOUER (fin pendant une campagne existante)
 -- Campagne 5: du 2024-09-12 pour 28 jours (jusqu'au 2024-10-10)
 -- Nouvelle campagne: du 2024-08-20 pour 30 jours (se termine pendant la campagne 5)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-08-20', 30);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-08-20', 30);
 -- Cette insertion devrait échouer car la plateforme 9 est déjà utilisée par la campagne 5
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (9, 14);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (9, 14);
 
 -- CAS 5: Insertion qui devrait ECHOUER (englobe une campagne existante)
 -- Campagne 8: du 2025-04-15 pour 25 jours (jusqu'au 2025-05-10)
 -- Nouvelle campagne: du 2025-04-01 pour 45 jours (englobe complètement la campagne 8)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2025-04-01', 45);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2025-04-01', 45);
 -- Cette insertion devrait échouer car la plateforme 5 est déjà utilisée par la campagne 8
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
 
 -- CAS 6: Insertion qui devrait REUSSIR (juste après une campagne)
 -- Campagne 3: du 2024-05-20 pour 21 jours (jusqu'au 2024-06-10)
 -- Nouvelle campagne: du 2024-06-11 pour 15 jours (commence le jour suivant)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-06-11', 15);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-06-11', 15);
 -- Cette insertion devrait réussir car commence après la fin de la campagne 3
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
 
 -- CAS 7: Insertion qui devrait REUSSIR (juste avant une campagne)
 -- Campagne 6: du 2024-11-01 pour 35 jours (à partir du 2024-11-01)
 -- Nouvelle campagne: du 2024-10-15 pour 15 jours (se termine le 2024-10-30)
-INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
+INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
+
+
+DELIMITER |
+CREATE TRIGGER gestion_budget_planifier
+AFTER INSERT ON PLANIFIER
+FOR EACH ROW
+BEGIN
+    declare cout_plateforme decimal(6,2);
+    declare duree_campagne int;
+    declare cout_total decimal(10,2);
+    
+    SELECT cout_journalier into cout_plateforme
+    FROM PLATEFORME
+    WHERE idPlateforme = NEW.idPlateforme;
+    
+    SELECT duree into duree_campagne
+    FROM CAMPAGNE
+    WHERE idCampagne = NEW.idCampagne;
+    
+    SET cout_total = cout_plateforme * duree_campagne;
+
+    INSERT into BUDGET (idCampage, idBudget, budget) VALUES (NEW.idCampagne, 1, cout_total);
+END |
+
+DELIMITER ;
