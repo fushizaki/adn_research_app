@@ -112,7 +112,7 @@ CREATE TABLE RAPPORTER(
 
 CREATE TABLE BUDGET(
     PRIMARY KEY(idCampage, idBudget),
-    idBudget int,
+    idBudget int NOT NULL AUTO_INCREMENT,
     idCampage int,
     budget decimal(6,2) -- calculer le budget a partir du cout journalier ( TRIGGER )
 );
@@ -470,7 +470,7 @@ BEGIN
     
     SET cout_total = cout_plateforme * duree_campagne;
 
-    INSERT into BUDGET (idCampage, idBudget, budget) VALUES (NEW.idCampagne, 1, cout_total);
+    INSERT into BUDGET (idCampage, idBudget, budget) VALUES (NEW.idCampagne, cout_total);
 END |
 
 DELIMITER ;
