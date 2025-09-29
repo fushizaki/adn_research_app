@@ -110,6 +110,20 @@ CREATE TABLE RAPPORTER(
     idCampagne int
 );
 
+CREATE TABLE BUDGET(
+    PRIMARY KEY(idCampage, idBudget),
+    idBudget int,
+    idCampage int,
+    budget decimal(6,2) -- calculer le budget a partir du cout journalier ( TRIGGER )
+);
+
+CREATE TABLE LOGIN(
+    PRIMARY KEY(idPersonne ,username),
+    username varchar(30),
+    password varchar(30),
+    idPersonne int
+);
+
 ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchant) REFERENCES ECHANTILLON(idEchant);
 ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEspece) REFERENCES ESPECE(idEspece);
 
@@ -130,6 +144,11 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(i
 
 ALTER TABLE DETENIR ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(idHabilitation);
 ALTER TABLE DETENIR ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME(idPlateforme);
+
+ALTER TABLE BUDGET ADD FOREIGN KEY (idCampage) REFERENCES CAMPAGNE(idCampagne);
+
+ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE(idPersonne);
+
 
 
 -- Insertion pour la BDD générer a l'aide de l'IA
