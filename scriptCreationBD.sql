@@ -415,5 +415,35 @@ BEGIN
 end |
 delimiter ;
 
+-- SCÉNARIO 1 : La nouvelle campagne est entièrement incluse dans l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-20', 10); -- Crée la campagne ID 11
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (11, 2);
+
+
+-- SCÉNARIO 2 : La nouvelle campagne commence avant et se termine pendant l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 15); -- Crée la campagne ID 12
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (12, 2);
+
+
+-- SCÉNARIO 3 : La nouvelle campagne commence pendant et se termine après l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-10', 10); -- Crée la campagne ID 13
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (13, 2);
+
+
+-- SCÉNARIO 4 : La nouvelle campagne englobe complètement l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 40); -- Crée la campagne ID 14
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
+
+
+-- SCÉNARIO 5 : La nouvelle campagne commence juste après la fin de l'ancienne (pas de chevauchement).
+-- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
+-- DEVRAIT RÉUSSIR :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+
 
 
