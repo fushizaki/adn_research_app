@@ -345,6 +345,71 @@ INSERT INTO RAPPORTER (idEchant, idCampagne) VALUES
 (4, 10),
 (5, 10);
 
+
+DELIMITER |
+
+CREATE TRIGGER verif_habilite_personnes
+BEFORE INSERT ON PLANNIFIER
+FOR EACH ROW
+
+BEGIN
+    DECLARE hab_requises INT;
+    DECLARE hab_people INT;
+    
+    SELECT COUNT(*) INTO hab_requises
+    FROM DETENIR
+    WHERE idPlateforme = NEW.idPlateforme;
+    
+
+    SELECT COUNT(DISTINCT h.idHabilitation) INTO hab_people
+    FROM PARTICIPER p
+    INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
+    WHERE p.idCampagne = NEW.idCampagne
+    AND h.idHabilitation IN (
+        SELECT idHabilitation
+        FROM DETENIR
+        WHERE idPlateforme = NEW.idPlateforme
+    );
+    
+    IF hab_people < hab_requises THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
+    END IF;
+END|
+
+DELIMITER ;
+
+-- La série de TESTS suivantes est générér à l'IA
+
+-- Test 1: DEVRAIT RÉUSSIR
+-- Campagne 1: personnes 1,2,3,4 
+-- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
+-- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (8, 1);
+
+-- Test 2: DEVRAIT ÉCHOUER  
+-- Campagne 8: personnes 3,7,11
+-- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
+-- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (4, 8);
+
+-- Test 3: DEVRAIT RÉUSSIR
+-- Campagne 4: personnes 13,14,15  
+-- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
+-- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (6, 4);
+
+-- Vérification des résultats
+SELECT 'Tests effectués:' AS info;
+SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
+FROM PLANNIFIER pl
+JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
+JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
+WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
+   OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
+   OR (pl.idPlateforme = 6 AND pl.idCampagne = 4); 
+
+
 -- Les plateformes doivent être libres ()
 DELIMITER |
 CREATE TRIGGER verif_dispo_plateforme
