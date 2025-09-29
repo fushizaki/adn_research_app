@@ -470,7 +470,7 @@ BEGIN
     
     SET cout_total = cout_plateforme * duree_campagne;
 
-    INSERT into BUDGET (idCampage, idBudget, budget) VALUES (NEW.idCampagne, cout_total);
+    INSERT into BUDGET (idCampage, budget) VALUES (NEW.idCampagne, cout_total);
 END |
 
 DELIMITER ;
