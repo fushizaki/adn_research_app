@@ -83,3 +83,167 @@ INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
 INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
+
+DELIMITER |
+CREATE TRIGGER verif_intervalle_maintenance
+BEFORE INSERT ON PLANNIFIER
+FOR EACH ROW
+BEGIN
+    DECLARE dureeFouille INT;
+    DECLARE intervalleMaintenance INT;
+
+    SELECT duree INTO dureeFouille
+    FROM CAMPAGNE
+    WHERE idCampagne = NEW.idCampagne;
+
+    SELECT intervalle_maintenance INTO intervalleMaintenance
+    FROM PLATEFORME
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    IF (intervalleMaintenance - dureeFouille < 0) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
+    END IF;
+END |
+DELIMITER ;
+
+
+--CREATE TABLE CAMPAGNE(
+--    PRIMARY KEY(idCampagne),
+--    idCampagne int NOT NULL AUTO_INCREMENT,
+--    date_debut date NOT NULL,
+--    duree int NOT NULL
+--);
+--
+--CREATE TABLE PARTICIPER(
+--    PRIMARY KEY (idCampagne, idPersonne),
+--    idCampagne int,
+--    idPersonne int
+--);
+
+
+--Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
+delimiter |
+CREATE TRIGGER personnes_libres
+BEFORE INSERT ON PARTICIPER
+FOR EACH ROW
+BEGIN
+    declare date_debutC date;
+    declare dureeC int default 0;
+    declare date_finC date;
+    declare libre int default 0;
+
+    select date_debut, duree into date_debutC, dureeC
+    from CAMPAGNE
+    where idCampagne = new.idCampagne;
+
+    set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
+
+    select count(*) into libre
+    from CAMPAGNE natural join PARTICIPER
+    where idPersonne = new.idPersonne and idCampagne != new.idCampagne
+            and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
+            and date_finC > date_debut;
+                                      
+
+    if (libre > 0) then
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : La personne travaille déjà, ou va traivailler sur une sur une autre campagne.';
+    end if;
+
+end |
+delimiter ;
+
+-- SCÉNARIO 1 : La nouvelle campagne est entièrement incluse dans l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-20', 10); -- Crée la campagne ID 11
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (11, 2);
+
+
+-- SCÉNARIO 2 : La nouvelle campagne commence avant et se termine pendant l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 15); -- Crée la campagne ID 12
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (12, 2);
+
+
+-- SCÉNARIO 3 : La nouvelle campagne commence pendant et se termine après l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-10', 10); -- Crée la campagne ID 13
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (13, 2);
+
+
+-- SCÉNARIO 4 : La nouvelle campagne englobe complètement l'ancienne.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 40); -- Crée la campagne ID 14
+-- DEVRAIT ÉCHOUER :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
+
+
+-- SCÉNARIO 5 : La nouvelle campagne commence juste après la fin de l'ancienne (pas de chevauchement).
+-- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
+-- DEVRAIT RÉUSSIR :
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+
+
+DELIMITER |
+
+CREATE TRIGGER verif_habilite_personnes
+BEFORE INSERT ON PLANNIFIER
+FOR EACH ROW
+
+BEGIN
+    DECLARE hab_requises INT;
+    DECLARE hab_people INT;
+    
+    SELECT COUNT(*) INTO hab_requises
+    FROM DETENIR
+    WHERE idPlateforme = NEW.idPlateforme;
+    
+
+    SELECT COUNT(DISTINCT h.idHabilitation) INTO hab_people
+    FROM PARTICIPER p
+    INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
+    WHERE p.idCampagne = NEW.idCampagne
+    AND h.idHabilitation IN (
+        SELECT idHabilitation
+        FROM DETENIR
+        WHERE idPlateforme = NEW.idPlateforme
+    );
+    
+    IF hab_people < hab_requises THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
+    END IF;
+END|
+
+DELIMITER ;
+
+-- La série de TESTS suivantes est générér à l'IA
+
+-- Test 1: DEVRAIT RÉUSSIR
+-- Campagne 1: personnes 1,2,3,4 
+-- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
+-- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (8, 1);
+
+-- Test 2: DEVRAIT ÉCHOUER  
+-- Campagne 8: personnes 3,7,11
+-- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
+-- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (4, 8);
+
+-- Test 3: DEVRAIT RÉUSSIR
+-- Campagne 4: personnes 13,14,15  
+-- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
+-- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
+INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (6, 4);
+
+-- Vérification des résultats
+SELECT 'Tests effectués:' AS info;
+SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
+FROM PLANNIFIER pl
+JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
+JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
+WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
+OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
+OR (pl.idPlateforme = 6 AND pl.idCampagne = 4); 
