@@ -33,7 +33,9 @@ BEGIN
 END |
 DELIMITER ;
 
--- Test du trigger verif_dispo_plateforme générer a l'aide de l'IA
+-- La série de TESTS suivante a été générée par l'IA
+
+-- Tests trigger verif_dispo_plateforme
 
 -- CAS 1: Insertion qui devrait REUSSIR (pas de conflit)
 -- Campagne 1: du 2024-01-15 pour 30 jours (jusqu'au 2024-02-14)
@@ -84,9 +86,13 @@ INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
 INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
 
+
+-------------------------------------------------------------------------------------------------------------------------
+
+
 DELIMITER |
 CREATE TRIGGER verif_intervalle_maintenance
-BEFORE INSERT ON PLANNIFIER
+BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
     DECLARE dureeFouille INT;
@@ -107,24 +113,47 @@ BEGIN
 END |
 DELIMITER ;
 
+-- La série de TESTS suivante a été générée par l'IA
 
---CREATE TABLE CAMPAGNE(
---    PRIMARY KEY(idCampagne),
---    idCampagne int NOT NULL AUTO_INCREMENT,
---    date_debut date NOT NULL,
---    duree int NOT NULL
---);
---
---CREATE TABLE PARTICIPER(
---    PRIMARY KEY (idCampagne, idPersonne),
---    idCampagne int,
---    idPersonne int
---);
+-- Tests trigger verif_intervalle_maintenance
+
+-- Test 1: DEVRAIT RÉUSSIR
+-- Plateforme 1: intervalle_maintenance = 30 jours
+-- Nouvelle campagne: durée = 20 jours (< 30 jours)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-01', 20);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, 11);
+
+-- Test 2: DEVRAIT ÉCHOUER
+-- Plateforme 2: intervalle_maintenance = 15 jours
+-- Nouvelle campagne: durée = 30 jours (> 15 jours)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-04-01', 30);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (2, 12);
+
+-- Test 3: DEVRAIT RÉUSSIR
+-- Plateforme 3: intervalle_maintenance = 45 jours
+-- Nouvelle campagne: durée = 45 jours (= 45 jours)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-05-01', 45);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, 13);
+
+-- Test 4: DEVRAIT ÉCHOUER
+-- Plateforme 4: intervalle_maintenance = 20 jours
+-- Nouvelle campagne: durée = 25 jours (> 20 jours)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-06-01', 25);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 14);
+
+-- Test 5: DEVRAIT RÉUSSIR
+-- Plateforme 5: intervalle_maintenance = 35 jours
+-- Nouvelle campagne: durée = 10 jours (< 35 jours)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-07-01', 10);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
+
+
+-------------------------------------------------------------------------------------------------------------------------
 
 
 --Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
 delimiter |
-CREATE TRIGGER personnes_libres
+CREATE TRIGGER verif_personnes_libres
 BEFORE INSERT ON PARTICIPER
 FOR EACH ROW
 BEGIN
@@ -153,6 +182,10 @@ BEGIN
 
 end |
 delimiter ;
+
+-- La série de TESTS suivante a été générée par l'IA
+
+-- Tests trigger verif_personnes_libres
 
 -- SCÉNARIO 1 : La nouvelle campagne est entièrement incluse dans l'ancienne.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-20', 10); -- Crée la campagne ID 11
@@ -185,10 +218,13 @@ INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la 
 INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
 
 
+-------------------------------------------------------------------------------------------------------------------------
+
+
 DELIMITER |
 
 CREATE TRIGGER verif_habilite_personnes
-BEFORE INSERT ON PLANNIFIER
+BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 
 BEGIN
@@ -218,30 +254,32 @@ END|
 
 DELIMITER ;
 
--- La série de TESTS suivantes est générér à l'IA
+-- La série de TESTS suivante a été générée par l'IA
+
+-- Tests trigger verif_habilite_personnes
 
 -- Test 1: DEVRAIT RÉUSSIR
 -- Campagne 1: personnes 1,2,3,4 
 -- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
 -- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
-INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (8, 1);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (8, 1);
 
 -- Test 2: DEVRAIT ÉCHOUER  
 -- Campagne 8: personnes 3,7,11
 -- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
 -- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
-INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (4, 8);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 8);
 
 -- Test 3: DEVRAIT RÉUSSIR
 -- Campagne 4: personnes 13,14,15  
 -- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
 -- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
-INSERT INTO PLANNIFIER (idPlateforme, idCampagne) VALUES (6, 4);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (6, 4);
 
 -- Vérification des résultats
 SELECT 'Tests effectués:' AS info;
 SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
-FROM PLANNIFIER pl
+FROM PLANIFIER pl
 JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
 JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
 WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
