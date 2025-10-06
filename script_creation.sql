@@ -118,13 +118,31 @@ CREATE TABLE
 
 CREATE TABLE
     LOGIN (
-        PRIMARY KEY (idPersonne, username),
+        PRIMARY KEY (idPersonne),
         username varchar(30),
         password varchar(30),
         idPersonne int
     );
 
-ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchant) REFERENCES ECHANTILLON (idEchant);
+CREATE TABLE
+    MATERIEL (
+        PRIMARY KEY (idMateriel),
+        idMateriel int NOT NULL AUTO_INCREMENT,
+        nomMateriel varchar(50),
+        descriptionMateriel varchar(255)
+    );
+
+CREATE TABLE
+    UTILISER (
+        PRIMARY KEY (idMateriel, idPlateforme),
+        idMateriel int,
+        idPlateforme int,
+        quantite int CHECK (quantite > 0)
+    );
+
+ALTER TABLE UTILISER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
+
+ALTER TABLE UTILISER ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
 
 ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEspece) REFERENCES ESPECE (idEspece);
 

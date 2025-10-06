@@ -144,7 +144,6 @@ BEGIN
     where idPersonne = new.idPersonne and idCampagne != new.idCampagne
             and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
             and date_finC > date_debut;
-                                      
 
     if (libre > 0) then
         SIGNAL SQLSTATE '45000'
@@ -246,4 +245,4 @@ JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme
 JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
 WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
 OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
-OR (pl.idPlateforme = 6 AND pl.idCampagne = 4); 
+OR (pl.idPlateforme = 6 AND pl.idCampagne = 4);
