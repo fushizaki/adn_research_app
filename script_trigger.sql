@@ -284,3 +284,4 @@ JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
 WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
 OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
 OR (pl.idPlateforme = 6 AND pl.idCampagne = 4);
+
