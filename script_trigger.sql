@@ -285,3 +285,135 @@ WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
 OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
 OR (pl.idPlateforme = 6 AND pl.idCampagne = 4);
 
+-------------------------------------------------------------------------------------------------------------------------
+
+delimiter |
+CREATE or REPLACE FUNCTION personne_disponible(idP INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
+BEGIN
+    DECLARE date_fin DATE;
+    DECLARE disponible INT;
+    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
+
+    SELECT count(*) INTO disponible
+    FROM PARTICIPER p
+    NATURAL JOIN CAMPAGNE c
+    WHERE p.idPersonne = idP and (
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+    );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
+
+delimiter |
+CREATE or REPLACE FUNCTION plateforme_disponible(idPl INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
+BEGIN
+    DECLARE date_fin DATE;
+    DECLARE disponible INT;
+    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
+
+    SELECT count(*) INTO disponible
+    FROM PLANIFIER p
+    NATURAL JOIN CAMPAGNE c
+    WHERE p.idPlateforme = idPl and (
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+    );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
+
+delimiter |
+CREATE or REPLACE FUNCTION materiel_disponible(idM INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
+BEGIN
+    DECLARE date_fin DATE;
+    DECLARE disponible INT;
+    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
+
+    SELECT count(*) INTO disponible
+    FROM UTILISER u
+    NATURAL JOIN CAMPAGNE c
+    WHERE u.idMateriel = idM and (
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+    );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
+
+delimiter |
+CREATE or REPLACE FUNCTION lieu_fouille_disponible(idL INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
+BEGIN
+    DECLARE date_fin DATE;
+    DECLARE disponible INT;
+    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
+
+    SELECT count(*) INTO disponible
+    FROM SEJOURNER s
+    NATURAL JOIN CAMPAGNE c
+    WHERE s.idLieu = idL and (
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+    );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
+
+delimiter |
+CREATE or REPLACE FUNCTION personne_disponible_habilitee(idP INT, date_debut_param DATE, duree_param INT, idH INT) RETURNS BOOLEAN
+BEGIN
+    DECLARE date_fin DATE;
+    DECLARE disponible INT;
+    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
+
+    SELECT count(*) INTO disponible
+    FROM PARTICIPER pa
+    INNER JOIN CAMPAGNE c ON pa.idCampagne = c.idCampagne
+    INNER JOIN HABILITER h ON pa.idPersonne = h.idPersonne
+    WHERE pa.idPersonne = idP and h.idHabilitation = idH and (
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+    );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
+
+delimiter |
+CREATE or REPLACE FUNCTION calcul_budget_mensuelle_restant(mois_param INT, annee_param INT) RETURNS DECIMAL(10,2)
+BEGIN
+    DECLARE budget_total DECIMAL(10,2);
+    DECLARE depenses_total DECIMAL(10,2);
+    DECLARE budget_restant DECIMAL(10,2);
+    
+    SELECT budget INTO budget_total
+    FROM BUDGET_MENSUEL
+    WHERE mois = mois_param and annee = annee_param;
+
+    SELECT SUM(c.duree * p.cout_journalier) INTO depenses_total
+    FROM CAMPAGNE c
+    NATURAL JOIN PLANIFIER pl
+    NATURAL JOIN PLATEFORME p
+    WHERE MONTH(c.date_debut) = mois_param and YEAR(c.date_debut) = annee_param;
+
+    SET budget_restant = COALESCE(budget_total, 0) - depenses_total;
+    RETURN budget_restant;
+END |
+delimiter ;
+
+
+

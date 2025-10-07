@@ -339,3 +339,173 @@ VALUES
     (3, 10),
     (4, 10),
     (5, 10);
+
+INSERT into
+    BUDGET_MENSUEL (annee, mois, budget)
+VALUES
+    (2024, 1, 15000.00),
+    (2024, 2, 12500.50),
+    (2024, 3, 18750.25),
+    (2024, 4, 16200.00),
+    (2024, 5, 14800.75),
+    (2024, 6, 17500.00),
+    (2024, 7, 20000.50),
+    (2024, 8, 19250.25),
+    (2024, 9, 16800.00),
+    (2024, 10, 21500.75),
+    (2024, 11, 18900.00),
+    (2024, 12, 22000.25),
+    (2025, 1, 16500.00),
+    (2025, 2, 14750.50),
+    (2025, 3, 19500.75),
+    (2025, 4, 17800.00),
+    (2025, 5, 15600.25),
+    (2025, 6, 18200.50),
+    (2025, 7, 21800.75),
+    (2025, 8, 20500.00),
+    (2025, 9, 17900.25),
+    (2025, 10, 23000.50);
+
+-- Les insertions sont juste temporaires, les mots de passes seront hashés dans la partie algorithme/flask
+INSERT into
+    LOGIN (username, password, idPersonne)
+VALUES
+    ('adurand', 'pass123', 1),
+    ('lmartin', 'secure456', 2),
+    ('ebernard', 'mypass789', 3),
+    ('npetit', 'password1', 4),
+    ('lrobert', 'secret234', 5),
+    ('lrichard', 'login567', 6),
+    ('cdubois', 'access890', 7),
+    ('gmoreau', 'user123', 8),
+    ('jlaurent', 'pass456', 9),
+    ('msimon', 'secure789', 10),
+    ('tmichel', 'mypass012', 11),
+    ('slefebvre', 'password345', 12),
+    ('rleroy', 'secret678', 13),
+    ('lroux', 'login901', 14),
+    ('ndavid', 'access234', 15),
+    ('eblanc', 'user567', 16),
+    ('hgarcia', 'pass890', 17),
+    ('zmuller', 'secure123', 18),
+    ('efaure', 'mypass456', 19),
+    ('clopez', 'password789', 20);
+
+INSERT into
+    MATERIEL (nomMateriel, descriptionMateriel)
+VALUES
+    (
+        'Microscope électronique',
+        'Microscope haute résolution pour analyse cellulaire'
+    ),
+    (
+        'Centrifugeuse',
+        'Équipement de séparation par force centrifuge'
+    ),
+    (
+        'Séquenceur ADN',
+        'Appareil de séquençage génétique automatisé'
+    ),
+    (
+        'Spectromètre de masse',
+        'Analyse de composition moléculaire'
+    ),
+    (
+        'PCR Thermocycleur',
+        'Amplification de séquences d''ADN'
+    ),
+    (
+        'Électrophorèse',
+        'Séparation de molécules par migration électrique'
+    ),
+    (
+        'Autoclave',
+        'Stérilisation haute pression et température'
+    ),
+    (
+        'Hotte chimique',
+        'Protection contre les vapeurs toxiques'
+    ),
+    (
+        'Balance analytique',
+        'Pesée de précision micrométrique'
+    ),
+    ('pH-mètre', 'Mesure du pH des solutions'),
+    ('Incubateur', 'Contrôle température et humidité'),
+    (
+        'Agitateur magnétique',
+        'Mélange homogène des solutions'
+    ),
+    (
+        'Pipette automatique',
+        'Prélèvement précis de volumes'
+    ),
+    (
+        'Congélateur -80°C',
+        'Conservation échantillons biologiques'
+    ),
+    (
+        'Chromatographe',
+        'Séparation et analyse de composés'
+    );
+
+INSERT into
+    UTILISER (idMateriel, idPlateforme, quantite)
+VALUES
+    (1, 1, 2),
+    (2, 1, 1),
+    (3, 1, 1),
+    (4, 2, 1),
+    (5, 2, 2),
+    (6, 2, 1),
+    (7, 3, 1),
+    (8, 3, 2),
+    (9, 3, 3),
+    (10, 4, 2),
+    (11, 4, 1),
+    (12, 4, 2),
+    (13, 5, 4),
+    (14, 5, 1),
+    (15, 5, 1),
+    (1, 6, 1),
+    (5, 6, 1),
+    (9, 6, 2),
+    (2, 7, 1),
+    (6, 7, 1),
+    (10, 7, 1),
+    (3, 8, 1),
+    (7, 8, 1),
+    (11, 8, 1),
+    (4, 9, 1),
+    (8, 9, 1),
+    (12, 9, 2),
+    (13, 10, 2),
+    (14, 10, 1),
+    (15, 10, 1);
+
+INSERT into
+    NECESSITER (idMateriel, idHabilitation)
+VALUES
+    (1, 1),
+    (2, 1),
+    (3, 1),
+    (3, 3),
+    (4, 1),
+    (4, 2),
+    (5, 1),
+    (5, 3),
+    (6, 1),
+    (6, 2),
+    (7, 1),
+    (8, 2),
+    (9, 1),
+    (10, 2),
+    (11, 1),
+    (11, 3),
+    (12, 1),
+    (12, 2),
+    (13, 3),
+    (14, 1),
+    (14, 3),
+    (15, 1),
+    (15, 2);

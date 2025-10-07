@@ -7,7 +7,7 @@ CREATE TABLE
         PRIMARY KEY (idCampagne),
         idCampagne int NOT NULL AUTO_INCREMENT,
         date_debut date NOT NULL,
-        duree int NOT NULL,
+        duree int NOT NULL
     );
 
 CREATE TABLE
@@ -15,7 +15,7 @@ CREATE TABLE
         PRIMARY KEY (idPersonne),
         idPersonne int NOT NULL AUTO_INCREMENT,
         nom varchar(30) NOT NULL,
-        prenom varchar(30) NOT NULL,
+        prenom varchar(30) NOT NULL
     );
 
 CREATE TABLE
