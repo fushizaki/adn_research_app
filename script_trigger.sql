@@ -239,7 +239,7 @@ BEGIN
     FROM PARTICIPER p
     INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
     WHERE p.idCampagne = NEW.idCampagne
-    AND h.idHabilitation IN (
+    and h.idHabilitation IN (
         SELECT idHabilitation
         FROM DETENIR
         WHERE idPlateforme = NEW.idPlateforme
@@ -281,9 +281,9 @@ SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
 FROM PLANIFIER pl
 JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
 JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
-WHERE (pl.idPlateforme = 8 AND pl.idCampagne = 1)
-OR (pl.idPlateforme = 4 AND pl.idCampagne = 8) 
-OR (pl.idPlateforme = 6 AND pl.idCampagne = 4);
+WHERE (pl.idPlateforme = 8 and pl.idCampagne = 1)
+OR (pl.idPlateforme = 4 and pl.idCampagne = 8) 
+OR (pl.idPlateforme = 6 and pl.idCampagne = 4);
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -295,10 +295,9 @@ BEGIN
     SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
 
     SELECT count(*) INTO disponible
-    FROM PARTICIPER p
-    NATURAL JOIN CAMPAGNE c
+    FROM PARTICIPER p NATURAL JOIN CAMPAGNE c
     WHERE p.idPersonne = idP and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
         RETURN FALSE;
@@ -316,10 +315,9 @@ BEGIN
     SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
 
     SELECT count(*) INTO disponible
-    FROM PLANIFIER p
-    NATURAL JOIN CAMPAGNE c
+    FROM PLANIFIER p NATURAL JOIN CAMPAGNE c
     WHERE p.idPlateforme = idPl and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
         RETURN FALSE;
@@ -337,10 +335,9 @@ BEGIN
     SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
 
     SELECT count(*) INTO disponible
-    FROM UTILISER u
-    NATURAL JOIN CAMPAGNE c
+    FROM UTILISER u NATURAL JOIN CAMPAGNE c
     WHERE u.idMateriel = idM and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
         RETURN FALSE;
@@ -358,10 +355,9 @@ BEGIN
     SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
 
     SELECT count(*) INTO disponible
-    FROM SEJOURNER s
-    NATURAL JOIN CAMPAGNE c
+    FROM SEJOURNER s NATURAL JOIN CAMPAGNE c
     WHERE s.idLieu = idL and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
         RETURN FALSE;
@@ -383,7 +379,7 @@ BEGIN
     INNER JOIN CAMPAGNE c ON pa.idCampagne = c.idCampagne
     INNER JOIN HABILITER h ON pa.idPersonne = h.idPersonne
     WHERE pa.idPersonne = idP and h.idHabilitation = idH and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) AND date_fin > c.date_debut)
+        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
         RETURN FALSE;
@@ -415,5 +411,15 @@ BEGIN
 END |
 delimiter ;
 
+delimiter |
+CREATE or REPLACE FUNCTION calcul_cout_total_campagne(idC INT) RETURNS DECIMAL(10,2)
+BEGIN
+    DECLARE cout_total DECIMAL(10,2);
 
+    SELECT SUM(c.duree * p.cout_journalier) INTO cout_total
+    FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
+    WHERE c.idCampagne = idC;
 
+    RETURN cout_total;
+END |
+delimiter ;
