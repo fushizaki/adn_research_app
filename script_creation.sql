@@ -98,7 +98,7 @@ CREATE TABLE BUDGET_MENSUEL(
     PRIMARY KEY(annee, mois),
     annee int NOT NULL,
     mois int NOT NULL,
-    budget decimal(6,2)
+    budget decimal(8,2)
 );
 
 CREATE TABLE LOGIN(
