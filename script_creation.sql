@@ -124,25 +124,28 @@ CREATE TABLE
         idPersonne int NOT NULL
     );
 
-CREATE TABLE MATERIEL(
+CREATE TABLE
+    MATERIEL (
         PRIMARY KEY (idMateriel),
         idMateriel int NOT NULL AUTO_INCREMENT,
         nomMateriel varchar(50) NOT NULL,
         descriptionMateriel varchar(255)
-);
+    );
 
-CREATE TABLE UTILISER(
+CREATE TABLE
+    UTILISER (
         PRIMARY KEY (idMateriel, idPlateforme),
         idMateriel int NOT NULL,
         idPlateforme int NOT NULL,
         quantite int NOT NULL CHECK (quantite > 0)
-);
+    );
 
-CREATE TABLE NECESSITER(
+CREATE TABLE
+    NECESSITER (
         PRIMARY KEY (idMateriel, idHabilitation),
         idMateriel INT NOT NULL,
         idHabilitation INT NOT NULL
-);
+    );
 
 ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
 
