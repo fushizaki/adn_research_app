@@ -15,7 +15,8 @@ CREATE TABLE
         PRIMARY KEY (idPersonne),
         idPersonne int NOT NULL AUTO_INCREMENT,
         nom varchar(30) NOT NULL,
-        prenom varchar(30) NOT NULL
+        prenom varchar(30) NOT NULL,
+        role_labo varchar(30) NOT NULL
     );
 
 CREATE TABLE

@@ -24,7 +24,7 @@ BEGIN
             or
             (date_debut_camp_insert>date_debut and date_debut_camp_insert<=DATE_ADD(date_debut, INTERVAL duree DAY))
             or
-            (date_debut_camp_insert<=date_debut and date_debut_camp_insert>=DATE_ADD(date_debut, INTERVAL duree DAY)); 
+            (date_debut_camp_insert<=date_debut and date_debut_camp_insert>=DATE_ADD(date_debut, INTERVAL duree DAY));
 
     IF (disponible>0) THEN
         SIGNAL SQLSTATE '45000'
@@ -89,24 +89,24 @@ INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
 
 -------------------------------------------------------------------------------------------------------------------------
 
-
 DELIMITER |
 CREATE TRIGGER verif_intervalle_maintenance
 BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
-    DECLARE dureeFouille INT;
-    DECLARE intervalleMaintenance INT;
+    DECLARE duree_fouille INT;
+    DECLARE date_depart_fouille DATE;
+    DECLARE intervalle_maintenance INT;
 
-    SELECT duree INTO dureeFouille
+    SELECT duree, date_debut INTO duree_fouille, date_depart_fouille
     FROM CAMPAGNE
     WHERE idCampagne = NEW.idCampagne;
 
-    SELECT intervalle_maintenance INTO intervalleMaintenance
+    SELECT intervalle_maintenance INTO intervalle_maintenance
     FROM PLATEFORME
     WHERE idPlateforme = NEW.idPlateforme;
 
-    IF (intervalleMaintenance - dureeFouille < 0) THEN
+    IF (intervalle_maintenance - duree_fouille < 0) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
     END IF;
@@ -282,7 +282,7 @@ FROM PLANIFIER pl
 JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
 JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
 WHERE (pl.idPlateforme = 8 and pl.idCampagne = 1)
-OR (pl.idPlateforme = 4 and pl.idCampagne = 8) 
+OR (pl.idPlateforme = 4 and pl.idCampagne = 8)
 OR (pl.idPlateforme = 6 and pl.idCampagne = 4);
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -328,26 +328,6 @@ END |
 delimiter ;
 
 delimiter |
-CREATE or REPLACE FUNCTION materiel_disponible(idM INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM UTILISER u NATURAL JOIN CAMPAGNE c
-    WHERE u.idMateriel = idM and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
-
-delimiter |
 CREATE or REPLACE FUNCTION lieu_fouille_disponible(idL INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
 BEGIN
     DECLARE date_fin DATE;
@@ -357,28 +337,6 @@ BEGIN
     SELECT count(*) INTO disponible
     FROM SEJOURNER s NATURAL JOIN CAMPAGNE c
     WHERE s.idLieu = idL and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
-
-delimiter |
-CREATE or REPLACE FUNCTION personne_disponible_habilitee(idP INT, date_debut_param DATE, duree_param INT, idH INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM PARTICIPER pa
-    INNER JOIN CAMPAGNE c ON pa.idCampagne = c.idCampagne
-    INNER JOIN HABILITER h ON pa.idPersonne = h.idPersonne
-    WHERE pa.idPersonne = idP and h.idHabilitation = idH and (
         (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
@@ -424,31 +382,21 @@ BEGIN
 END |
 delimiter ;
 
--------------------------------------------------------------------------------------------------------------------------
 
-DELIMITER |
-CREATE OR REPLACE TRIGGER rendre_dispo_materiel
-AFTER DELETE ON PLANIFIER
-FOR EACH ROW 
+-- Permet de calculer le temps restants avant la prochaine intervalle
+delimiter |
+CREATE or REPLACE FUNCTION temps_restant_intervalle(idP INT) RETURNS INT
 BEGIN
-    DECLARE idMUtilise int default 0;
-    DECLARE fini boolean default false;
-    DECLARE lesId cursor for 
-        select idMateriel
-        from PLANIFIER natural join PLATEFORME natural join UTILISER
-        where idCampagne = old.idCampagne and idPlateforme = old.idPlateforme;
+    DECLARE temps_restant INT;
+    DECLARE intervalle_maintenance_p INT;
 
-    DECLARE continue handler for not found set fini = true;
+    SELECT intervalle_maintenance into intervalle_maintenance_p
+    FROM PLATEFORME
+    WHERE idP = idPlateforme;
 
-    OPEN lesId;
-    WHILE NOT fini do
-        FETCH lesId into idMUtilise;
-            IF NOT fini AND idMUtilise > 0  THEN 
-                DELETE FROM UTILISER WHERE idMateriel = idMUtilise AND idPlateforme = old.idPlateforme;
-            END IF;
-    END WHILE;
-    CLOSE lesId;
+    set temps_restant = intervalle_maintenance_p-DAY(NOW());
+
+    RETURN temps_restant;
 END |
-DELIMITER ;
+delimiter ;
 
-CREATE OR REPLACE FUNCTION verif_dispo_materiel
