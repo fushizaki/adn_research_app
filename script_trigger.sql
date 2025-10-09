@@ -423,3 +423,32 @@ BEGIN
     RETURN cout_total;
 END |
 delimiter ;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+DELIMITER |
+CREATE OR REPLACE TRIGGER rendre_dispo_materiel
+AFTER DELETE ON PLANIFIER
+FOR EACH ROW 
+BEGIN
+    DECLARE idMUtilise int default 0;
+    DECLARE fini boolean default false;
+    DECLARE lesId cursor for 
+        select idMateriel
+        from PLANIFIER natural join PLATEFORME natural join UTILISER
+        where idCampagne = old.idCampagne and idPlateforme = old.idPlateforme;
+
+    DECLARE continue handler for not found set fini = true;
+
+    OPEN lesId;
+    WHILE NOT fini do
+        FETCH lesId into idMUtilise;
+            IF NOT fini AND idMUtilise > 0  THEN 
+                DELETE FROM UTILISER WHERE idMateriel = idMUtilise AND idPlateforme = old.idPlateforme;
+            END IF;
+    END WHILE;
+    CLOSE lesId;
+END |
+DELIMITER ;
+
+CREATE OR REPLACE FUNCTION verif_dispo_materiel
