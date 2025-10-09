@@ -98,7 +98,7 @@ CREATE TABLE BUDGET_MENSUEL(
     PRIMARY KEY(annee, mois),
     annee int NOT NULL,
     mois int NOT NULL,
-    budget decimal(6,2)
+    budget decimal(8,2)
 );
 
 CREATE TABLE LOGIN(
@@ -106,6 +106,26 @@ CREATE TABLE LOGIN(
     username varchar(30),
     password varchar(30),
     idPersonne int
+);
+
+CREATE TABLE MATERIEL(
+        PRIMARY KEY (idMateriel),
+        idMateriel int NOT NULL AUTO_INCREMENT,
+        nomMateriel varchar(50) NOT NULL,
+        descriptionMateriel varchar(255)
+);
+
+CREATE TABLE UTILISER(
+        PRIMARY KEY (idMateriel, idPlateforme),
+        idMateriel int NOT NULL,
+        idPlateforme int NOT NULL,
+        quantite int NOT NULL CHECK (quantite > 0)
+);
+
+CREATE TABLE NECESSITER(
+        PRIMARY KEY (idMateriel, idHabilitation),
+        idMateriel INT NOT NULL,
+        idHabilitation INT NOT NULL
 );
 
 ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchant) REFERENCES ECHANTILLON(idEchant);
@@ -128,5 +148,11 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(i
 
 ALTER TABLE DETENIR ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(idHabilitation);
 ALTER TABLE DETENIR ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME(idPlateforme);
+
+ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL(idMateriel);
+ALTER TABLE NECESSITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION(idHabilitation);
+
+ALTER TABLE UTILISER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL(idMateriel);
+ALTER TABLE UTILISER ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME(idPlateforme);
 
 ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE(idPersonne);
