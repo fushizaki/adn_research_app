@@ -12,14 +12,14 @@ BEGIN
 
     SELECT date_debut, duree into date_debut_camp_insert, duree_camp_insert
     FROM CAMPAGNE
-    WHERE idCampagne = NEW.idCampagne;
+    WHERE id_campagne = NEW.id_campagne;
 
     -- https://www.w3schools.com/sql/func_mysql_date_add.asp
     set date_fin_camp_insert = DATE_ADD(date_debut_camp_insert, INTERVAL duree_camp_insert DAY);
     
     SELECT count(*) into disponible
     FROM PLATEFORME NATURAL JOIN PLANIFIER NATURAL JOIN CAMPAGNE
-    WHERE idPlateforme = NEW.idPlateforme and 
+    WHERE id_plateforme = NEW.id_plateforme and 
             (date_debut_camp_insert>=date_debut and date_debut_camp_insert<DATE_ADD(date_debut, INTERVAL duree DAY)) 
             or
             (date_debut_camp_insert>date_debut and date_debut_camp_insert<=DATE_ADD(date_debut, INTERVAL duree DAY))
@@ -42,49 +42,49 @@ DELIMITER ;
 -- Nouvelle campagne: du 2024-03-01 pour 20 jours (après la fin de la campagne 1)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-03-01', 20);
 -- Cette insertion devrait réussir car pas de chevauchement
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 11);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (1, 11);
 
 -- CAS 2: Insertion qui devrait ECHOUER (conflit total)
 -- Campagne 2: du 2024-03-10 pour 45 jours (jusqu'au 2024-04-24)
 -- Nouvelle campagne: du 2024-03-15 pour 30 jours (chevauche complètement)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-03-15', 30);
 -- Cette insertion devrait échouer car la plateforme 3 est déjà utilisée par la campagne 2
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (3, 12);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (3, 12);
 
 -- CAS 3: Insertion qui devrait ECHOUER (début pendant une campagne existante)
 -- Campagne 4: du 2024-07-05 pour 60 jours (jusqu'au 2024-09-03)
 -- Nouvelle campagne: du 2024-08-01 pour 25 jours (commence pendant la campagne 4)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-08-01', 25);
 -- Cette insertion devrait échouer car la plateforme 8 est déjà utilisée par la campagne 4
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (8, 13);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (8, 13);
 
 -- CAS 4: Insertion qui devrait ECHOUER (fin pendant une campagne existante)
 -- Campagne 5: du 2024-09-12 pour 28 jours (jusqu'au 2024-10-10)
 -- Nouvelle campagne: du 2024-08-20 pour 30 jours (se termine pendant la campagne 5)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-08-20', 30);
 -- Cette insertion devrait échouer car la plateforme 9 est déjà utilisée par la campagne 5
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (9, 14);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (9, 14);
 
 -- CAS 5: Insertion qui devrait ECHOUER (englobe une campagne existante)
 -- Campagne 8: du 2025-04-15 pour 25 jours (jusqu'au 2025-05-10)
 -- Nouvelle campagne: du 2025-04-01 pour 45 jours (englobe complètement la campagne 8)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2025-04-01', 45);
 -- Cette insertion devrait échouer car la plateforme 5 est déjà utilisée par la campagne 8
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (5, 15);
 
 -- CAS 6: Insertion qui devrait REUSSIR (juste après une campagne)
 -- Campagne 3: du 2024-05-20 pour 21 jours (jusqu'au 2024-06-10)
 -- Nouvelle campagne: du 2024-06-11 pour 15 jours (commence le jour suivant)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-06-11', 15);
 -- Cette insertion devrait réussir car commence après la fin de la campagne 3
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (5, 16);
 
 -- CAS 7: Insertion qui devrait REUSSIR (juste avant une campagne)
 -- Campagne 6: du 2024-11-01 pour 35 jours (à partir du 2024-11-01)
 -- Nouvelle campagne: du 2024-10-15 pour 15 jours (se termine le 2024-10-30)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
+INSERT into PLANIFIER (id_plateforme, id_campagne) VALUES (1, 17);
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -95,18 +95,18 @@ CREATE TRIGGER verif_intervalle_maintenance
 BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
-    DECLARE dureeFouille INT;
-    DECLARE intervalleMaintenance INT;
+    DECLARE duree_fouille INT;
+    DECLARE intervalle_maintenance INT;
 
-    SELECT duree INTO dureeFouille
+    SELECT duree INTO duree_fouille
     FROM CAMPAGNE
-    WHERE idCampagne = NEW.idCampagne;
+    WHERE id_campagne = NEW.id_campagne;
 
-    SELECT intervalle_maintenance INTO intervalleMaintenance
+    SELECT intervalle_maintenance INTO intervalle_maintenance
     FROM PLATEFORME
-    WHERE idPlateforme = NEW.idPlateforme;
+    WHERE id_plateforme = NEW.id_plateforme;
 
-    IF (intervalleMaintenance - dureeFouille < 0) THEN
+    IF (intervalle_maintenance - duree_fouille < 0) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erreur : La durée de fouille empiète sur l’intervalle de maintenance de la plateforme.';
     END IF;
@@ -121,31 +121,31 @@ DELIMITER ;
 -- Plateforme 1: intervalle_maintenance = 30 jours
 -- Nouvelle campagne: durée = 20 jours (< 30 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-01', 20);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, 11);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (1, 11);
 
 -- Test 2: DEVRAIT ÉCHOUER
 -- Plateforme 2: intervalle_maintenance = 15 jours
 -- Nouvelle campagne: durée = 30 jours (> 15 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-04-01', 30);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (2, 12);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (2, 12);
 
 -- Test 3: DEVRAIT RÉUSSIR
 -- Plateforme 3: intervalle_maintenance = 45 jours
 -- Nouvelle campagne: durée = 45 jours (= 45 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-05-01', 45);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, 13);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (3, 13);
 
 -- Test 4: DEVRAIT ÉCHOUER
 -- Plateforme 4: intervalle_maintenance = 20 jours
 -- Nouvelle campagne: durée = 25 jours (> 20 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-06-01', 25);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 14);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (4, 14);
 
 -- Test 5: DEVRAIT RÉUSSIR
 -- Plateforme 5: intervalle_maintenance = 35 jours
 -- Nouvelle campagne: durée = 10 jours (< 35 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-07-01', 10);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (5, 15);
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -164,13 +164,13 @@ BEGIN
 
     select date_debut, duree into date_debutC, dureeC
     from CAMPAGNE
-    where idCampagne = new.idCampagne;
+    where id_campagne = new.id_campagne;
 
     set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
 
     select count(*) into libre
     from CAMPAGNE natural join PARTICIPER
-    where idPersonne = new.idPersonne and idCampagne != new.idCampagne
+    where id_personne = new.id_personne and id_campagne != new.id_campagne
             and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
             and date_finC > date_debut;
 
@@ -189,32 +189,32 @@ delimiter ;
 -- SCÉNARIO 1 : La nouvelle campagne est entièrement incluse dans l'ancienne.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-20', 10); -- Crée la campagne ID 11
 -- DEVRAIT ÉCHOUER :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (11, 2);
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (11, 2);
 
 
 -- SCÉNARIO 2 : La nouvelle campagne commence avant et se termine pendant l'ancienne.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 15); -- Crée la campagne ID 12
 -- DEVRAIT ÉCHOUER :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (12, 2);
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (12, 2);
 
 
 -- SCÉNARIO 3 : La nouvelle campagne commence pendant et se termine après l'ancienne.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-10', 10); -- Crée la campagne ID 13
 -- DEVRAIT ÉCHOUER :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (13, 2);
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (13, 2);
 
 
 -- SCÉNARIO 4 : La nouvelle campagne englobe complètement l'ancienne.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 40); -- Crée la campagne ID 14
 -- DEVRAIT ÉCHOUER :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (14, 2);
 
 
 -- SCÉNARIO 5 : La nouvelle campagne commence juste après la fin de l'ancienne (pas de chevauchement).
 -- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
 -- DEVRAIT RÉUSSIR :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (15, 2);
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -232,17 +232,17 @@ BEGIN
     
     SELECT COUNT(*) INTO hab_requises
     FROM DETENIR
-    WHERE idPlateforme = NEW.idPlateforme;
+    WHERE id_plateforme = NEW.id_plateforme;
     
 
-    SELECT COUNT(DISTINCT h.idHabilitation) INTO hab_people
+    SELECT COUNT(DISTINCT h.id_habilitation) INTO hab_people
     FROM PARTICIPER p
-    INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
-    WHERE p.idCampagne = NEW.idCampagne
-    and h.idHabilitation IN (
-        SELECT idHabilitation
+    INNER JOIN HABILITER h ON p.id_personne = h.id_personne
+    WHERE p.id_campagne = NEW.id_campagne
+    and h.id_habilitation IN (
+        SELECT id_habilitation
         FROM DETENIR
-        WHERE idPlateforme = NEW.idPlateforme
+        WHERE id_plateforme = NEW.id_plateforme
     );
     
     IF hab_people < hab_requises THEN
@@ -261,29 +261,29 @@ DELIMITER ;
 -- Campagne 1: personnes 1,2,3,4 
 -- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
 -- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (8, 1);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (8, 1);
 
 -- Test 2: DEVRAIT ÉCHOUER  
 -- Campagne 8: personnes 3,7,11
 -- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
 -- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 8);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (4, 8);
 
 -- Test 3: DEVRAIT RÉUSSIR
 -- Campagne 4: personnes 13,14,15  
 -- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
 -- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (6, 4);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (6, 4);
 
 -- Vérification des résultats
 SELECT 'Tests effectués:' AS info;
-SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
+SELECT p.nom AS plateforme, c.id_campagne, 'AJOUTÉ' AS statut
 FROM PLANIFIER pl
-JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
-JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
-WHERE (pl.idPlateforme = 8 and pl.idCampagne = 1)
-OR (pl.idPlateforme = 4 and pl.idCampagne = 8) 
-OR (pl.idPlateforme = 6 and pl.idCampagne = 4);
+JOIN PLATEFORME p ON pl.id_plateforme = p.id_plateforme  
+JOIN CAMPAGNE c ON pl.id_campagne = c.id_campagne
+WHERE (pl.id_plateforme = 8 and pl.id_campagne = 1)
+OR (pl.id_plateforme = 4 and pl.id_campagne = 8) 
+OR (pl.id_plateforme = 6 and pl.id_campagne = 4);
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -296,7 +296,7 @@ BEGIN
 
     SELECT count(*) INTO disponible
     FROM PARTICIPER p NATURAL JOIN CAMPAGNE c
-    WHERE p.idPersonne = idP and (
+    WHERE p.id_personne = idP and (
         (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
@@ -316,27 +316,7 @@ BEGIN
 
     SELECT count(*) INTO disponible
     FROM PLANIFIER p NATURAL JOIN CAMPAGNE c
-    WHERE p.idPlateforme = idPl and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
-
-delimiter |
-CREATE or REPLACE FUNCTION materiel_disponible(idM INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM UTILISER u NATURAL JOIN CAMPAGNE c
-    WHERE u.idMateriel = idM and (
+    WHERE p.id_plateforme = idPl and (
         (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
@@ -357,28 +337,6 @@ BEGIN
     SELECT count(*) INTO disponible
     FROM SEJOURNER s NATURAL JOIN CAMPAGNE c
     WHERE s.idLieu = idL and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
-
-delimiter |
-CREATE or REPLACE FUNCTION personne_disponible_habilitee(idP INT, date_debut_param DATE, duree_param INT, idH INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM PARTICIPER pa
-    INNER JOIN CAMPAGNE c ON pa.idCampagne = c.idCampagne
-    INNER JOIN HABILITER h ON pa.idPersonne = h.idPersonne
-    WHERE pa.idPersonne = idP and h.idHabilitation = idH and (
         (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
     IF disponible > 0 THEN
@@ -418,7 +376,7 @@ BEGIN
 
     SELECT SUM(c.duree * p.cout_journalier) INTO cout_total
     FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
-    WHERE c.idCampagne = idC;
+    WHERE c.id_campagne = idC;
 
     RETURN cout_total;
 END |
@@ -426,29 +384,3 @@ delimiter ;
 
 -------------------------------------------------------------------------------------------------------------------------
 
-DELIMITER |
-CREATE OR REPLACE TRIGGER rendre_dispo_materiel
-AFTER DELETE ON PLANIFIER
-FOR EACH ROW 
-BEGIN
-    DECLARE idMUtilise int default 0;
-    DECLARE fini boolean default false;
-    DECLARE lesId cursor for 
-        select idMateriel
-        from PLANIFIER natural join PLATEFORME natural join UTILISER
-        where idCampagne = old.idCampagne and idPlateforme = old.idPlateforme;
-
-    DECLARE continue handler for not found set fini = true;
-
-    OPEN lesId;
-    WHILE NOT fini do
-        FETCH lesId into idMUtilise;
-            IF NOT fini AND idMUtilise > 0  THEN 
-                DELETE FROM UTILISER WHERE idMateriel = idMUtilise AND idPlateforme = old.idPlateforme;
-            END IF;
-    END WHILE;
-    CLOSE lesId;
-END |
-DELIMITER ;
-
-CREATE OR REPLACE FUNCTION verif_dispo_materiel
