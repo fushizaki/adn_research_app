@@ -113,7 +113,7 @@ CREATE TABLE
         PRIMARY KEY (annee, mois),
         annee int NOT NULL,
         mois int NOT NULL,
-        budget decimal(6, 2) NOT NULL
+        budget decimal(10, 2) NOT NULL
     );
 
 CREATE TABLE
