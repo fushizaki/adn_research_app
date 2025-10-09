@@ -256,4 +256,3 @@ DELIMITER ;
 
 -- La série de TESTS suivante a été générée par l'IA
 
--
