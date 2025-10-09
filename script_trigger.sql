@@ -219,7 +219,38 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
 
 -------------------------------------------------------------------------------------------------------------------------
 
+-- affiche les habilitations du materiel
 
+DELIMITER |
+create or replace procedure affiche_habilites(p_id_plateforme int)
+BEGIN
+    declare p_nom_habilitation varchar(50);
+    declare res varchar(100);
+    declare fini BOOLEAN default FALSE;
+    declare les_habilites cursor for
+    
+        select nom_habilitation
+        FROM PLATFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL NATURAL JOIN NECESSITER
+        WHERE PLATEFORME.idPlateforme = PLATEFORME.p_id_plateforme;
+
+        declare continue handler for not found set fini = true;
+
+        open les_habilites;
+        while not fini do
+            fetch les_habilites into p_nom_habilitation;
+        
+            if not fini then
+                set res = concat (res,'',p_nom_habilitation,'');
+                end if;
+        end while;
+    close les_habilites;
+    select res;
+end |
+delimiter ;
+call affiche_habilites(p_id_plateforme);
+
+
+    
 DELIMITER |
 
 CREATE TRIGGER verif_habilite_personnes
@@ -255,37 +286,6 @@ DELIMITER ;
 
 -- La série de TESTS suivante a été générée par l'IA
 
-<<<<<<< HEAD
-=======
--- Tests trigger verif_habilite_personnes
-
--- Test 1: DEVRAIT RÉUSSIR
--- Campagne 1: personnes 1,2,3,4 
--- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
--- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (8, 1);
-
--- Test 2: DEVRAIT ÉCHOUER  
--- Campagne 8: personnes 3,7,11
--- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
--- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 8);
-
--- Test 3: DEVRAIT RÉUSSIR
--- Campagne 4: personnes 13,14,15  
--- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
--- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (6, 4);
-
--- Vérification des résultats
-SELECT 'Tests effectués:' AS info;
-SELECT p.nom AS plateforme, c.idCampagne, 'AJOUTÉ' AS statut
-FROM PLANIFIER pl
-JOIN PLATEFORME p ON pl.idPlateforme = p.idPlateforme  
-JOIN CAMPAGNE c ON pl.idCampagne = c.idCampagne
-WHERE (pl.idPlateforme = 8 and pl.idCampagne = 1)
-OR (pl.idPlateforme = 4 and pl.idCampagne = 8) 
-OR (pl.idPlateforme = 6 and pl.idCampagne = 4);
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -329,25 +329,6 @@ BEGIN
 END |
 delimiter ;
 
-delimiter |
-CREATE or REPLACE FUNCTION materiel_disponible(idM INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM UTILISER u NATURAL JOIN CAMPAGNE c
-    WHERE u.idMateriel = idM and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
 
 delimiter |
 CREATE or REPLACE FUNCTION lieu_fouille_disponible(idL INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
@@ -369,27 +350,6 @@ BEGIN
 END |
 delimiter ;
 
-delimiter |
-CREATE or REPLACE FUNCTION personne_disponible_habilitee(idP INT, date_debut_param DATE, duree_param INT, idH INT) RETURNS BOOLEAN
-BEGIN
-    DECLARE date_fin DATE;
-    DECLARE disponible INT;
-    SET date_fin = DATE_ADD(date_debut_param, INTERVAL duree_param DAY);
-
-    SELECT count(*) INTO disponible
-    FROM PARTICIPER pa
-    INNER JOIN CAMPAGNE c ON pa.idCampagne = c.idCampagne
-    INNER JOIN HABILITER h ON pa.idPersonne = h.idPersonne
-    WHERE pa.idPersonne = idP and h.idHabilitation = idH and (
-        (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
-    );
-    IF disponible > 0 THEN
-        RETURN FALSE;
-    ELSE
-        RETURN TRUE;
-    END IF;
-END |
-delimiter ;
 
 delimiter |
 CREATE or REPLACE FUNCTION calcul_budget_mensuelle_restant(mois_param INT, annee_param INT) RETURNS DECIMAL(10,2)
@@ -428,30 +388,3 @@ delimiter ;
 
 -------------------------------------------------------------------------------------------------------------------------
 
-DELIMITER |
-CREATE OR REPLACE TRIGGER rendre_dispo_materiel
-AFTER DELETE ON PLANIFIER
-FOR EACH ROW 
-BEGIN
-    DECLARE idMUtilise int default 0;
-    DECLARE fini boolean default false;
-    DECLARE lesId cursor for 
-        select idMateriel
-        from PLANIFIER natural join PLATEFORME natural join UTILISER
-        where idCampagne = old.idCampagne and idPlateforme = old.idPlateforme;
-
-    DECLARE continue handler for not found set fini = true;
-
-    OPEN lesId;
-    WHILE NOT fini do
-        FETCH lesId into idMUtilise;
-            IF NOT fini AND idMUtilise > 0  THEN 
-                DELETE FROM UTILISER WHERE idMateriel = idMUtilise AND idPlateforme = old.idPlateforme;
-            END IF;
-    END WHILE;
-    CLOSE lesId;
-END |
-DELIMITER ;
-
-CREATE OR REPLACE FUNCTION verif_dispo_materiel
->>>>>>> dev
