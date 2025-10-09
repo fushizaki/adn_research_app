@@ -44,13 +44,6 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    DETENIR (
-        PRIMARY KEY (idHabilitation, idPlateforme),
-        idHabilitation int NOT NULL,
-        idPlateforme int NOT NULL
-    );
-
-CREATE TABLE
     PLANIFIER (
         PRIMARY KEY (idPlateforme, idCampagne),
         idPlateforme int NOT NULL,
@@ -176,9 +169,5 @@ ALTER TABLE PARTICIPER ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPerso
 ALTER TABLE HABILITER ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPersonne);
 
 ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
-
-ALTER TABLE DETENIR ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
-
-ALTER TABLE DETENIR ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
 
 ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPersonne);
