@@ -70,30 +70,6 @@ VALUES
     ('radiations', 'Habilitation radiations');
 
 INSERT into
-    DETENIR (idHabilitation, idPlateforme)
-VALUES
-    (1, 1),
-    (2, 1),
-    (3, 2),
-    (4, 2),
-    (1, 3),
-    (3, 3),
-    (2, 4),
-    (4, 4),
-    (1, 5),
-    (4, 5),
-    (2, 6),
-    (3, 6),
-    (1, 7),
-    (2, 7),
-    (3, 7),
-    (4, 8),
-    (1, 9),
-    (3, 9),
-    (2, 10),
-    (4, 10);
-
-INSERT into
     HABILITER (idPersonne, idHabilitation)
 VALUES
     (1, 1),
