@@ -222,7 +222,8 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
 -- procédure qui affiche les habilitations du materiel
 
 DELIMITER |
-create or replace procedure affiche_habilites(p_id_plateforme int)
+create or replace function retourne_habilites(p_id_plateforme int)
+RETURNS varchar(100)
 BEGIN
     declare p_nom_habilitation varchar(50);
     declare res varchar(100) default '';
@@ -245,32 +246,54 @@ BEGIN
                 end if;
         end while;
     close les_habilites;
-    select res;
+    return res;
 end |
 delimiter ;
-call affiche_habilites(2);
 
 -- La série de TESTS suivante a été générée par l'IA
--- Test 3: Plateforme avec habilitations redondantes
--- Plateforme 3 utilise: Autoclave (électrique), Hotte chimique (chimique), Balance analytique (électrique)
--- DEVRAIT RETOURNER: électrique chimique
-CALL affiche_habilites(3);
+
+-- Test 1: Plateforme avec plusieurs habilitations
+SELECT retourne_habilites(1) AS 'Habilitations Plateforme 1';
+
+-- Test 2: Plateforme avec habilitations variées
+SELECT retourne_habilites(2) AS 'Habilitations Plateforme 2';
+
+-- Test 3: Plateforme avec matériel chimique
+SELECT retourne_habilites(3) AS 'Habilitations Plateforme 3';
 
 -- Test 4: Plateforme avec peu de matériel
--- Plateforme 8 utilise: Séquenceur ADN (électrique, biologique), Autoclave (électrique), Incubateur (électrique, biologique)
--- DEVRAIT RETOURNER: électrique biologique
-CALL affiche_habilites(8);
+SELECT retourne_habilites(8) AS 'Habilitations Plateforme 8';
 
--- Test 5: Plateforme 10
--- Plateforme 10 utilise: Pipette automatique (biologique), Congélateur -80°C (électrique, biologique), Chromatographe (électrique, chimique)
--- DEVRAIT RETOURNER: biologique électrique chimique
-CALL affiche_habilites(10);
+-- Test 5: Vérifier toutes les plateformes
+SELECT idPlateforme, nom, retourne_habilites(idPlateforme) AS habilitations_requises
+FROM PLATEFORME
+WHERE idPlateforme IN (1, 2, 3, 5, 10);
 
 
 -- trigger qui verifie si le groupe de personne possede bien les habilitations demandées
-
+/*
 DELIMITER |
-create or replace TRIGGER verif_habilitations_personne
+
+CREATE TRIGGER verif_habilite_personnes
+BEFORE INSERT ON PLANIFIER
+FOR EACH ROW
+
+BEGIN
+    DECLARE hab_requises varchar(50);
+    DECLARE hab_possedees INT;
+    
+    SELECT COUNT(*) INTO hab_requises
+    FROM DETENIR
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    IF hab_people < hab_requises THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : L équipe ne possède pas toutes les habilitations requises';
+    END IF;
+END|
+
+DELIMITER ;
+*/
 
 
 -------------------------------------------------------------------------------------------------------------------------
