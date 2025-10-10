@@ -219,19 +219,20 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
 
 -------------------------------------------------------------------------------------------------------------------------
 
--- affiche les habilitations du materiel
+-- procédure qui affiche les habilitations du materiel
 
 DELIMITER |
 create or replace procedure affiche_habilites(p_id_plateforme int)
 BEGIN
     declare p_nom_habilitation varchar(50);
-    declare res varchar(100);
+    declare res varchar(100) default '';
     declare fini BOOLEAN default FALSE;
     declare les_habilites cursor for
     
         select nom_habilitation
-        FROM PLATFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL NATURAL JOIN NECESSITER
-        WHERE PLATEFORME.idPlateforme = PLATEFORME.p_id_plateforme;
+        FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL 
+        NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
+        WHERE PLATEFORME.idPlateforme = p_id_plateforme;
 
         declare continue handler for not found set fini = true;
 
@@ -240,51 +241,36 @@ BEGIN
             fetch les_habilites into p_nom_habilitation;
         
             if not fini then
-                set res = concat (res,'',p_nom_habilitation,'');
+                set res = concat (res,' ',p_nom_habilitation,' ');
                 end if;
         end while;
     close les_habilites;
     select res;
 end |
 delimiter ;
-call affiche_habilites(p_id_plateforme);
-
-
-    
-DELIMITER |
-
-CREATE TRIGGER verif_habilite_personnes
-BEFORE INSERT ON PLANIFIER
-FOR EACH ROW
-
-BEGIN
-    DECLARE hab_requises INT;
-    DECLARE hab_people INT;
-    
-    SELECT COUNT(*) INTO hab_requises
-    FROM DETENIR
-    WHERE idPlateforme = NEW.idPlateforme;
-    
-
-    SELECT COUNT(DISTINCT h.idHabilitation) INTO hab_people
-    FROM PARTICIPER p
-    INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
-    WHERE p.idCampagne = NEW.idCampagne
-    and h.idHabilitation IN (
-        SELECT idHabilitation
-        FROM DETENIR
-        WHERE idPlateforme = NEW.idPlateforme
-    );
-    
-    IF hab_people < hab_requises THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
-    END IF;
-END|
-
-DELIMITER ;
+call affiche_habilites(2);
 
 -- La série de TESTS suivante a été générée par l'IA
+-- Test 3: Plateforme avec habilitations redondantes
+-- Plateforme 3 utilise: Autoclave (électrique), Hotte chimique (chimique), Balance analytique (électrique)
+-- DEVRAIT RETOURNER: électrique chimique
+CALL affiche_habilites(3);
+
+-- Test 4: Plateforme avec peu de matériel
+-- Plateforme 8 utilise: Séquenceur ADN (électrique, biologique), Autoclave (électrique), Incubateur (électrique, biologique)
+-- DEVRAIT RETOURNER: électrique biologique
+CALL affiche_habilites(8);
+
+-- Test 5: Plateforme 10
+-- Plateforme 10 utilise: Pipette automatique (biologique), Congélateur -80°C (électrique, biologique), Chromatographe (électrique, chimique)
+-- DEVRAIT RETOURNER: biologique électrique chimique
+CALL affiche_habilites(10);
+
+
+-- trigger qui verifie si le groupe de personne possede bien les habilitations demandées
+
+DELIMITER |
+create or replace TRIGGER verif_habilitations_personne
 
 
 -------------------------------------------------------------------------------------------------------------------------
