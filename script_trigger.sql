@@ -271,29 +271,39 @@ WHERE idPlateforme IN (1, 2, 3, 5, 10);
 
 
 -- trigger qui verifie si le groupe de personne possede bien les habilitations demandées
-/*
+
 DELIMITER |
+create or replace trigger verif_habilite_personnes
+before insert on PLANIFIER
+for each row
+begin
+    declare hab_requises INT;
+    declare hab_possedees INT;
 
-CREATE TRIGGER verif_habilite_personnes
-BEFORE INSERT ON PLANIFIER
-FOR EACH ROW
-
-BEGIN
-    DECLARE hab_requises varchar(50);
-    DECLARE hab_possedees INT;
-    
-    SELECT COUNT(*) INTO hab_requises
-    FROM DETENIR
+    select COUNT(DISTINCT idHabilitation) into hab_requises
+    FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL
+    NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
     WHERE idPlateforme = NEW.idPlateforme;
 
-    IF hab_people < hab_requises THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : L équipe ne possède pas toutes les habilitations requises';
-    END IF;
-END|
+    select COUNT(DISTINCT h.idHabilitation) into hab_possedees
+    FROM PERSONNE NATURAL JOIN PARTICIPER NATURAL JOIN HABILITER
+    WHERE idCampagne = NEW.idCampagne
+    and idHabilitation in 
+    
+    (
+        select distinct idHabilitation
+        FROM UTILISER NATURAL JOIN NECESSITER
+        WHERE idPlateforme = NEW.idPlateforme
+    );
 
+    IF hab_possedees < hab_requises THEN
+        SIGNAL SQLSTATE '45000'
+        set MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
+    end if;
+end |
 DELIMITER ;
-*/
+
+-- La série de TESTS suivante a été générée par l'IA
 
 
 -------------------------------------------------------------------------------------------------------------------------
