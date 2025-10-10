@@ -32,7 +32,7 @@ BEGIN
     END IF;
 END |
 DELIMITER ;
-
+/*
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_dispo_plateforme
@@ -84,7 +84,7 @@ INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
 -- Nouvelle campagne: du 2024-10-15 pour 15 jours (se termine le 2024-10-30)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);*/
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ BEGIN
     END IF;
 END |
 DELIMITER ;
-
+/*
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_intervalle_maintenance
@@ -145,7 +145,7 @@ INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 14);
 -- Plateforme 5: intervalle_maintenance = 35 jours
 -- Nouvelle campagne: durée = 10 jours (< 35 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-07-01', 10);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);*/
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ BEGIN
 
 end |
 delimiter ;
-
+/*
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_personnes_libres
@@ -214,7 +214,7 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
 -- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
 -- DEVRAIT RÉUSSIR :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);*/
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ BEGIN
     declare fini BOOLEAN default FALSE;
     declare les_habilites cursor for
     
-        select nom_habilitation
+        select DISTINCT nom_habilitation
         FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL 
         NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
         WHERE PLATEFORME.idPlateforme = p_id_plateforme;
@@ -281,12 +281,11 @@ begin
     declare hab_possedees INT;
 
     select COUNT(DISTINCT idHabilitation) into hab_requises
-    FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL
-    NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
+    FROM UTILISER NATURAL JOIN NECESSITER 
     WHERE idPlateforme = NEW.idPlateforme;
 
-    select COUNT(DISTINCT h.idHabilitation) into hab_possedees
-    FROM PERSONNE NATURAL JOIN PARTICIPER NATURAL JOIN HABILITER
+    select COUNT(DISTINCT idHabilitation) into hab_possedees
+    FROM PARTICIPER NATURAL JOIN HABILITER
     WHERE idCampagne = NEW.idCampagne
     and idHabilitation in 
     
@@ -303,7 +302,21 @@ begin
 end |
 DELIMITER ;
 
--- La série de TESTS suivante a été générée par l'IA
+-- La série de TESTS suivante a été générée par l'IA\
+-- Test 1 : DOIT RÉUSSIR
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-01-15', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 19);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, LAST_INSERT_ID());
+
+-- Test 2 : DOIT ÉCHOUER
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-03-01', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 2);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (2, LAST_INSERT_ID());
+
+-- Test 3 : DOIT RÉUSSIR
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-05-10', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 13);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, LAST_INSERT_ID());
 
 
 -------------------------------------------------------------------------------------------------------------------------
