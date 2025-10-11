@@ -320,6 +320,52 @@ INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, LAST_INSERT_ID());
 
 
 -------------------------------------------------------------------------------------------------------------------------
+-- fonction alerte maintenance 
+delimiter $$
+
+create or replace function alertemaintenance(p_idplateforme int)
+returns varchar(20)
+begin
+    declare v_joursrestants int;
+    declare v_intervalle int;
+    declare v_dernierecampagne date;
+    declare v_datemaintenance date;
+    
+    select intervalle_maintenance into v_intervalle
+    from PLATEFORME
+    where idPlateforme = p_idplateforme;
+    
+    select max(date_add(c.date_debut, interval c.duree day))
+    into v_dernierecampagne
+    from CAMPAGNE c natural join PLANIFIER p
+    where p.idPlateforme = p_idplateforme;
+    
+    if v_dernierecampagne is null then
+        return 'Tranquille';
+    end if;
+    
+    set v_datemaintenance = date_add(v_dernierecampagne, interval v_intervalle day);
+    set v_joursrestants = datediff(v_datemaintenance, curdate());
+    
+    if v_joursrestants <= 3 then
+        return 'URGENT';
+    elseif v_joursrestants <= 10 then
+        return 'Modéré';
+    else
+        return 'Tranquille';
+    end if;
+end$$
+
+delimiter ;
+
+--test
+select idPlateforme, nom, alertemaintenance(idPlateforme) as alerte
+from PLATEFORME;
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
 
 delimiter |
 CREATE or REPLACE FUNCTION personne_disponible(idP INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
