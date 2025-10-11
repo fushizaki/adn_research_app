@@ -444,11 +444,11 @@ END |
 delimiter ;
 
 delimiter |
-CREATE or REPLACE FUNCTION calcul_cout_total_campagne_planifie(idC INT) RETURNS DECIMAL(10,2)
+CREATE or REPLACE FUNCTION calcul_cout_total_campagne(idC INT) RETURNS DECIMAL(10,2)
 BEGIN
     DECLARE cout_total DECIMAL(10,2);
 
-    SELECT SUM(c.duree * p.cout_journalier) INTO cout_total
+    SELECT IFNULL(SUM(c.duree * p.cout_journalier) 0.0) INTO cout_total
     FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
     WHERE c.idCampagne = idC;
 
