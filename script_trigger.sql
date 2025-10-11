@@ -432,9 +432,7 @@ BEGIN
     WHERE mois = mois_param and annee = annee_param;
 
     SELECT SUM(c.duree * p.cout_journalier) into depenses_total
-    FROM CAMPAGNE c
-    NATURAL JOIN PLANIFIER pl
-    NATURAL JOIN PLATEFORME p
+    FROM CAMPAGNE c NATURAL JOIN PLANIFIER pl NATURAL JOIN PLATEFORME p
     WHERE MONTH(c.date_debut) = mois_param and YEAR(c.date_debut) = annee_param;
 
     SET budget_restant = COALESCE(budget_total, 0) - depenses_total;
