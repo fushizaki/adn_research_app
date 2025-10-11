@@ -32,7 +32,7 @@ BEGIN
     END IF;
 END |
 DELIMITER ;
-/*
+
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_dispo_plateforme
@@ -84,7 +84,7 @@ INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (5, 16);
 -- Nouvelle campagne: du 2024-10-15 pour 15 jours (se termine le 2024-10-30)
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-10-15', 15);
 -- Cette insertion devrait réussir car se termine avant le début de la campagne 6
-INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);*/
+INSERT into PLANIFIER (idPlateforme, idCampagne) VALUES (1, 17);
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ BEGIN
     END IF;
 END |
 DELIMITER ;
-/*
+
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_intervalle_maintenance
@@ -145,13 +145,13 @@ INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (4, 14);
 -- Plateforme 5: intervalle_maintenance = 35 jours
 -- Nouvelle campagne: durée = 10 jours (< 35 jours)
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-07-01', 10);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);*/
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (5, 15);
 
 
 -------------------------------------------------------------------------------------------------------------------------
 
-
 --Les personnes doivent être libres (ne doivent pas déjà travailler sur un autre site)
+
 delimiter |
 CREATE TRIGGER verif_personnes_libres
 BEFORE INSERT ON PARTICIPER
@@ -181,7 +181,7 @@ BEGIN
 
 end |
 delimiter ;
-/*
+
 -- La série de TESTS suivante a été générée par l'IA
 
 -- Tests trigger verif_personnes_libres
@@ -214,12 +214,12 @@ INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (14, 2);
 -- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
 -- DEVRAIT RÉUSSIR :
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);*/
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
 
 
 -------------------------------------------------------------------------------------------------------------------------
 
--- procédure qui affiche les habilitations du materiel
+-- fonction qui affiche les habilitations du materiel
 
 DELIMITER |
 create or replace function retourne_habilites(p_id_plateforme int)
