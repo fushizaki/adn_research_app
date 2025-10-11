@@ -1,37 +1,37 @@
 -- Les plateformes doivent être libres ()
-DELIMITER |
-CREATE TRIGGER verif_dispo_plateforme
-BEFORE INSERT ON PLANIFIER
-FOR EACH ROW
-BEGIN
-    declare disponible int;
-
-    declare date_debut_camp_insert date;
-    declare date_fin_camp_insert date;
-    declare duree_camp_insert int;
-
-    SELECT date_debut, duree into date_debut_camp_insert, duree_camp_insert
-    FROM CAMPAGNE
-    WHERE id_campagne = NEW.id_campagne;
-
-    -- https://www.w3schools.com/sql/func_mysql_date_add.asp
-    set date_fin_camp_insert = DATE_ADD(date_debut_camp_insert, INTERVAL duree_camp_insert DAY);
-    
-    SELECT count(*) into disponible
-    FROM PLATEFORME NATURAL JOIN PLANIFIER NATURAL JOIN CAMPAGNE
-    WHERE id_plateforme = NEW.id_plateforme and 
-            (date_debut_camp_insert>=date_debut and date_debut_camp_insert<DATE_ADD(date_debut, INTERVAL duree DAY)) 
-            or
-            (date_debut_camp_insert>date_debut and date_debut_camp_insert<=DATE_ADD(date_debut, INTERVAL duree DAY))
-            or
-            (date_debut_camp_insert<=date_debut and date_debut_camp_insert>=DATE_ADD(date_debut, INTERVAL duree DAY)); 
-
-    IF (disponible>0) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : La plateforme nest pas disponible pour cette campagne';
-    END IF;
-END |
-DELIMITER ;
+--DELIMITER |
+--CREATE TRIGGER verif_dispo_plateforme
+--BEFORE INSERT ON PLANIFIER
+--FOR EACH ROW
+--BEGIN
+--    declare disponible int;
+--
+--    declare date_debut_camp_insert date;
+--    declare date_fin_camp_insert date;
+--    declare duree_camp_insert int;
+--
+--    SELECT date_debut, duree into date_debut_camp_insert, duree_camp_insert
+--    FROM CAMPAGNE
+--    WHERE id_campagne = NEW.id_campagne;
+--
+--    -- https://www.w3schools.com/sql/func_mysql_date_add.asp
+--    set date_fin_camp_insert = DATE_ADD(date_debut_camp_insert, INTERVAL duree_camp_insert DAY);
+--    
+--    SELECT count(*) into disponible
+--    FROM PLATEFORME NATURAL JOIN PLANIFIER NATURAL JOIN CAMPAGNE
+--    WHERE id_plateforme = NEW.id_plateforme and 
+--            (date_debut_camp_insert>=date_debut and date_debut_camp_insert<DATE_ADD(date_debut, INTERVAL duree DAY)) 
+--            or
+--            (date_debut_camp_insert>date_debut and date_debut_camp_insert<=DATE_ADD(date_debut, INTERVAL duree DAY))
+--            or
+--            (date_debut_camp_insert<=date_debut and date_debut_camp_insert>=DATE_ADD(date_debut, INTERVAL duree DAY)); 
+--
+--    IF (disponible>0) THEN
+--        SIGNAL SQLSTATE '45000'
+--        SET MESSAGE_TEXT = 'Erreur : La plateforme nest pas disponible pour cette campagne';
+--    END IF;
+--END |
+--DELIMITER ;
 
 -- La série de TESTS suivante a été générée par l'IA
 
@@ -220,38 +220,38 @@ INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (15, 2);
 -------------------------------------------------------------------------------------------------------------------------
 
 
-DELIMITER |
-
-CREATE TRIGGER verif_habilite_personnes
-BEFORE INSERT ON PLANIFIER
-FOR EACH ROW
-
-BEGIN
-    DECLARE hab_requises INT;
-    DECLARE hab_people INT;
-    
-    SELECT COUNT(*) INTO hab_requises
-    FROM DETENIR
-    WHERE id_plateforme = NEW.id_plateforme;
-    
-
-    SELECT COUNT(DISTINCT h.id_habilitation) INTO hab_people
-    FROM PARTICIPER p
-    INNER JOIN HABILITER h ON p.id_personne = h.id_personne
-    WHERE p.id_campagne = NEW.id_campagne
-    and h.id_habilitation IN (
-        SELECT id_habilitation
-        FROM DETENIR
-        WHERE id_plateforme = NEW.id_plateforme
-    );
-    
-    IF hab_people < hab_requises THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
-    END IF;
-END|
-
-DELIMITER ;
+--DELIMITER |
+--
+--CREATE TRIGGER verif_habilite_personnes
+--BEFORE INSERT ON PLANIFIER
+--FOR EACH ROW
+--
+--BEGIN
+--    DECLARE hab_requises INT;
+--    DECLARE hab_people INT;
+--    
+--    SELECT COUNT(*) INTO hab_requises
+--    FROM DETENIR
+--    WHERE id_plateforme = NEW.id_plateforme;
+--    
+--
+--    SELECT COUNT(DISTINCT h.id_habilitation) INTO hab_people
+--    FROM PARTICIPER p
+--    INNER JOIN HABILITER h ON p.id_personne = h.id_personne
+--    WHERE p.id_campagne = NEW.id_campagne
+--    and h.id_habilitation IN (
+--        SELECT id_habilitation
+--        FROM DETENIR
+--        WHERE id_plateforme = NEW.id_plateforme
+--    );
+--    
+--    IF hab_people < hab_requises THEN
+--        SIGNAL SQLSTATE '45000'
+--        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
+--    END IF;
+--END|
+--
+--DELIMITER ;
 
 -- La série de TESTS suivante a été générée par l'IA
 
@@ -285,7 +285,76 @@ WHERE (pl.id_plateforme = 8 and pl.id_campagne = 1)
 OR (pl.id_plateforme = 4 and pl.id_campagne = 8) 
 OR (pl.id_plateforme = 6 and pl.id_campagne = 4);
 
+
 -------------------------------------------------------------------------------------------------------------------------
+
+
+DELIMITER |
+
+CREATE OR REPLACE TRIGGER verif_budget_mensuel
+BEFORE INSERT ON PLANIFIER
+FOR EACH ROW
+BEGIN
+    DECLARE date_debut_camp_insert DATE;
+    DECLARE cout_total DECIMAL(10,2);
+    DECLARE budget_mensuel_restant DECIMAL(10,2);
+    DECLARE depassement DECIMAL(10,2);
+    DECLARE res varchar(500) default '';
+    
+    SET cout_total = calcul_cout_total_campagne_non_planifie(new.id_campagne, new.id_plateforme);
+
+    SELECT date_debut INTO date_debut_camp_insert
+    FROM CAMPAGNE 
+    WHERE id_campagne = new.id_campagne;
+
+    SET budget_mensuel_restant = calcul_budget_mensuel_restant(MONTH(date_debut_camp_insert), YEAR(date_debut_camp_insert));
+
+    IF budget_mensuel_restant - cout_total < 0 THEN
+        SET depassement = cout_total - budget_mensuel_restant;
+        SET res = CONCAT(res, 'Erreur : Le budget de la campagne dépasse le budget mensuel restant de : ', depassement, ' euros');
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = res;
+    END IF;
+END |
+
+DELIMITER ;
+
+-- La série de TESTS suivante a été générée par l'IA
+
+-- Tests trigger verif_budget_mensuel
+
+-- Test 1: DEVRAIT RÉUSSIR
+-- Budget octobre 2025: 23000.50€, supposons aucune dépense engagée
+-- Campagne courte et pas chère: 10 jours sur plateforme 1 (cout_journalier = 150.50€)
+-- Coût total: 10 × 150.50 = 1505€ (< budget disponible)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2025-10-05', 10);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (1, 29);
+
+-- Test 2: DEVRAIT ÉCHOUER
+-- Budget janvier 2024: 8500€
+-- Campagne très longue et chère: 80 jours sur plateforme 7 (cout_journalier = 300.15€)
+-- Coût total: 80 × 300.15 = 24012€ (>> budget disponible)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-01-10', 80);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (7, 30);
+
+-- Test 3: DEVRAIT RÉUSSIR (limite)
+-- Budget février 2024: 7250.50€
+-- Campagne modérée: 30 jours sur plateforme 2 (cout_journalier = 165.25€)
+-- Coût total: 30 × 165.25 = 4957.50€ (< budget disponible si pas d'autres dépenses)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-02-01', 30);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (2, 31);
+
+-- Test 4: DEVRAIT ÉCHOUER
+-- Budget mars 2024: 9100.25€
+-- Campagne très chère: 50 jours sur plateforme 10 (cout_journalier = 275.80€)
+-- Coût total: 50 × 275.80 = 13790€ (> budget disponible)
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-15', 50);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (10, 32);
+
+    
+-------------------------------------------------------------------------------------------------------------------------
+
+
 
 delimiter |
 CREATE or REPLACE FUNCTION personne_disponible(idP INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
@@ -348,7 +417,7 @@ END |
 delimiter ;
 
 delimiter |
-CREATE or REPLACE FUNCTION calcul_budget_mensuelle_restant(mois_param INT, annee_param INT) RETURNS DECIMAL(10,2)
+CREATE or REPLACE FUNCTION calcul_budget_mensuel_restant(mois_param INT, annee_param INT) RETURNS DECIMAL(10,2)
 BEGIN
     DECLARE budget_total DECIMAL(10,2);
     DECLARE depenses_total DECIMAL(10,2);
@@ -358,7 +427,7 @@ BEGIN
     FROM BUDGET_MENSUEL
     WHERE mois = mois_param and annee = annee_param;
 
-    SELECT SUM(c.duree * p.cout_journalier) INTO depenses_total
+    SELECT IFNULL(SUM(c.duree * p.cout_journalier), 0) into depenses_total
     FROM CAMPAGNE c
     NATURAL JOIN PLANIFIER pl
     NATURAL JOIN PLATEFORME p
@@ -370,17 +439,54 @@ END |
 delimiter ;
 
 delimiter |
-CREATE or REPLACE FUNCTION calcul_cout_total_campagne(idC INT) RETURNS DECIMAL(10,2)
+CREATE or REPLACE FUNCTION calcul_cout_total_campagne_non_planifie(idC INT, idP INT) RETURNS DECIMAL(10,2)
 BEGIN
     DECLARE cout_total DECIMAL(10,2);
+    DECLARE cout_journalier_plateforme DECIMAL(10,2);
+    DECLARE duree_camp INT DEFAULT 0;
 
-    SELECT SUM(c.duree * p.cout_journalier) INTO cout_total
-    FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
-    WHERE c.id_campagne = idC;
+    SELECT cout_journalier INTO cout_journalier_plateforme
+    FROM PLATEFORME
+    WHERE id_plateforme = idP;
+
+    SELECT duree INTO duree_camp
+    FROM CAMPAGNE
+    where id_campagne = idC;
+
+    SET cout_total = duree_camp * cout_journalier_plateforme; 
 
     RETURN cout_total;
 END |
 delimiter ;
 
--------------------------------------------------------------------------------------------------------------------------
+delimiter |
+CREATE or REPLACE FUNCTION calcul_cout_total_campagne_planifie(idC INT) RETURNS DECIMAL(10,2)
+BEGIN
+    DECLARE cout_total DECIMAL(10,2);
+
+    SELECT SUM(c.duree * p.cout_journalier) INTO cout_total
+    FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
+    WHERE c.idCampagne = idC;
+
+    RETURN cout_total;
+END |
+delimiter ;
+
+-- Permet de calculer le temps restants avant la prochaine intervalle
+delimiter |
+CREATE or REPLACE FUNCTION temps_restant_intervalle(idP INT) RETURNS INT
+BEGIN
+    DECLARE temps_restant INT;
+    DECLARE intervalle_maintenance_p INT;
+
+    SELECT intervalle_maintenance into intervalle_maintenance_p
+    FROM PLATEFORME
+    WHERE idP = idPlateforme;
+
+    set temps_restant = intervalle_maintenance_p-DAY(NOW());
+
+    RETURN temps_restant;
+END |
+delimiter ;
+
 
