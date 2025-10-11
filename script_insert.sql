@@ -1,27 +1,27 @@
 -- Insertion pour la BDD générer a l'aide de l'IA
 INSERT into
-    PERSONNE (nom, prenom)
+    PERSONNE (nom, prenom, role_labo)
 VALUES
-    ('Durand', 'Alice'),
-    ('Martin', 'Lucas'),
-    ('Bernard', 'Emma'),
-    ('Petit', 'Noah'),
-    ('Robert', 'Léa'),
-    ('Richard', 'Louis'),
-    ('Dubois', 'Chloé'),
-    ('Moreau', 'Gabriel'),
-    ('Laurent', 'Jules'),
-    ('Simon', 'Manon'),
-    ('Michel', 'Tom'),
-    ('Lefebvre', 'Sarah'),
-    ('Leroy', 'Raphaël'),
-    ('Roux', 'Lina'),
-    ('David', 'Nathan'),
-    ('Blanc', 'Eva'),
-    ('Garcia', 'Hugo'),
-    ('Muller', 'Zoé'),
-    ('Faure', 'Enzo'),
-    ('Lopez', 'Camille');
+    ('Durand', 'Alice', 'Directeur'),
+    ('Martin', 'Lucas', 'Chercheur'),
+    ('Bernard', 'Emma', 'Technicien'),
+    ('Petit', 'Noah', 'Administratif'),
+    ('Robert', 'Léa', 'Chercheur'),
+    ('Richard', 'Louis', 'Technicien'),
+    ('Dubois', 'Chloé', 'Chercheur'),
+    ('Moreau', 'Gabriel', 'Administratif'),
+    ('Laurent', 'Jules', 'Technicien'),
+    ('Simon', 'Manon', 'Chercheur'),
+    ('Michel', 'Tom', 'Directeur'),
+    ('Lefebvre', 'Sarah', 'Technicien'),
+    ('Leroy', 'Raphaël', 'Chercheur'),
+    ('Roux', 'Lina', 'Administratif'),
+    ('David', 'Nathan', 'Technicien'),
+    ('Blanc', 'Eva', 'Chercheur'),
+    ('Garcia', 'Hugo', 'Directeur'),
+    ('Muller', 'Zoé', 'Technicien'),
+    ('Faure', 'Enzo', 'Chercheur'),
+    ('Lopez', 'Camille', 'Administratif');
 
 INSERT into
     PLATEFORME (

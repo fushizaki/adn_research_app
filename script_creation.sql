@@ -15,7 +15,8 @@ CREATE TABLE
         PRIMARY KEY (id_personne),
         id_personne int NOT NULL AUTO_INCREMENT,
         nom varchar(30) NOT NULL,
-        prenom varchar(30) NOT NULL
+        prenom varchar(30) NOT NULL,
+        role_labo varchar(30) NOT NULL
     );
 
 CREATE TABLE
@@ -140,7 +141,17 @@ CREATE TABLE
         id_habilitation INT NOT NULL
     );
 
-ALTER TABLE NECESSITER ADD FOREIGN KEY (id_materiel) REFERENCES MATERIEL (id_materiel);
+CREATE TABLE
+    MAINTENANCE (
+        PRIMARY KEY (idMaintenance),
+        idMaintenance int NOT NULL AUTO_INCREMENT,
+        idPlateforme int NOT NULL,
+        date_maintenance date NOT NULL,
+        duree_maintenance int NOT NULL DEFAULT 1,
+        statut ENUM('planifiée', 'en_cours', 'terminée') DEFAULT 'planifiée'
+    );
+
+ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
 
 ALTER TABLE NECESSITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
 
@@ -170,4 +181,6 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_pers
 
 ALTER TABLE HABILITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
 
-ALTER TABLE LOGIN ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_personne);
+ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPersonne);
+
+ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
