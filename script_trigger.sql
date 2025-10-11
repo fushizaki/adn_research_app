@@ -337,7 +337,7 @@ begin
     
     select max(DATE_ADD(c.date_debut, interval c.duree day))
     into v_dernierecampagne
-    from CAMPAGNE c natural join PLANIFIER p
+    from CAMPAGNE c NATURAL JOIN PLANIFIER p
     where p.idPlateforme = p_idplateforme;
     
     if v_dernierecampagne is null then
@@ -345,7 +345,7 @@ begin
     end if;
     
     set v_datemaintenance = DATE_ADD(v_dernierecampagne, interval v_intervalle day);
-    set v_joursrestants = datediff(v_datemaintenance, curdate());
+    set v_joursrestants = DATEDIFF(v_datemaintenance, curdate());
     
     if v_joursrestants <= 3 then
         return 'URGENT';
