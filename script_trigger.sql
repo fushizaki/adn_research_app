@@ -82,11 +82,11 @@ BEGIN
     DECLARE temps_avant_maintenance INT;
     DECLARE intervalle_requis INT;
     
-    SET temps_avant_maintenance = temps_restant_avant_maintenance(NEW.idPlateforme);
+    SET temps_avant_maintenance = temps_restant_avant_maintenance(NEW.id_plateforme);
     
     SELECT intervalle_maintenance into intervalle_requis
     FROM PLATEFORME 
-    WHERE idPlateforme = NEW.idPlateforme;
+    WHERE id_plateforme = NEW.id_plateforme;
     
     IF temps_avant_maintenance >= intervalle_requis THEN
         SIGNAL SQLSTATE '45000'
@@ -122,27 +122,27 @@ SET @id_camp_m3 = @id_camp_m1 + 2;
 
 -- CAS 1: DEVRAIT RÉUSSIR - Maintenance récente (5 jours), intervalle 30 jours
 -- Dernière maintenance il y a 5 jours (< 30 jours requis)
-INSERT INTO MAINTENANCE (idPlateforme, date_maintenance, duree_maintenance, statut) 
+INSERT INTO MAINTENANCE (id_plateforme, date_maintenance, duree_maintenance, statut) 
 VALUES (@id_plat_m1, DATE_SUB(NOW(), INTERVAL 5 DAY), 1, 'terminée');
 
 -- Cette insertion devrait RÉUSSIR car 5 < 30
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m1, @id_camp_m1);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m1, @id_camp_m1);
 
 -- CAS 2: DEVRAIT ÉCHOUER - Maintenance ancienne (35 jours), intervalle 30 jours  
 -- Dernière maintenance il y a 35 jours (> 30 jours requis)
-INSERT INTO MAINTENANCE (idPlateforme, date_maintenance, duree_maintenance, statut) 
+INSERT INTO MAINTENANCE (id_plateforme, date_maintenance, duree_maintenance, statut) 
 VALUES (@id_plat_m2, DATE_SUB(NOW(), INTERVAL 35 DAY), 2, 'terminée');
 
 -- Cette insertion devrait ÉCHOUER car 35 >= 30
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m2, @id_camp_m2);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m2, @id_camp_m2);
 
 -- CAS 3: DEVRAIT RÉUSSIR - Maintenance récente (45 jours), intervalle 60 jours
 -- Dernière maintenance il y a 45 jours (< 60 jours requis)
-INSERT INTO MAINTENANCE (idPlateforme, date_maintenance, duree_maintenance, statut) 
+INSERT INTO MAINTENANCE (id_plateforme, date_maintenance, duree_maintenance, statut) 
 VALUES (@id_plat_m3, DATE_SUB(NOW(), INTERVAL 45 DAY), 1, 'terminée');
 
 -- Cette insertion devrait RÉUSSIR car 45 < 60
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m3, @id_camp_m2);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m3, @id_camp_m2);
 
 -- CAS 4: DEVRAIT ÉCHOUER - Maintenance exactement à l'intervalle requis (60 jours = 60 jours)
 -- Ajout d'une nouvelle plateforme pour ce test
@@ -150,11 +150,11 @@ INSERT INTO PLATEFORME (nom, min_nb_personne, cout_journalier, intervalle_mainte
 VALUES ('Plateforme Test M4', 2, 180.00, 60);
 SET @id_plat_m4 = LAST_INSERT_ID();
 
-INSERT INTO MAINTENANCE (idPlateforme, date_maintenance, duree_maintenance, statut) 
+INSERT INTO MAINTENANCE (id_plateforme, date_maintenance, duree_maintenance, statut) 
 VALUES (@id_plat_m4, DATE_SUB(NOW(), INTERVAL 60 DAY), 1, 'terminée');
 
 -- Cette insertion devrait ÉCHOUER car 60 >= 60
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m4, @id_camp_m3);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m4, @id_camp_m3);
 
 -- CAS 5: DEVRAIT ÉCHOUER - Aucune maintenance terminée (considéré comme maintenance nécessaire)
 -- Plateforme sans maintenance terminée
@@ -163,24 +163,24 @@ VALUES ('Plateforme Test M5', 1, 120.00, 30);
 SET @id_plat_m5 = LAST_INSERT_ID();
 
 -- Ajout d'une maintenance planifiée seulement (pas terminée)
-INSERT INTO MAINTENANCE (idPlateforme, date_maintenance, duree_maintenance, statut) 
+INSERT INTO MAINTENANCE (id_plateforme, date_maintenance, duree_maintenance, statut) 
 VALUES (@id_plat_m5, '2025-11-20', 1, 'planifiée');
 
 -- Cette insertion devrait ÉCHOUER car aucune maintenance terminée trouvée
 -- La fonction temps_restant_avant_maintenance retournera une valeur très élevée (NULL -> NOW() - NULL)
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m5, @id_camp_m1);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m5, @id_camp_m1);
 
 -- TESTS D'ÉCHEC (commentés pour éviter les erreurs lors de l'exécution)
 -- Décommenter individuellement pour tester chaque cas d'échec
 
 -- Test du CAS 2:
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m2, @id_camp_m2);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m2, @id_camp_m2);
 
 -- Test du CAS 4:
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m4, @id_camp_m3);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m4, @id_camp_m3);
 
 -- Test du CAS 5:
--- INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (@id_plat_m5, @id_camp_m1);
+-- INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (@id_plat_m5, @id_camp_m1);
 
 -- VÉRIFICATION DES RÉSULTATS
 SELECT 'Tests trigger verif_maintenance_necessaire - Résultats:' AS Info;
@@ -195,14 +195,14 @@ SELECT
         ELSE 'N/A' 
     END AS 'Jours écoulés',
     CASE 
-        WHEN pl.idPlateforme IS NOT NULL THEN 'PLANIFIÉE' 
+        WHEN pl.id_plateforme IS NOT NULL THEN 'PLANIFIÉE' 
         ELSE 'NON PLANIFIÉE' 
     END AS 'Statut planification'
 FROM PLATEFORME p
-LEFT JOIN MAINTENANCE m ON p.idPlateforme = m.idPlateforme AND m.statut = 'terminée'
-LEFT JOIN PLANIFIER pl ON p.idPlateforme = pl.idPlateforme
+LEFT JOIN MAINTENANCE m ON p.id_plateforme = m.id_plateforme AND m.statut = 'terminée'
+LEFT JOIN PLANIFIER pl ON p.id_plateforme = pl.id_plateforme
 WHERE p.nom LIKE 'Plateforme Test M%'
-GROUP BY p.idPlateforme, p.nom, p.intervalle_maintenance, pl.idPlateforme;
+GROUP BY p.id_plateforme, p.nom, p.intervalle_maintenance, pl.id_plateforme;
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -271,7 +271,7 @@ INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (14, 2);
 -- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
 -- DEVRAIT RÉUSSIR :
-INSERT into PARTICIPER (idCampagne, idPersonne) VALUES (15, 2);
+INSERT into PARTICIPER (id_campagne, idPersonne) VALUES (15, 2);
 
 
 -------------------------------------------------------------------------------------------------------------------------
@@ -289,17 +289,17 @@ BEGIN
     
     SELECT COUNT(*) into hab_requises
     FROM DETENIR
-    WHERE idPlateforme = NEW.idPlateforme;
+    WHERE id_plateforme = NEW.id_plateforme;
     
 
     SELECT COUNT(DISTINCT h.idHabilitation) into hab_people
     FROM PARTICIPER p
     INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
-    WHERE p.idCampagne = NEW.idCampagne
+    WHERE p.id_campagne = NEW.id_campagne
     and h.idHabilitation IN (
         SELECT idHabilitation
         FROM DETENIR
-        WHERE idPlateforme = NEW.idPlateforme
+        WHERE id_plateforme = NEW.id_plateforme
     );
     
     IF hab_people < hab_requises THEN
@@ -425,6 +425,13 @@ BEGIN
     WHERE p.id_personne = idP and (
         (date_debut_param < DATE_ADD(c.date_debut, INTERVAL c.duree DAY) and date_fin > c.date_debut)
     );
+    IF disponible > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END |
+delimiter ;
 
 delimiter |
 CREATE or REPLACE FUNCTION plateforme_disponible(idPl INT, date_debut_param DATE, duree_param INT) RETURNS BOOLEAN
@@ -512,9 +519,9 @@ CREATE or REPLACE FUNCTION calcul_cout_total_campagne(idC INT) RETURNS DECIMAL(1
 BEGIN
     DECLARE cout_total DECIMAL(10,2);
 
-    SELECT IFNULL(SUM(c.duree * p.cout_journalier) 0.0) INTO cout_total
+    SELECT IFNULL(SUM(c.duree * p.cout_journalier), 0.0) INTO cout_total
     FROM CAMPAGNE c NATURAL JOIN PLANIFIER NATURAL JOIN PLATEFORME
-    WHERE c.idCampagne = idC;
+    WHERE c.id_campagne = idC;
 
     RETURN cout_total;
 END |
@@ -530,7 +537,7 @@ BEGIN
 
     SELECT MAX(date_maintenance) into derniere_maintenance
     FROM MAINTENANCE
-    WHERE idPlateforme=idP and statut = "terminée";
+    WHERE id_plateforme=idP and statut = "terminée";
 
     set temps_restant = DATEDIFF(NOW(),derniere_maintenance);
 

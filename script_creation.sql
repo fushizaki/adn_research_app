@@ -143,15 +143,15 @@ CREATE TABLE
 
 CREATE TABLE
     MAINTENANCE (
-        PRIMARY KEY (idMaintenance),
-        idMaintenance int NOT NULL AUTO_INCREMENT,
-        idPlateforme int NOT NULL,
+        PRIMARY KEY (id_maintenance),
+        id_maintenance int NOT NULL AUTO_INCREMENT,
+        id_plateforme int NOT NULL,
         date_maintenance date NOT NULL,
         duree_maintenance int NOT NULL DEFAULT 1,
         statut ENUM('planifiée', 'en_cours', 'terminée') DEFAULT 'planifiée'
     );
 
-ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
+ALTER TABLE NECESSITER ADD FOREIGN KEY (id_materiel) REFERENCES MATERIEL (id_materiel);
 
 ALTER TABLE NECESSITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
 
@@ -181,6 +181,6 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_pers
 
 ALTER TABLE HABILITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
 
-ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPersonne);
+ALTER TABLE LOGIN ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_personne);
 
-ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
+ALTER TABLE MAINTENANCE ADD FOREIGN KEY (id_plateforme) REFERENCES PLATEFORME (id_plateforme);
