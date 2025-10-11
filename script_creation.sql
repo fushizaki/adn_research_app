@@ -141,6 +141,16 @@ CREATE TABLE
         idHabilitation INT NOT NULL
     );
 
+CREATE TABLE
+    MAINTENANCE (
+        PRIMARY KEY (idMaintenance),
+        idMaintenance int NOT NULL AUTO_INCREMENT,
+        idPlateforme int NOT NULL,
+        date_maintenance date NOT NULL,
+        duree_maintenance int NOT NULL DEFAULT 1,
+        statut ENUM('planifiée', 'en_cours', 'terminée') DEFAULT 'planifiée'
+    );
+
 ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
 
 ALTER TABLE NECESSITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
@@ -172,3 +182,5 @@ ALTER TABLE HABILITER ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPerson
 ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
 
 ALTER TABLE LOGIN ADD FOREIGN KEY (idPersonne) REFERENCES PERSONNE (idPersonne);
+
+ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
