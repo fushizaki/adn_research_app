@@ -271,7 +271,7 @@ INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (14, 2);
 -- Cet INSERT DEVRAIT RÉUSSIR car il n'y a pas de conflit.
 INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la campagne ID 15
 -- DEVRAIT RÉUSSIR :
-INSERT into PARTICIPER (id_campagne, idPersonne) VALUES (15, 2);
+INSERT into PARTICIPER (id_campagne, id_personne) VALUES (15, 2);
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ BEGIN
         select DISTINCT nom_habilitation
         FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL 
         NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
-        WHERE PLATEFORME.idPlateforme = p_id_plateforme;
+        WHERE PLATEFORME.id_plateforme = p_id_plateforme;
 
         declare continue handler for not found set fini = true;
 
@@ -321,9 +321,9 @@ SELECT retourne_habilites(3) AS 'Habilitations Plateforme 3';
 SELECT retourne_habilites(8) AS 'Habilitations Plateforme 8';
 
 -- Test 5: Vérifier toutes les plateformes
-SELECT idPlateforme, nom, retourne_habilites(idPlateforme) AS habilitations_requises
+SELECT id_plateforme, nom, retourne_habilites(id_plateforme) AS habilitations_requises
 FROM PLATEFORME
-WHERE idPlateforme IN (1, 2, 3, 5, 10);
+WHERE id_plateforme IN (1, 2, 3, 5, 10);
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -336,19 +336,19 @@ begin
     declare hab_requises INT;
     declare hab_possedees INT;
 
-    select COUNT(DISTINCT idHabilitation) into hab_requises
+    select COUNT(DISTINCT id_habilitation) into hab_requises
     FROM UTILISER NATURAL JOIN NECESSITER 
-    WHERE idPlateforme = NEW.idPlateforme;
+    WHERE id_plateforme = NEW.id_plateforme;
 
-    select COUNT(DISTINCT idHabilitation) into hab_possedees
+    select COUNT(DISTINCT id_habilitation) into hab_possedees
     FROM PARTICIPER NATURAL JOIN HABILITER
-    WHERE idCampagne = NEW.idCampagne
+    WHERE id_campagne = NEW.id_campagne
     and idHabilitation in 
     
     (
-        select distinct idHabilitation
+        select distinct id_habilitation
         FROM UTILISER NATURAL JOIN NECESSITER
-        WHERE idPlateforme = NEW.idPlateforme
+        WHERE id_plateforme = NEW.id_plateforme
     );
 
     IF hab_possedees < hab_requises THEN
@@ -361,18 +361,18 @@ DELIMITER ;
 -- La série de TESTS suivante a été générée par l'IA\
 -- Test 1 : DOIT RÉUSSIR
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-01-15', 10);
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 19);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, LAST_INSERT_ID());
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (LAST_INSERT_ID(), 19);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (3, LAST_INSERT_ID());
 
 -- Test 2 : DOIT ÉCHOUER
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-03-01', 10);
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 2);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (2, LAST_INSERT_ID());
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (LAST_INSERT_ID(), 2);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (2, LAST_INSERT_ID());
 
 -- Test 3 : DOIT RÉUSSIR
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-05-10', 10);
-INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 13);
-INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, LAST_INSERT_ID());
+INSERT INTO PARTICIPER (id_campagne, id_personne) VALUES (LAST_INSERT_ID(), 13);
+INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (1, LAST_INSERT_ID());
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -454,12 +454,12 @@ begin
     
     select intervalle_maintenance into v_intervalle
     from PLATEFORME
-    where idPlateforme = p_idplateforme;
+    where id_plateforme = p_idplateforme;
     
     select max(DATE_ADD(c.date_debut, interval c.duree day))
     into v_dernierecampagne
     from CAMPAGNE c NATURAL JOIN PLANIFIER p
-    where p.idPlateforme = p_idplateforme;
+    where p.id_plateforme = p_idplateforme;
     
     if v_dernierecampagne is null then
         return 'Tranquille';
@@ -480,7 +480,7 @@ end|
 delimiter ;
 
 --test
-select idPlateforme, nom, alertemaintenance(idPlateforme) as alerte
+select id_plateforme, nom, alertemaintenance(id_plateforme) as alerte
 from PLATEFORME;
     
 -------------------------------------------------------------------------------------------------------------------------
