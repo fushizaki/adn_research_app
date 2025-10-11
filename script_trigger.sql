@@ -321,7 +321,7 @@ INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, LAST_INSERT_ID());
 
 -------------------------------------------------------------------------------------------------------------------------
 -- fonction alerte maintenance 
-delimiter $$
+delimiter |
 
 create or replace function alertemaintenance(p_idplateforme int)
 returns varchar(20)
@@ -335,7 +335,7 @@ begin
     from PLATEFORME
     where idPlateforme = p_idplateforme;
     
-    select max(date_add(c.date_debut, interval c.duree day))
+    select max(DATE_ADD(c.date_debut, interval c.duree day))
     into v_dernierecampagne
     from CAMPAGNE c natural join PLANIFIER p
     where p.idPlateforme = p_idplateforme;
@@ -344,7 +344,7 @@ begin
         return 'Tranquille';
     end if;
     
-    set v_datemaintenance = date_add(v_dernierecampagne, interval v_intervalle day);
+    set v_datemaintenance = DATE_ADD(v_dernierecampagne, interval v_intervalle day);
     set v_joursrestants = datediff(v_datemaintenance, curdate());
     
     if v_joursrestants <= 3 then
@@ -354,7 +354,7 @@ begin
     else
         return 'Tranquille';
     end if;
-end$$
+end|
 
 delimiter ;
 
