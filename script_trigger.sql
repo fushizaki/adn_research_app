@@ -273,75 +273,106 @@ INSERT into CAMPAGNE (date_debut, duree) VALUES ('2024-02-15', 10); -- Crée la 
 -- DEVRAIT RÉUSSIR :
 INSERT into PARTICIPER (id_campagne, idPersonne) VALUES (15, 2);
 
-
 -------------------------------------------------------------------------------------------------------------------------
 
+-- fonction qui affiche les habilitations du materiel
 
-delimiter |
-
-CREATE TRIGGER verif_habilite_personnes
-BEFORE INSERT ON PLANIFIER
-FOR EACH ROW
-
+DELIMITER |
+create or replace function retourne_habilites(p_id_plateforme int)
+RETURNS varchar(100)
 BEGIN
-    DECLARE hab_requises INT;
-    DECLARE hab_people INT;
+    declare p_nom_habilitation varchar(50);
+    declare res varchar(100) default '';
+    declare fini BOOLEAN default FALSE;
+    declare les_habilites cursor for
     
-    SELECT COUNT(*) into hab_requises
-    FROM DETENIR
-    WHERE id_plateforme = NEW.id_plateforme;
-    
+        select DISTINCT nom_habilitation
+        FROM PLATEFORME NATURAL JOIN UTILISER NATURAL JOIN MATERIEL 
+        NATURAL JOIN NECESSITER NATURAL JOIN HABILITATION
+        WHERE PLATEFORME.idPlateforme = p_id_plateforme;
 
-    SELECT COUNT(DISTINCT h.idHabilitation) into hab_people
-    FROM PARTICIPER p
-    INNER JOIN HABILITER h ON p.idPersonne = h.idPersonne
-    WHERE p.id_campagne = NEW.id_campagne
-    and h.idHabilitation IN (
-        SELECT idHabilitation
-        FROM DETENIR
-        WHERE id_plateforme = NEW.id_plateforme
-    );
-    
-    IF hab_people < hab_requises THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
-    END IF;
-END|
+        declare continue handler for not found set fini = true;
 
+        open les_habilites;
+        while not fini do
+            fetch les_habilites into p_nom_habilitation;
+        
+            if not fini then
+                set res = concat (res,' ',p_nom_habilitation,' ');
+                end if;
+        end while;
+    close les_habilites;
+    return res;
+end |
 delimiter ;
 
 -- La série de TESTS suivante a été générée par l'IA
 
--- Tests trigger verif_habilite_personnes
+-- Test 1: Plateforme avec plusieurs habilitations
+SELECT retourne_habilites(1) AS 'Habilitations Plateforme 1';
 
--- Test 1: DEVRAIT RÉUSSIR
--- Campagne 1: personnes 1,2,3,4 
--- Personne 1: hab 1,2 | Personne 2: hab 3,4 | Personne 3: hab 1,3 | Personne 4: hab 2,4
--- Plateforme 8 requiert seulement l'habilitation 4 -> OK (personne 2 et 4 l'ont)
-INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (8, 1);
+-- Test 2: Plateforme avec habilitations variées
+SELECT retourne_habilites(2) AS 'Habilitations Plateforme 2';
 
--- Test 2: DEVRAIT ÉCHOUER  
--- Campagne 8: personnes 3,7,11
--- Personne 3: hab 1,3 | Personne 7: hab 1,2,3 | Personne 11: hab 1,2
--- Plateforme 4 requiert hab 2,4 -> ÉCHEC (aucune personne n'a l'hab 4)
-INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (4, 8);
+-- Test 3: Plateforme avec matériel chimique
+SELECT retourne_habilites(3) AS 'Habilitations Plateforme 3';
 
--- Test 3: DEVRAIT RÉUSSIR
--- Campagne 4: personnes 13,14,15  
--- Personne 13: hab 1,3 | Personne 14: hab 2,4 | Personne 15: hab 1,4
--- Plateforme 6 requiert hab 2,3 -> OK (personne 14 a hab 2, personne 13 a hab 3)
-INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (6, 4);
+-- Test 4: Plateforme avec peu de matériel
+SELECT retourne_habilites(8) AS 'Habilitations Plateforme 8';
 
--- Vérification des résultats
-SELECT 'Tests effectués:' AS info;
-SELECT p.nom AS plateforme, c.id_campagne, 'AJOUTÉ' AS statut
-FROM PLANIFIER pl
-JOIN PLATEFORME p ON pl.id_plateforme = p.id_plateforme  
-JOIN CAMPAGNE c ON pl.id_campagne = c.id_campagne
-WHERE (pl.id_plateforme = 8 and pl.id_campagne = 1)
-OR (pl.id_plateforme = 4 and pl.id_campagne = 8) 
-OR (pl.id_plateforme = 6 and pl.id_campagne = 4);
+-- Test 5: Vérifier toutes les plateformes
+SELECT idPlateforme, nom, retourne_habilites(idPlateforme) AS habilitations_requises
+FROM PLATEFORME
+WHERE idPlateforme IN (1, 2, 3, 5, 10);
 
+-------------------------------------------------------------------------------------------------------------------------
+
+
+DELIMITER |
+create or replace trigger verif_habilite_personnes
+before insert on PLANIFIER
+for each row
+begin
+    declare hab_requises INT;
+    declare hab_possedees INT;
+
+    select COUNT(DISTINCT idHabilitation) into hab_requises
+    FROM UTILISER NATURAL JOIN NECESSITER 
+    WHERE idPlateforme = NEW.idPlateforme;
+
+    select COUNT(DISTINCT idHabilitation) into hab_possedees
+    FROM PARTICIPER NATURAL JOIN HABILITER
+    WHERE idCampagne = NEW.idCampagne
+    and idHabilitation in 
+    
+    (
+        select distinct idHabilitation
+        FROM UTILISER NATURAL JOIN NECESSITER
+        WHERE idPlateforme = NEW.idPlateforme
+    );
+
+    IF hab_possedees < hab_requises THEN
+        SIGNAL SQLSTATE '45000'
+        set MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
+    end if;
+end |
+DELIMITER ;
+
+-- La série de TESTS suivante a été générée par l'IA\
+-- Test 1 : DOIT RÉUSSIR
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-01-15', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 19);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (3, LAST_INSERT_ID());
+
+-- Test 2 : DOIT ÉCHOUER
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-03-01', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 2);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (2, LAST_INSERT_ID());
+
+-- Test 3 : DOIT RÉUSSIR
+INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2027-05-10', 10);
+INSERT INTO PARTICIPER (idCampagne, idPersonne) VALUES (LAST_INSERT_ID(), 13);
+INSERT INTO PLANIFIER (idPlateforme, idCampagne) VALUES (1, LAST_INSERT_ID());
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -408,6 +439,49 @@ INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (2, 31);
 INSERT INTO CAMPAGNE (date_debut, duree) VALUES ('2024-03-15', 50);
 INSERT INTO PLANIFIER (id_plateforme, id_campagne) VALUES (10, 32);
 
+-------------------------------------------------------------------------------------------------------------------------
+
+-- fonction alerte maintenance 
+delimiter |
+
+create or replace function alertemaintenance(p_idplateforme int)
+returns varchar(20)
+begin
+    declare v_joursrestants int;
+    declare v_intervalle int;
+    declare v_dernierecampagne date;
+    declare v_datemaintenance date;
+    
+    select intervalle_maintenance into v_intervalle
+    from PLATEFORME
+    where idPlateforme = p_idplateforme;
+    
+    select max(DATE_ADD(c.date_debut, interval c.duree day))
+    into v_dernierecampagne
+    from CAMPAGNE c NATURAL JOIN PLANIFIER p
+    where p.idPlateforme = p_idplateforme;
+    
+    if v_dernierecampagne is null then
+        return 'Tranquille';
+    end if;
+    
+    set v_datemaintenance = DATE_ADD(v_dernierecampagne, interval v_intervalle day);
+    set v_joursrestants = DATEDIFF(v_datemaintenance, curdate());
+    
+    if v_joursrestants <= 3 then
+        return 'URGENT';
+    elseif v_joursrestants <= 10 then
+        return 'Modéré';
+    else
+        return 'Tranquille';
+    end if;
+end|
+
+delimiter ;
+
+--test
+select idPlateforme, nom, alertemaintenance(idPlateforme) as alerte
+from PLATEFORME;
     
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -548,5 +622,3 @@ BEGIN
     RETURN temps_restant;
 END |
 delimiter ;
-
-
