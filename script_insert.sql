@@ -1,27 +1,27 @@
 -- Insertion pour la BDD générer a l'aide de l'IA
 INSERT into
-    PERSONNE (nom, prenom)
+    PERSONNE (nom, prenom, role_labo)
 VALUES
-    ('Durand', 'Alice'),
-    ('Martin', 'Lucas'),
-    ('Bernard', 'Emma'),
-    ('Petit', 'Noah'),
-    ('Robert', 'Léa'),
-    ('Richard', 'Louis'),
-    ('Dubois', 'Chloé'),
-    ('Moreau', 'Gabriel'),
-    ('Laurent', 'Jules'),
-    ('Simon', 'Manon'),
-    ('Michel', 'Tom'),
-    ('Lefebvre', 'Sarah'),
-    ('Leroy', 'Raphaël'),
-    ('Roux', 'Lina'),
-    ('David', 'Nathan'),
-    ('Blanc', 'Eva'),
-    ('Garcia', 'Hugo'),
-    ('Muller', 'Zoé'),
-    ('Faure', 'Enzo'),
-    ('Lopez', 'Camille');
+    ('Durand', 'Alice', 'Directeur'),
+    ('Martin', 'Lucas', 'Chercheur'),
+    ('Bernard', 'Emma', 'Technicien'),
+    ('Petit', 'Noah', 'Administratif'),
+    ('Robert', 'Léa', 'Chercheur'),
+    ('Richard', 'Louis', 'Technicien'),
+    ('Dubois', 'Chloé', 'Chercheur'),
+    ('Moreau', 'Gabriel', 'Administratif'),
+    ('Laurent', 'Jules', 'Technicien'),
+    ('Simon', 'Manon', 'Chercheur'),
+    ('Michel', 'Tom', 'Directeur'),
+    ('Lefebvre', 'Sarah', 'Technicien'),
+    ('Leroy', 'Raphaël', 'Chercheur'),
+    ('Roux', 'Lina', 'Administratif'),
+    ('David', 'Nathan', 'Technicien'),
+    ('Blanc', 'Eva', 'Chercheur'),
+    ('Garcia', 'Hugo', 'Directeur'),
+    ('Muller', 'Zoé', 'Technicien'),
+    ('Faure', 'Enzo', 'Chercheur'),
+    ('Lopez', 'Camille', 'Administratif');
 
 INSERT into
     PLATEFORME (
@@ -70,7 +70,7 @@ VALUES
     ('radiations', 'Habilitation radiations');
 
 INSERT into
-    HABILITER (idPersonne, idHabilitation)
+    HABILITER (id_personne, id_habilitation)
 VALUES
     (1, 1),
     (1, 2),
@@ -130,7 +130,7 @@ VALUES
     ('2025-08-30', 50);
 
 INSERT into
-    PARTICIPER (idCampagne, idPersonne)
+    PARTICIPER (id_campagne, id_personne)
 VALUES
     (1, 1),
     (1, 2),
@@ -173,7 +173,7 @@ VALUES
     (10, 19);
 
 INSERT into
-    PLANIFIER (idPlateforme, idCampagne)
+    PLANIFIER (id_plateforme, id_campagne)
 VALUES
     (1, 1),
     (2, 1),
@@ -200,7 +200,7 @@ VALUES
     (3, 10);
 
 INSERT into
-    SEJOURNER (idCampagne, idLieu)
+    SEJOURNER (id_campagne, id_lieu)
 VALUES
     (1, 1),
     (1, 2),
@@ -274,7 +274,7 @@ VALUES
     ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
 INSERT into
-    APPARTENIR (idEspece, idEchant)
+    APPARTENIR (id_espece, id_echant)
 VALUES
     (9, 1),
     (2, 2),
@@ -293,7 +293,7 @@ VALUES
     (14, 15);
 
 INSERT into
-    RAPPORTER (idEchant, idCampagne)
+    RAPPORTER (id_echant, id_campagne)
 VALUES
     (1, 1),
     (2, 1),
@@ -344,7 +344,7 @@ VALUES
 
 -- Les insertions sont juste temporaires, les mots de passes seront hashés dans la partie algorithme/flask
 INSERT into
-    LOGIN (username, password, idPersonne)
+    LOGIN (username, password, id_personne)
 VALUES
     ('adurand', 'pass123', 1),
     ('lmartin', 'secure456', 2),
@@ -368,7 +368,7 @@ VALUES
     ('clopez', 'password789', 20);
 
 INSERT into
-    MATERIEL (nomMateriel, descriptionMateriel)
+    MATERIEL (nom_materiel, description_materiel)
 VALUES
     (
         'Microscope électronique',
@@ -426,7 +426,7 @@ VALUES
     );
 
 INSERT into
-    UTILISER (idMateriel, idPlateforme, quantite)
+    UTILISER (id_materiel, id_plateforme, quantite)
 VALUES
     (1, 1, 2),
     (2, 1, 1),
@@ -460,7 +460,7 @@ VALUES
     (15, 10, 1);
 
 INSERT into
-    NECESSITER (idMateriel, idHabilitation)
+    NECESSITER (id_materiel, id_habilitation)
 VALUES
     (1, 1),
     (2, 1),
