@@ -5,11 +5,11 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
     """Simule des mutations par remplacement dans une séquence ADN.
 
     Args:
-        sequence (_type_): _description_
-        p (_type_): _description_
+        sequence (str): sequence 
+        p (float): probabilité qu'une mutation se fasse
 
     Returns:
-        _type_: _description_
+        str: sequence avec mutation
     """
     sequence_mutation = ""
     if p < 0 or p > 1:
