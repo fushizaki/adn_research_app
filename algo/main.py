@@ -2,36 +2,36 @@ import random
 from constants import *
 
 
-def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
+def sauvegarder_sequence(sequence_aleatoire: str, nom_fichier: str) -> None:
     """
     Sauvegarde une séquence ADN dans un fichier .adn
     
     Args:
-        sequence (str): La séquence ADN à sauvegarder
+        sequence_aleatoire (str): La séquence ADN à sauvegarder
         nom_fichier (str): Le nom du fichier (sans extension)
     """
     try:
         with open(f"./data/{nom_fichier}.adn", 'w') as fichier:
-            fichier.write(sequence)
+            fichier.write(sequence_aleatoire)
         print(f"Séquence sauvegardée dans {nom_fichier}.adn")
     except OSError:
         print(f"Erreur lors de la sauvegarde du fichier : {nom_fichier}")
         
 
-def simuler_mutations_remplacements(sequence: str, p: float) -> str:
+def simuler_mutations_remplacements(sequence_aleatoire: str, p: float) -> str:
     """Simule des mutations par remplacement dans une séquence ADN.
 
     Args:
-        sequence (str): sequence 
+        sequence_aleatoire (str): sequence_aleatoire 
         p (float): probabilité qu'une mutation se fasse
 
     Returns:
-        str: sequence avec mutation
+        str: sequence_aleatoire avec mutation
     """
     sequence_mutation = ""
     if p < 0 or p > 1:
         raise ValueError("Valeur de p pas comprise entre 0 et 1")
-    for base in sequence:
+    for base in sequence_aleatoire:
         if random.random() < p:
             restes_bases = bases.copy()
             restes_bases.remove(base)
@@ -69,3 +69,20 @@ def distance_de_levenshtein(seq1: str, seq2: str) -> int:
             tableau_d[i][j] = min(tableau_d[i - 1][j] + 1, tableau_d[i][j - 1] + 1,
                           tableau_d[i - 1][j - 1] + cout_substitution)
     return tableau_d[len_seq1][len_seq2]
+
+def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
+    """Genère une sequence_aleatoire adn aléatoirement a partir d'une base donnée
+        en paramètre
+
+    Args:
+        bases (list): les bases qui vont constituer l'ADN
+        longeur (int): la longeur de la séquence à génerer
+
+    Returns:
+        str: la séquence générée
+    """
+    
+    sequence_aleatoire = ""
+    for i in range(longeur):
+        sequence_aleatoire += random.choice(bases)
+    return sequence_aleatoire
