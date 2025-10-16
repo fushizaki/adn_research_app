@@ -6,6 +6,9 @@ def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
         sequence (str): La séquence ADN à sauvegarder
         nom_fichier (str): Le nom du fichier (sans extension)
     """
-    with open(f"./data/{nom_fichier}.adn", 'w') as fichier:
-        fichier.write(sequence)
-    print(f"Séquence sauvegardée dans {nom_fichier}.adn")
+    try:
+        with open(f"./data/{nom_fichier}.adn", 'w') as fichier:
+            fichier.write(sequence)
+        print(f"Séquence sauvegardée dans {nom_fichier}.adn")
+    except OSError:
+        print(f"Erreur lors de la sauvegarde du fichier : {nom_fichier}")
