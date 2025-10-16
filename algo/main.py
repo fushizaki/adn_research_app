@@ -2,36 +2,36 @@ import random
 from constants import *
 
 
-def sauvegarder_sequence(sequence_aleatoire: str, nom_fichier: str) -> None:
+def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
     """
     Sauvegarde une séquence ADN dans un fichier .adn
     
     Args:
-        sequence_aleatoire (str): La séquence ADN à sauvegarder
+        sequence (str): La séquence ADN à sauvegarder
         nom_fichier (str): Le nom du fichier (sans extension)
     """
     try:
         with open(f"./data/{nom_fichier}.adn", 'w') as fichier:
-            fichier.write(sequence_aleatoire)
+            fichier.write(sequence)
         print(f"Séquence sauvegardée dans {nom_fichier}.adn")
     except OSError:
         print(f"Erreur lors de la sauvegarde du fichier : {nom_fichier}")
         
 
-def simuler_mutations_remplacements(sequence_aleatoire: str, p: float) -> str:
+def simuler_mutations_remplacements(sequence: str, p: float) -> str:
     """Simule des mutations par remplacement dans une séquence ADN.
 
     Args:
-        sequence_aleatoire (str): sequence_aleatoire 
+        sequence (str): sequence 
         p (float): probabilité qu'une mutation se fasse
 
     Returns:
-        str: sequence_aleatoire avec mutation
+        str: sequence avec mutation
     """
     sequence_mutation = ""
     if p < 0 or p > 1:
         raise ValueError("Valeur de p pas comprise entre 0 et 1")
-    for base in sequence_aleatoire:
+    for base in sequence:
         if random.random() < p:
             restes_bases = bases.copy()
             restes_bases.remove(base)
@@ -71,7 +71,7 @@ def distance_de_levenshtein(seq1: str, seq2: str) -> int:
     return tableau_d[len_seq1][len_seq2]
 
 def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
-    """Genère une sequence_aleatoire adn aléatoirement a partir d'une base donnée
+    """Genère une sequence adn aléatoirement a partir d'une base donnée
         en paramètre
 
     Args:
