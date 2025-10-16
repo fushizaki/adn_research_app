@@ -1,4 +1,6 @@
 import random
+import math
+
 from constants import *
 
 
@@ -40,6 +42,31 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
         else:
             sequence_mutation += base
     return sequence_mutation
+
+def mutation_par_insertion(sequence: str, p: float) -> str:
+    """Mutation obtenue par intégration d'un ou plusieurs nucléotides dans une séquence
+
+    Args:
+        sequence(str) : une sequence adn
+        p (float) : probabilité qu'une mutation ait lieu
+
+    Returns:
+        str_: une sequence avec mutation d'insertion
+    """
+    res = ""
+    index = random.randint(0, len(sequence)-1)
+    liste_nucleotides = list(sequence.copy())
+
+    if p < 0 or p > 1:
+        raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
+    
+    for n in liste_nucleotides:
+        if random.random() < p:
+            liste_nucleotides.insert(index, random.choice(bases))
+
+            
+
+            
   
   
 # Implémentation littérale de l'algorithme de Levenshtein depuis Wikipédia
