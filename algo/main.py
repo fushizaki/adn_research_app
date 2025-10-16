@@ -43,6 +43,7 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
             sequence_mutation += base
     return sequence_mutation
 
+
 def mutation_par_insertion(sequence: str, p: float) -> str:
     """Mutation obtenue par intégration d'un ou plusieurs nucléotides dans une séquence
 
@@ -54,21 +55,41 @@ def mutation_par_insertion(sequence: str, p: float) -> str:
         str_: une sequence avec mutation d'insertion
     """
     res = ""
-    index = random.randint(0, len(sequence)-1)
-    liste_nucleotides = list(sequence.copy())
 
-    if p < 0 or p > 1:
+    if p < 0 or p > 1: 
         raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
     
-    for n in liste_nucleotides:
+    for nucleotide in sequence:
         if random.random() < p:
-            liste_nucleotides.insert(index, random.choice(bases))
+            res += random.choice(bases)  
+        res += nucleotide  
 
-            
+    if random.random() < p:
+        res += random.choice(bases)
+    return res
 
-            
-  
-  
+
+def mutation_par_deletion(sequence: str, p: float) -> str:
+    """Mutation obtenue par suppression d'un nucléotide dans une séquence
+
+    Args:
+        sequence(str) : une sequence adn
+        p (float) : probabilité qu'une mutation ait lieu
+
+    Returns:
+        str_: une sequence ADN
+    """
+    res = ""
+
+    if p < 0 or p > 1: 
+        raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
+    
+    for nucleotide in sequence:
+        if random.random() < p:
+            res += nucleotide
+    return res
+
+
 # Implémentation littérale de l'algorithme de Levenshtein depuis Wikipédia
 def distance_de_levenshtein(seq1: str, seq2: str) -> int:
     """Calcule la distance de Levenshtein entre deux séquences.
