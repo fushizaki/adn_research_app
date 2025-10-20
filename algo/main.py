@@ -69,3 +69,20 @@ def distance_de_levenshtein(seq1: str, seq2: str) -> int:
             tableau_d[i][j] = min(tableau_d[i - 1][j] + 1, tableau_d[i][j - 1] + 1,
                           tableau_d[i - 1][j - 1] + cout_substitution)
     return tableau_d[len_seq1][len_seq2]
+
+def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
+    """Genère une sequence adn aléatoirement a partir d'une base donnée
+        en paramètre
+
+    Args:
+        bases (list): les bases qui vont constituer l'ADN
+        longeur (int): la longeur de la séquence à génerer
+
+    Returns:
+        str: la séquence générée
+    """
+    
+    sequence_aleatoire = ""
+    for i in range(longeur):
+        sequence_aleatoire += random.choice(bases)
+    return sequence_aleatoire
