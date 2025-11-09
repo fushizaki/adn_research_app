@@ -86,3 +86,25 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
     for i in range(longeur):
         sequence_aleatoire += random.choice(bases)
     return sequence_aleatoire
+
+def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
+    """Calcule la distance entre deux échantillon en se basant 
+        sur les mutations de remplacement
+
+    Args:
+        echantillon1 (str): l'echantillon 1
+        echantillion2 (str): l'échantillon 2 
+
+    Returns:
+        int: la distance entre les deux échantillons
+    """
+    
+    distance = 0
+    
+    for base_o in echantillon1:
+        for base_m in echantillion2:
+            if base_o != base_m:
+                distance += 1
+    
+    return distance
+    
