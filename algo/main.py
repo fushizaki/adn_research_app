@@ -101,10 +101,11 @@ def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
     
     distance = 0
     
-    for base_o in echantillon1:
-        for base_m in echantillion2:
-            if base_o != base_m:
-                distance += 1
+    for base in range(len(echantillon1)):
+        if echantillon1[base] != echantillion2[base]:
+            distance += 1
     
     return distance
+
+
     
