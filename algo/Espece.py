@@ -4,7 +4,7 @@ class Espece:
         self.nom = nom
         self.sequence_adn = sequence_adn
         self.est_hypothetique = est_hypothetique
-        self.especes_filles = especes_filles
+        self.especes_filles = especes_filles if especes_filles is not None else []
 
     def est_averee(self):
         """Vérifie si l'espèce est avérée (non hypothétique).
@@ -30,6 +30,14 @@ class Espece:
             espece_fille (Espece): L'espèce fille à supprimer.
         """
         self.especes_filles.remove(espece_fille)
+
+    def get_adn(self):
+        """Retourne la séquence ADN de l'espèce.
+
+        Returns:
+            str: La séquence ADN de l'espèce.
+        """
+        return self.sequence_adn
 
     def __str__(self):
         return f"Espece(nom={self.nom}, sequence_adn={self.sequence_adn}, est_hypothetique={self.est_hypothetique}, especes_filles={[fille.nom for fille in self.especes_filles]})"
