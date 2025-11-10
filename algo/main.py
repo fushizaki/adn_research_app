@@ -85,7 +85,7 @@ def mutation_par_deletion(sequence: str, p: float) -> str:
         raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
     
     for nucleotide in sequence:
-        if random.random() < p:
+        if random.random() > p:
             res += nucleotide
     return res
 
