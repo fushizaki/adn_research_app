@@ -86,3 +86,24 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
     for i in range(longeur):
         sequence_aleatoire += random.choice(bases)
     return sequence_aleatoire
+
+
+
+#Pour reconstruire l’arbre phylogénétique, on procède comme suit:
+#• On crée toutes les espèces
+#• Tant qu’il reste au moins deux espèces qui n’ont pas d’ancêtre commun, on trouve les deux
+#espèces dont la distance est la plus petite, et on les remplace par l’espèce-hypothétique
+#représentant leur dernier ancêtre commun.
+def reconstruction_arbre_phylogenetique(liste_fichier_adn):
+    dico_adn = {}
+    sequence_adn = ""
+    
+    for adn_file in liste_fichier_adn:
+        sequence_adn = open(adn_file)
+        dico_adn[adn_file] = sequence_adn.read()
+        
+    print(dico_adn)
+reconstruction_arbre_phylogenetique(["./adn/abeille.adn", "./adn/eponge.adn"])
+        
+    
+    
