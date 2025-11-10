@@ -16,7 +16,7 @@ def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
         print(f"Séquence sauvegardée dans {nom_fichier}.adn")
     except OSError:
         print(f"Erreur lors de la sauvegarde du fichier : {nom_fichier}")
-        
+
 
 def simuler_mutations_remplacements(sequence: str, p: float) -> str:
     """Simule des mutations par remplacement dans une séquence ADN.
@@ -40,8 +40,8 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
         else:
             sequence_mutation += base
     return sequence_mutation
-  
-  
+
+
 # Implémentation littérale de l'algorithme de Levenshtein depuis Wikipédia
 def distance_de_levenshtein(seq1: str, seq2: str) -> int:
     """Calcule la distance de Levenshtein entre deux séquences.
@@ -66,9 +66,11 @@ def distance_de_levenshtein(seq1: str, seq2: str) -> int:
                 cout_substitution = 0
             else:
                 cout_substitution = 1
-            tableau_d[i][j] = min(tableau_d[i - 1][j] + 1, tableau_d[i][j - 1] + 1,
-                          tableau_d[i - 1][j - 1] + cout_substitution)
+            tableau_d[i][j] = min(tableau_d[i - 1][j] + 1,
+                                  tableau_d[i][j - 1] + 1,
+                                  tableau_d[i - 1][j - 1] + cout_substitution)
     return tableau_d[len_seq1][len_seq2]
+
 
 def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
     """Genère une sequence adn aléatoirement a partir d'une base donnée
@@ -81,8 +83,10 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
     Returns:
         str: la séquence générée
     """
-    
+
     sequence_aleatoire = ""
     for i in range(longeur):
         sequence_aleatoire += random.choice(bases)
     return sequence_aleatoire
+
+
