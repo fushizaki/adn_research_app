@@ -1,4 +1,6 @@
 import random
+import math
+
 from constants import *
 
 
@@ -40,6 +42,52 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
         else:
             sequence_mutation += base
     return sequence_mutation
+
+
+def mutation_par_insertion(sequence: str, p: float) -> str:
+    """Mutation obtenue par intégration d'un ou plusieurs nucléotides dans une séquence
+
+    Args:
+        sequence(str) : une sequence adn
+        p (float) : probabilité qu'une mutation ait lieu
+
+    Returns:
+        str_: une sequence avec mutation d'insertion
+    """
+    res = ""
+
+    if p < 0 or p > 1: 
+        raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
+    
+    for nucleotide in sequence:
+        if random.random() < p:
+            res += random.choice(bases)  
+        res += nucleotide  
+
+    if random.random() < p:
+        res += random.choice(bases)
+    return res
+
+
+def mutation_par_deletion(sequence: str, p: float) -> str:
+    """Mutation obtenue par suppression d'un nucléotide dans une séquence
+
+    Args:
+        sequence(str) : une sequence adn
+        p (float) : probabilité qu'une mutation ait lieu
+
+    Returns:
+        str_: une sequence ADN
+    """
+    res = ""
+
+    if p < 0 or p > 1: 
+        raise ValueError("Valeur de p impossibles : doit être comprit entre 0 et 1")
+    
+    for nucleotide in sequence:
+        if random.random() > p:
+            res += nucleotide
+    return res
 
 
 # Implémentation littérale de l'algorithme de Levenshtein depuis Wikipédia
@@ -89,4 +137,25 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
         sequence_aleatoire += random.choice(bases)
     return sequence_aleatoire
 
+def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
+    """Calcule la distance entre deux échantillon en se basant 
+        sur les mutations de remplacement
 
+    Args:
+        echantillon1 (str): l'echantillon 1
+        echantillion2 (str): l'échantillon 2 
+
+    Returns:
+        int: la distance entre les deux échantillons
+    """
+    
+    distance = 0
+    
+    for base in range(len(echantillon1)):
+        if echantillon1[base] != echantillion2[base]:
+            distance += 1
+    
+    return distance
+
+
+    
