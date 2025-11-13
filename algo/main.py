@@ -97,12 +97,17 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
 def reconstruction_arbre_phylogenetique(liste_fichier_adn):
     dico_adn = {}
     sequence_adn = ""
+    nom_espece = ""
     
+    #creation des especes
     for adn_file in liste_fichier_adn:
+        nom_espece = adn_file.split(".")[-1]
+        print(nom_espece)
         sequence_adn = open(adn_file)
-        dico_adn[adn_file] = sequence_adn.read()
+        dico_adn[nom_espece] = sequence_adn.read()
+    
         
-    print(dico_adn)
+         
 reconstruction_arbre_phylogenetique(["./adn/abeille.adn", "./adn/eponge.adn"])
         
     
