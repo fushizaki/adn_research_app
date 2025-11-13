@@ -1,7 +1,6 @@
 import random
 import math
-
-from constants import *
+from . import constants
 
 
 def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
@@ -35,7 +34,9 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
         raise ValueError("Valeur de p pas comprise entre 0 et 1")
     for base in sequence:
         if random.random() < p:
-            restes_bases = bases.copy()
+            restes_bases = constants.bases.copy()
+            print(base)
+            print(restes_bases)
             restes_bases.remove(base)
             nouvelle_base = random.choice(restes_bases)
             sequence_mutation += nouvelle_base
@@ -61,11 +62,11 @@ def mutation_par_insertion(sequence: str, p: float) -> str:
     
     for nucleotide in sequence:
         if random.random() < p:
-            res += random.choice(bases)  
+            res += random.choice(constants.bases)  
         res += nucleotide  
 
     if random.random() < p:
-        res += random.choice(bases)
+        res += random.choice(constants.bases)
     return res
 
 
@@ -125,7 +126,7 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
         en paramètre
 
     Args:
-        bases (list): les bases qui vont constituer l'ADN
+        constants.bases (list): les constants.bases qui vont constituer l'ADN
         longeur (int): la longeur de la séquence à génerer
 
     Returns:
@@ -134,7 +135,7 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
 
     sequence_aleatoire = ""
     for i in range(longeur):
-        sequence_aleatoire += random.choice(bases)
+        sequence_aleatoire += random.choice(constants.bases)
     return sequence_aleatoire
 
 def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
