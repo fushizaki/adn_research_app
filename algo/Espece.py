@@ -13,6 +13,14 @@ class Espece:
             bool: True si l'espèce est avérée, False sinon.
         """
         return not self.est_hypothetique
+    
+    def est_hypothetique(self):
+        """Vérifie si l'espèce est hypothétique.
+
+        Returns:
+            bool: True si l'espèce est hypothétique, False sinon.
+        """
+        return self.est_hypothetique
 
     def add_espece_fille(self, espece_fille):
         """Ajoute une espèce fille à l'espèce actuelle si elle est hypothétique.
@@ -38,6 +46,14 @@ class Espece:
             str: La séquence ADN de l'espèce.
         """
         return self.sequence_adn
+    
+    def get_especes_filles(self):
+        """Retourne la liste des espèces filles de l'espèce actuelle.
+
+        Returns:
+            list: La liste des espèces filles.
+        """
+        return self.especes_filles
 
     def __str__(self):
         return f"Espece(nom={self.nom}, sequence_adn={self.sequence_adn}, est_hypothetique={self.est_hypothetique}, especes_filles={[fille.nom for fille in self.especes_filles]})"

@@ -1,6 +1,7 @@
 import random
 import math
 
+from algo import Espece
 from constants import *
 
 
@@ -157,5 +158,33 @@ def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
     
     return distance
 
+def calculer_distance(espece1: Espece, espece2: Espece) -> int:
+    """Calcule la distance entre deux espèces en fonction de leur statut (hypothétique ou avérée).
+    Args:
+        espece1 (Espece): une espèce hypothétique 
+        espece2 (Espece): une espèce soit hypothétique soit avérée  
 
-    
+    Returns:
+        int: la distance entre les deux espèces
+    """
+
+
+    if espece1.est_hypothetique() and espece2.est_averee():
+        espece1_filles = espece1.get_especes_filles()
+        somme_dist = 0
+
+        for e in espece1_filles:
+            somme_dist += distance_de_levenshtein(espece1, e)
+        moyenne = somme_dist / len(espece1_filles)
+        return moyenne
+            
+    if espece1.est_hypothetique() and espece2.est_hypothetique():
+        espece1_filles = espece1.get_especes_filles()
+        espece2_filles = espece2.get_especes_filles()
+        somme_dist = 0
+
+        for e1 in espece1_filles:
+            for e2 in espece2_filles:
+                somme_dist += distance_de_levenshtein(e1,e2)
+        moyenne = somme_dist / len(espece1_filles) * len(espece2_filles)
+        return moyenne
