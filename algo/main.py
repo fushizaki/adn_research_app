@@ -1,8 +1,9 @@
 import random
 import math
-from . import constants
-from algo import Espece
 
+from Espece import Espece
+from constants import *
+from . import constants
 
 def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
     """
@@ -166,8 +167,8 @@ def calculer_distance(espece1: Espece, espece2: Espece) -> int:
     Returns:
         int: la distance entre les deux espèces
     """
-    
-    if espece1.est_hypothetique and espece2.est_averee():
+
+    if espece1.get_est_hypothetique() and espece2.est_averee():
         espece1_filles = espece1.get_especes_filles()
         somme_dist = 0
 
@@ -175,8 +176,8 @@ def calculer_distance(espece1: Espece, espece2: Espece) -> int:
             somme_dist += distance_de_levenshtein(espece1.sequence_adn, e.sequence_adn)
         moyenne = somme_dist / len(espece1_filles)
         return moyenne
-
-    if espece1.est_hypothetique and espece2.est_hypothetique:
+            
+    if espece1.get_est_hypothetique() and espece2.get_est_hypothetique():
         espece1_filles = espece1.get_especes_filles()
         espece2_filles = espece2.get_especes_filles()
         somme_dist = 0
