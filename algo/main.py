@@ -1,6 +1,7 @@
 import random
 import math
 
+from algo import Espece
 from constants import *
 
 
@@ -157,32 +158,33 @@ def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
     
     return distance
 
+def calculer_distance(espece1: Espece, espece2: Espece) -> int:
+    """Calcule la distance entre deux espèces en fonction de leur statut (hypothétique ou avérée).
+    Args:
+        espece1 (Espece): une espèce hypothétique 
+        espece2 (Espece): une espèce soit hypothétique soit avérée  
 
-    
+    Returns:
+        int: la distance entre les deux espèces
+    """
 
 
+    if espece1.est_hypothetique() and espece2.est_averee():
+        espece1_filles = espece1.get_especes_filles()
+        somme_dist = 0
 
+        for e in espece1_filles:
+            somme_dist += distance_de_levenshtein(espece1, e)
+        moyenne = somme_dist / len(espece1_filles)
+        return moyenne
+            
+    if espece1.est_hypothetique() and espece2.est_hypothetique():
+        espece1_filles = espece1.get_especes_filles()
+        espece2_filles = espece2.get_especes_filles()
+        somme_dist = 0
 
-#Pour reconstruire l’arbre phylogénétique, on procède comme suit:
-#• On crée toutes les espèces
-#• Tant qu’il reste au moins deux espèces qui n’ont pas d’ancêtre commun, on trouve les deux
-#espèces dont la distance est la plus petite, et on les remplace par l’espèce-hypothétique
-#représentant leur dernier ancêtre commun.
-def reconstruction_arbre_phylogenetique(liste_fichier_adn):
-    dico_adn = {}
-    sequence_adn = ""
-    nom_espece = ""
-    
-    #creation des especes
-    for adn_file in liste_fichier_adn:
-        nom_espece = adn_file.split(".")[-1]
-        print(nom_espece)
-        sequence_adn = open(adn_file)
-        dico_adn[nom_espece] = sequence_adn.read()
-    
-        
-         
-reconstruction_arbre_phylogenetique(["./adn/abeille.adn", "./adn/eponge.adn"])
-        
-    
-    
+        for e1 in espece1_filles:
+            for e2 in espece2_filles:
+                somme_dist += distance_de_levenshtein(e1,e2)
+        moyenne = somme_dist / len(espece1_filles) * len(espece2_filles)
+        return moyenne
