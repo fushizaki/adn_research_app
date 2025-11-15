@@ -31,11 +31,12 @@ SAE_Dev_Web/
 │       ├── lapin.adn
 │       ├── roadrunner.adn
 │       └── trex.adn
-├── script_creation.sql                  # Script de création de la base de données
-├── script_insert.sql                    # Script d'insertion de données
-├── script_trigger.sql                   # Script des triggers
-├── README.md                            # Ce fichier
-└── requirements.txt                     # Dépendances Python
+├── bd/ 
+    ├── script_creation.sql              # Script de création de la base de données
+    ├── script_insert.sql                # Script d'insertion de données
+    ├── script_trigger.sql               # Script des triggers
+    ├── README.md                        # Ce fichier
+    └── requirements.txt                 # Dépendances Python
 ```
 
 ### Lancement de l'application
