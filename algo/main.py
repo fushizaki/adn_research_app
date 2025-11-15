@@ -206,7 +206,6 @@ def reconstruction_arbre_phylogenetique(liste_fichier_adn):
     if(liste_fichier_adn == []):
         return None
     
-    #creation des especes
     for adn_file in liste_fichier_adn:
         nom_espece = adn_file.replace(".", "/").split("/")[-2]
         sequence_adn = open(adn_file)
