@@ -2,8 +2,7 @@ import random
 import math
 
 from Espece import Espece
-from constants import *
-from . import constants
+import constants as constants
 
 def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
     """
