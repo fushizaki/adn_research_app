@@ -14,7 +14,7 @@ class Espece:
         """
         return not self.est_hypothetique
     
-    def est_hypothetique(self):
+    def get_est_hypothetique(self):
         """Vérifie si l'espèce est hypothétique.
 
         Returns:
