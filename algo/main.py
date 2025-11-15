@@ -3,7 +3,7 @@ import math
 
 from Espece import Espece
 from constants import *
-
+from . import constants
 
 def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
     """
@@ -36,7 +36,7 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
         raise ValueError("Valeur de p pas comprise entre 0 et 1")
     for base in sequence:
         if random.random() < p:
-            restes_bases = bases.copy()
+            restes_bases = constants.bases.copy()
             restes_bases.remove(base)
             nouvelle_base = random.choice(restes_bases)
             sequence_mutation += nouvelle_base
@@ -62,11 +62,11 @@ def mutation_par_insertion(sequence: str, p: float) -> str:
     
     for nucleotide in sequence:
         if random.random() < p:
-            res += random.choice(bases)  
+            res += random.choice(constants.bases)  
         res += nucleotide  
 
     if random.random() < p:
-        res += random.choice(bases)
+        res += random.choice(constants.bases)
     return res
 
 
@@ -126,7 +126,7 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
         en paramètre
 
     Args:
-        bases (list): les bases qui vont constituer l'ADN
+        constants.bases (list): les constants.bases qui vont constituer l'ADN
         longeur (int): la longeur de la séquence à génerer
 
     Returns:
@@ -135,7 +135,7 @@ def generer_sequence_adn_aleatoirement(bases: list, longeur: int) -> str:
 
     sequence_aleatoire = ""
     for i in range(longeur):
-        sequence_aleatoire += random.choice(bases)
+        sequence_aleatoire += random.choice(constants.bases)
     return sequence_aleatoire
 
 def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
@@ -173,7 +173,7 @@ def calculer_distance(espece1: Espece, espece2: Espece) -> int:
         somme_dist = 0
 
         for e in espece1_filles:
-            somme_dist += distance_de_levenshtein(espece1, e)
+            somme_dist += distance_de_levenshtein(espece1.sequence_adn, e.sequence_adn)
         moyenne = somme_dist / len(espece1_filles)
         return moyenne
             
@@ -184,14 +184,16 @@ def calculer_distance(espece1: Espece, espece2: Espece) -> int:
 
         for e1 in espece1_filles:
             for e2 in espece2_filles:
-                somme_dist += distance_de_levenshtein(e1,e2)
+                somme_dist += distance_de_levenshtein(e1.sequence_adn ,e2.sequence_adn)
         moyenne = somme_dist / len(espece1_filles) * len(espece2_filles)
         return moyenne
 
 def reconstruction_arbre_phylogenetique(liste_fichier_adn):
     """Construit un arbre phylogénétique à partir de fichiers adn
+
     Args:
         liste_fichier_adn (str): les chemiens vers les fichiers adn
+
     Returns:
         Espece: l'espèce à la racine de l'arbre, qui contient l'arbre phylogénétique 
     """
@@ -200,15 +202,15 @@ def reconstruction_arbre_phylogenetique(liste_fichier_adn):
     nom_espece = ""
     count = 0
     dist_min = None
-
+    
     if(liste_fichier_adn == []):
         return None
-
+    
     for adn_file in liste_fichier_adn:
         nom_espece = adn_file.replace(".", "/").split("/")[-2]
         sequence_adn = open(adn_file)
         les_especes.append(Espece(nom_espece, sequence_adn.read(), False, None))
-
+        
     while len(les_especes) >= 2:
         dist_min = None
         paire_min = None
@@ -226,7 +228,7 @@ def reconstruction_arbre_phylogenetique(liste_fichier_adn):
 
                     if(espece_b.est_hypothetique):
                         dist = calculer_distance(espece_b, espece_a)
-
+                    
                 if dist_min is None or dist < dist_min:
                     dist_min = dist
                     paire_min = (espece_a, espece_b)
