@@ -244,4 +244,3 @@ def reconstruction_arbre_phylogenetique(liste_fichier_adn):
 
     racine = les_especes[0] 
     return racine   
-             
