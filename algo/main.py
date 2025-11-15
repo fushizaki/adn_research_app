@@ -166,24 +166,82 @@ def calculer_distance(espece1: Espece, espece2: Espece) -> int:
     Returns:
         int: la distance entre les deux espèces
     """
-
-
-    if espece1.est_hypothetique() and espece2.est_averee():
+    
+    if espece1.est_hypothetique and espece2.est_averee():
         espece1_filles = espece1.get_especes_filles()
         somme_dist = 0
 
         for e in espece1_filles:
-            somme_dist += distance_de_levenshtein(espece1, e)
+            somme_dist += distance_de_levenshtein(espece1.sequence_adn, e.sequence_adn)
         moyenne = somme_dist / len(espece1_filles)
         return moyenne
-            
-    if espece1.est_hypothetique() and espece2.est_hypothetique():
+
+    if espece1.est_hypothetique and espece2.est_hypothetique:
         espece1_filles = espece1.get_especes_filles()
         espece2_filles = espece2.get_especes_filles()
         somme_dist = 0
 
         for e1 in espece1_filles:
             for e2 in espece2_filles:
-                somme_dist += distance_de_levenshtein(e1,e2)
+                somme_dist += distance_de_levenshtein(e1.sequence_adn ,e2.sequence_adn)
         moyenne = somme_dist / len(espece1_filles) * len(espece2_filles)
         return moyenne
+
+def reconstruction_arbre_phylogenetique(liste_fichier_adn):
+    """Construit un arbre phylogénétique à partir de fichiers adn
+
+    Args:
+        liste_fichier_adn (str): les chemiens vers les fichiers adn
+
+    Returns:
+        Espece: l'espèce à la racine de l'arbre, qui contient l'arbre phylogénétique 
+    """
+    les_especes = []
+    sequence_adn = ""
+    nom_espece = ""
+    count = 0
+    dist_min = None
+    
+    if(liste_fichier_adn == []):
+        return None
+    
+    for adn_file in liste_fichier_adn:
+        nom_espece = adn_file.replace(".", "/").split("/")[-2]
+        sequence_adn = open(adn_file)
+        les_especes.append(Espece(nom_espece, sequence_adn.read(), False, None))
+        
+    while len(les_especes) >= 2:
+        dist_min = None
+        paire_min = None
+
+        for esp_count1 in range(len(les_especes)):
+            for esp_count2 in range(esp_count1+1, len(les_especes)):
+                espece_a = les_especes[esp_count1]
+                espece_b = les_especes[esp_count2]
+
+                if(espece_a.est_averee() and espece_b.est_averee()):
+                    dist = distance_de_levenshtein(espece_a.sequence_adn, espece_b.sequence_adn)
+                else:
+                    if(espece_a.est_hypothetique):
+                        dist = calculer_distance(espece_a, espece_b)
+
+                    if(espece_b.est_hypothetique):
+                        dist = calculer_distance(espece_b, espece_a)
+                    
+                if dist_min is None or dist < dist_min:
+                    dist_min = dist
+                    paire_min = (espece_a, espece_b)
+
+        if paire_min:
+            esp_a, esp_b = paire_min
+            esp_hypo = Espece(f"EspeceHypothetique_{count}", '', True, [esp_a, esp_b])
+
+            les_especes.remove(esp_a)
+            les_especes.remove(esp_b)
+            les_especes.append(esp_hypo)
+
+            count += 1
+
+    racine = les_especes[0] 
+    return racine   
+             
