@@ -22,9 +22,7 @@ SAE_Dev_Web/
 │   ├── Espece.py                        # Classe Espece pour représenter les espèces
 │   ├── constants.py                     # Constantes (bases ADN, etc.)
 │   ├── app.py                           # Application terminal
-│   └── data/                            # Répertoire pour les fichiers .adn générés
-├── adn/
-│   └── adn_raisonnable/                 # Fichiers .adn de test
+│   └── data/                            # Fichiers .adn exemple
 │       ├── abeille.adn
 │       ├── eponge.adn
 │       ├── humain.adn
