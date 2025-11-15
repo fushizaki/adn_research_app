@@ -35,8 +35,6 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
     for base in sequence:
         if random.random() < p:
             restes_bases = constants.bases.copy()
-            print(base)
-            print(restes_bases)
             restes_bases.remove(base)
             nouvelle_base = random.choice(restes_bases)
             sequence_mutation += nouvelle_base
