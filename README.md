@@ -9,8 +9,23 @@
 ### Installation des dépendances
 
 ```bash
-cd /home/Kitcat/SAE_Dev_Web
+cd SAE_Dev_Web
 pip install -r requirements.txt
+cd appJurassique
+npm install
+```
+
+### Mariadb Databases
+
+```bash
+soon...
+```
+
+### .env
+
+Create a .env file and add
+```bash
+
 ```
 
 ### Structure du projet
