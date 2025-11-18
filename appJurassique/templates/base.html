@@ -10,7 +10,24 @@
 
 <body>
     {% block navbar %}
-
+        <nav class="sticky z-50 w-full bg-black">
+            <div class="grid grid-cols-3 py-4 px-6 items-center">
+                <div class="flex justify-start">
+                    <p class="text-white font-exo text-4xl font-bold">DINOTRACK</p>
+                </div>
+                <div class="flex justify-center">
+                    <ul class="flex gap-8">
+                        <li><a href="#" class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">Home</a></li>
+                        <li><a href="#" class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">About</a></li>
+                        <li><a href="#" class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="flex justify-end gap-4 items-center">
+                    <a href="#" class="px-4 py-2 text-white hover:text-opacity-80 transition-colors">Sign In</a>
+                    <a href="#" class="px-4 py-2 border-[1px] border-white border-solid rounded-lg text-white hover:border-opacity-80 transition-colors">Sign Up</a>
+                </div>
+            </div>
+        </nav>
     {% endblock %}
     {% block content %}
     <main role="main" class="">
