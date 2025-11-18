@@ -1,3 +1,7 @@
+import logging as lg
+from .app import app, db
+
+
 @app.cli.command()
 def syncdb():
     '''Creates all missing tables.'''
