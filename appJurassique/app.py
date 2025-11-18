@@ -1,11 +1,17 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask( __name__ )
-# Config options - Make sure you created a 'config.py' file.
-app.config.from_object('config')
-# To get one variable, tape app.config['MY_VARIABLE']
+load_dotenv()
 
-# Create database connection object
-db = SQLAlchemy()
-db.init_app(app)
+app = Flask(__name__)
+
+app.config.from_object('config')
+
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+db_name = os.getenv("DB_NAME")
+
+app.config[
+    "SQLALCHEMY_DATABASE_URI"] = f"mysql://{db_user}:{db_password}@localhost/{db_name}"
+
+db = SQLAlchemy(app)
