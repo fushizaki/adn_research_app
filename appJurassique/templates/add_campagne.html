@@ -1,13 +1,30 @@
-{% extends "base.html" %}
 {% block main %}
 
-<html>
-<div class="">
-    <div>
-        
+<body class="max-w-2xl mx-auto">
+    <div class="rounded-lg bg-gray-800 shadow-md p-8 mt-6 border border-green-500">
+        <div class="space-y-6">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="bg-green-500 rounded-full p-1"></div>
+                    <p class="text-lg font-semibold text-white">Informations</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-green-400 text-sm font-medium">Titre *</label>
+                        <input type="text" placeholder="Dinosarus AX1" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white mt-1" />
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4 justify-end pt-4">
+                <button class="px-6 py-2 border border-gray-600 text-white hover:bg-gray-700 rounded">
+                    Annuler
+                </button>
+                <button class="px-6 py-2 bg-green-500 hover:bg-green-600 text-black font-semibold rounded">
+                    Créer la campagne
+                </button>
+            </div>
+        </div>
     </div>
-</div>
-
-</html>
+</body>
 
 {% endblock %}

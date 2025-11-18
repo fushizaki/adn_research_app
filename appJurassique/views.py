@@ -6,6 +6,8 @@ from .app import app, db
 def index():
     return render_template('index.html', title='Accueil')
 
+@app.route('/add_campagne')
+@app.route('/add_campagne/')
 def add_campagne():
     return render_template('add_campagne.html', title='Ajouter une Campagne')
 
