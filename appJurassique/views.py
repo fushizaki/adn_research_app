@@ -10,5 +10,9 @@ def index():
 def login():
     return render_template('login.html', title='Login')
 
+@app.route('/add_plateforme/')
+def add_plateforme():
+    return render_template('add_plateforme.html', title= "Ajout d'une plateforme")
+
 if __name__ == "__main__":
     app.run()
