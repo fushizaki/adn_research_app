@@ -2,12 +2,12 @@
 module.exports = {
   content: [
     "./templates/**/*.html",
-    "./static/**/*.js"
   ],
   theme: {
     extend: {
       colors: {
-        'gray-div': 'rgba(26, 31, 26, 1)'
+        'gray-div': 'rgba(26, 31, 26, 1)',
+        'green-l': 'rgba(0, 255, 77, 1)'
       },
     },
   },
