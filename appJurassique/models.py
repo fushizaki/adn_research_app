@@ -1,5 +1,7 @@
 from .app import db
 from datetime import datetime
+import enum
+
 
 class MATERIEL(db.Model):
     __tablename__ = 'MATERIEL'
@@ -8,7 +10,7 @@ class MATERIEL(db.Model):
     description = db.Column(db.String(500))
     plateforme = db.relationship('PLATEFORME', back_populates='materiel')
     habitations = db.relationship('HABITATION', back_populates='materiel')
-    
+
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
 
@@ -22,22 +24,23 @@ class PLATEFORME(db.Model):
     intervalle_maintenance = db.Column(db.Integer)
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='plateforme')
+
     #manque des trucs jsp
-    
+
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
 
 
-class HABITATION(db.Model):
-    __tablename__ = 'HABITATION'
-    idHabitation = db.Column(db.Integer, primary_key=True)
-    nom_habitation = db.Column(db.String(100), nullable=False)
+class HABILITATION(db.Model):
+    __tablename__ = 'HABILITATION'
+    idHabilitation = db.Column(db.Integer, primary_key=True)
+    nom_habilitation = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='habitations')
-    
+    materiel = db.relationship('MATERIEL', back_populates='habilitations')
+
     def __repr__(self):
-        return f"<HABITATION {self.nom_habitation}>"
+        return f"<HABILITATION {self.nom_habilitation}>"
 
 
 class BUDGET_MENSUEL(db.Model):
@@ -45,7 +48,7 @@ class BUDGET_MENSUEL(db.Model):
     annee = db.Column(db.Integer, primary_key=True)
     mois = db.Column(db.Integer, primary_key=True)
     budget = db.Column(db.Float, nullable=False)
-    
+
     def __repr__(self):
         return f"<BUDGET_MENSUEL {self.annee}-{self.mois} {self.budget}>"
 
@@ -55,31 +58,22 @@ class LIEU_FOUILLE(db.Model):
     idLieu = db.Column(db.Integer, primary_key=True)
     nomLieu = db.Column(db.String(100), nullable=False)
     campagnes = db.relationship('CAMPAGNE', back_populates='lieu')
-    
+
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
 
 class PERSONNE(db.Model):
     __tablename__ = 'PERSONNE'
-    idPersonne = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
-    login = db.relationship('LOGIN', back_populates='personne')
+    password = db.Column(db.String(255), nullable=False)
+    role_labo = db.Column(db.String(100), nullable=False)
+
     #a rajouter des liaisons
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
-
-
-class LOGIN(db.Model):
-    __tablename__ = 'LOGIN'
-    username = db.Column(db.String(50), primary_key=True)
-    password = db.Column(db.String(255), nullable=False)
-    idPersonne = db.Column(db.Integer, db.ForeignKey('PERSONNE.idPersonne'), nullable=False)
-    personne = db.relationship('PERSONNE', back_populates='login')
-    
-    def __repr__(self):
-        return f"<LOGIN {self.username}>"
 
 
 class CAMPAGNE(db.Model):
@@ -89,7 +83,165 @@ class CAMPAGNE(db.Model):
     duree = db.Column(db.Integer, nullable=False)
     idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'))
     lieu = db.relationship('LIEU_FOUILLE', back_populates='campagnes')
+
     #pareil
 
     def __repr__(self):
         return f"<CAMPAGNE ({self.idCampagne}) {self.dateDebut}>"
+
+
+class PARTICIPER(db.Model):
+    __tablename__ = 'PARTICIPER'
+    username = db.Column(db.String(50),
+                         db.ForeignKey('PERSONNE.username'),
+                         primary_key=True)
+    idCampagne = db.Column(db.Integer,
+                           db.ForeignKey('CAMPAGNE.idCampagne'),
+                           primary_key=True)
+    personne = db.relationship('PERSONNE', back_populates='participer')
+    campagne = db.relationship('CAMPAGNE', back_populates='participer')
+
+    def __repr__(self):
+        return f"<PARTICIPER {self.username} in {self.idCampagne}>"
+
+
+class PLANIFIER(db.Model):
+    __tablename__ = 'PLANIFIER'
+    idPlateforme = db.Column(db.Integer,
+                             db.ForeignKey('PLATEFORME.idPlateforme'),
+                             primary_key=True)
+    idCampagne = db.Column(db.Integer,
+                           db.ForeignKey('CAMPAGNE.idCampagne'),
+                           primary_key=True)
+    plateforme = db.relationship('PLATEFORME', back_populates='planifier')
+    campagne = db.relationship('CAMPAGNE', back_populates='planifier')
+
+    def __repr__(self):
+        return f"<PLANIFIER Plateforme {self.idPlateforme} for Campagne {self.idCampagne}>"
+
+
+# Entree campagne et lieu
+class SEJOURNER(db.Model):
+    __tablename__ = 'SEJOURNER'
+    idCampagne = db.Column(db.Integer,
+                           db.ForeignKey('CAMPAGNE.idCampagne'),
+                           primary_key=True)
+    idLieu = db.Column(db.Integer,
+                       db.ForeignKey('LIEU_FOUILLE.idLieu'),
+                       primary_key=True)
+    campagne = db.relationship('CAMPAGNE', back_populates='sejourner')
+    lieu = db.relationship('LIEU_FOUILLE', back_populates='sejourner')
+
+    def __repr__(self):
+        return f"<SEJOURNER Campagne {self.idCampagne} at Lieu {self.idLieu}>"
+
+
+class ECHANTILLON(db.Model):
+    __tablename__ = 'ECHANTILLON'
+    idEchantillon = db.Column(db.Integer, primary_key=True)
+    seqNucleotides = db.Column(db.String(1000), nullable=False)
+    commentairesEnchatillion = db.Column(db.String(500))
+
+    def __repr__(self):
+        return f"<ECHANTILLON {self.idEchantillon}>"
+
+
+class ESPECE(db.Model):
+    __tablename__ = 'ESPECE'
+    idEspece = db.Column(db.Integer, primary_key=True)
+    nomEspece = db.Column(db.String(100), nullable=False)
+    caracteristiques = db.Column(db.String(500))
+
+    def __repr__(self):
+        return f"<ESPECE {self.nomEspece}>"
+
+
+class APPARTENIR(db.Model):
+    __tablename__ = 'APPARTENIR'
+    idEchantillon = db.Column(db.Integer,
+                              db.ForeignKey('ECHANTILLON.idEchantillon'),
+                              primary_key=True)
+    idEspece = db.Column(db.Integer,
+                         db.ForeignKey('ESPECE.idEspece'),
+                         primary_key=True)
+    echantillon = db.relationship('ECHANTILLON', back_populates='appartenir')
+    espece = db.relationship('ESPECE', back_populates='appartenir')
+
+    def __repr__(self):
+        return f"<APPARTENIR Echantillon {self.idEchantillon} to Espece {self.idEspece}>"
+
+
+class HABILITER(db.Model):
+    __tablename__ = 'HABILITER'
+    username = db.Column(db.String(50),
+                         db.ForeignKey('PERSONNE.username'),
+                         primary_key=True)
+    idHabilitation = db.Column(db.Integer,
+                               db.ForeignKey('HABILITATION.idHabilitation'),
+                               primary_key=True)
+    personne = db.relationship('PERSONNE', back_populates='habiliter')
+    habilitation = db.relationship('HABILITATION', back_populates='habiliter')
+
+    def __repr__(self):
+        return f"<HABILITER {self.username} to Habilitation {self.idHabilitation}>"
+
+
+class RAPPORTER(db.Model):
+    __tablename__ = 'RAPPORTER'
+    idEchantillon = db.Column(db.Integer,
+                              db.ForeignKey('ECHANTILLON.idEchantillon'),
+                              primary_key=True)
+    idCampagne = db.Column(db.Integer,
+                           db.ForeignKey('CAMPAGNE.idCampagne'),
+                           primary_key=True)
+    echantillon = db.relationship('ECHANTILLON', back_populates='rapporter')
+    campagne = db.relationship('CAMPAGNE', back_populates='rapporter')
+
+    def __repr__(self):
+        return f"<RAPPORTER Echantillon {self.idEchantillon} from Campagne {self.idCampagne}>"
+
+
+class UTILISER(db.Model):
+    __tablename__ = 'UTILISER'
+    idMateriel = db.Column(db.Integer,
+                           db.ForeignKey('MATERIEL.idMateriel'),
+                           primary_key=True)
+    idPlateforme = db.Column(db.Integer,
+                             db.ForeignKey('PLATEFORME.idPlateforme'),
+                             primary_key=True)
+
+    def __repr__(self):
+        return f"<UTILISER Plateforme {self.idPlateforme} in Campagne {self.idCampagne}>"
+
+
+class NECESSITER(db.Model):
+    __tablename__ = 'NECESSITER'
+    idHabilitation = db.Column(db.Integer,
+                               db.ForeignKey('HABILITATION.idHabilitation'),
+                               primary_key=True)
+    idMateriel = db.Column(db.Integer,
+                           db.ForeignKey('MATERIEL.idMateriel'),
+                           primary_key=True)
+
+    def __repr__(self):
+        return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
+
+
+class statut(enum.Enum):
+    PLANIFIEE = "PLANIFIEE"
+    EN_COURS = "EN_COURS"
+    TERMINEE = "TERMINEE"
+
+
+class MAINTENANCE(db.Model):
+    __tablename__ = 'MAINTENANCE'
+    idMaintenance = db.Column(db.Integer, primary_key=True)
+    dateMaintenance = db.Column(db.Date, nullable=False)
+    duree_maintenance = db.Column(db.Integer, nullable=False)
+    statut = db.Column(db.Enum(statut), nullable=False)
+    idPlateforme = db.Column(db.Integer,
+                             db.ForeignKey('PLATEFORME.idPlateforme'))
+    plateforme = db.relationship('PLATEFORME', back_populates='maintenance')
+
+    def __repr__(self):
+        return f"<MAINTENANCE {self.idMaintenance} on {self.dateMaintenance}>"
