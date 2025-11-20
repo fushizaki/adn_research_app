@@ -14,6 +14,3 @@ def add_campagne():
 def login():
     return render_template('login.html', title='Login')
 
-@app.route('/add_campagne/')
-def add_campagne():
-    return render_template('add_campagne.html', title='Ajouter une Campagne')

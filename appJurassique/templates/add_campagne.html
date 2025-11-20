@@ -2,12 +2,13 @@
 {% block title %}Ajouter une campagne{% endblock %}
 {% block main %}
 
-<div class="max-w-2xl mx-auto">
-    <div class="rounded-lg bg-gray-950 shadow-md p-10 mt-6 border border-green-500">
+    <div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green.900)_0%,theme(colors.green.800)_30%,theme(colors.black)_70%)] flex items-center justify-center">    <div class="rounded-lg bg-gray-div shadow-md p-10 mt-6 border border-green-500">
 
         <div class="flex gap-3 mb-8">
             <div class="bg-green-500 rounded-lg p-2">
-                <p class="text-3xl font-bold">+</p>
+                <div class="bg-green-500 rounded-lg p-2 h-8 w-8 flex items-center justify-center">
+                    <p class="text-3xl font-bold">+</p>
+                </div>
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-white">Ajouter une campagne</h1>
@@ -16,6 +17,10 @@
             <button class="ml-auto text-gray-400 hover:text-white text-2xl">
                 <i class="fas fa-times"></i>
             </button>
+        </div>
+        <hr class="border-t border-green-500 my-6">
+        <div>
+
         </div>
 
 {% endblock %}
