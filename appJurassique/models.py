@@ -1,5 +1,6 @@
-from .app import db
+from .app import db, login_manager
 from datetime import datetime
+from flask_login import UserMixin
 import enum
 
 
@@ -71,6 +72,12 @@ class PERSONNE(db.Model):
     password = db.Column(db.String(255), nullable=False)
     role_labo = db.Column(db.String(100), nullable=False)
 
+    def get_id(self):
+        return self.Login
+    
+    @login_manager.user_loader
+    def load_user(username):
+        return PERSONNE.query.get(username)
     #a rajouter des liaisons
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
