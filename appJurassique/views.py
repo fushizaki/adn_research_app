@@ -1,4 +1,5 @@
 from flask import render_template
+from .forms import Form_plateforme
 from .app import app, db
 
 @app.route('/')
@@ -12,7 +13,8 @@ def login():
 
 @app.route('/add_plateforme/')
 def add_plateforme():
-    return render_template('add_plateforme.html', title= "Ajout d'une plateforme")
+    form_plat = Form_plateforme()
+    return render_template('add_plateforme.html', form_plateforme = form_plat, plateforme_existante = False,  title = "Ajout d'une plateforme")
 
 if __name__ == "__main__":
     app.run()

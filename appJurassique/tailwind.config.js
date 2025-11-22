@@ -7,7 +7,10 @@ module.exports = {
     extend: {
       colors: {
         'gray-div': 'rgba(26, 31, 26, 1)',
-        'green-l': 'rgba(0, 255, 77, 1)'
+        'green-l': 'rgba(0, 255, 77, 1)',
+        'green-txt': 'rgba(0, 199, 43, 1)',
+        'green-ext-radial': 'rgba(0, 179, 54 ,1)',
+        'green-center-radial': 'rgba(0, 91, 27, 1)'
       },
     },
   },
