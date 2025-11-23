@@ -7,7 +7,7 @@ from monApp.forms import LoginForm
 @app.route('/')
 @app.route('/index/')
 def index():
-    return render_template('index.html', title='Accueil')
+    return render_template('index.html', title='Accueil', current_page='index')
 
 
 @app.route("/login/", methods=(

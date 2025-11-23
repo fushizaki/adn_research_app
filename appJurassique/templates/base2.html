@@ -1,0 +1,81 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    {% block navbar %}
+    <div class="flex min-h-screen">
+        <div id="sidenav" class="w-64 bg-black text-white flex flex-col overflow-hidden transition-all duration-300">
+            <div class="flex items-center h-16 px-[18px] ">
+                <p class="text-white font-exo text-4xl font-bold">DINOTRACK</p>
+            </div>
+            <nav class="flex-1 px-3 py-4 space-y-4">
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'dashboard' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-house w-6 text-center"></i>
+                    <span class="font-medium">Tableau de bord</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'campagne' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-calendar w-6 text-center"></i>
+                    <span class="font-medium">Campagnes</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'plateforme' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-suitcase w-6 text-center"></i>
+                    <span class="font-medium">Plateforme</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'personnels' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-user-group w-6 text-center"></i>
+                    <span class="font-medium">Personnels</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'budget' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-sack-dollar w-6 text-center"></i>
+                    <span class="font-medium">Budget</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'maintenances' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-wrench w-6 text-center"></i>
+                    <span class="font-medium">Maintenances</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'echantillon-adn' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-flask w-6 text-center"></i>
+                    <span class="font-medium">Echantillon ADN</span>
+                </a>
+            </nav>
+            <div class="mt-auto w-full flex justify-center mb-4">
+                <button id="close-button" class="focus:outline-none">
+                    <i class="text-4xl fas fa-arrows-left-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    {% block content %}
+    <main role="main" class="">
+        {% block main %}{% endblock %}
+    </main>
+    {% endblock %}
+</body>
+
+<script>
+    document.getElementById("close-button").addEventListener("click", function() {
+        var sidenav = document.getElementById("sidenav");
+        if (sidenav.classList.contains("w-20")) {
+            sidenav.classList.replace("w-20", "w-64");
+        } else {
+            sidenav.classList.replace("w-64", "w-20");
+        }
+    });
+</script>
+
+</html>
