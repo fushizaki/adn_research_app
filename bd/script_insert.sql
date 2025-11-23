@@ -1,27 +1,27 @@
 -- Insertion pour la BDD générer a l'aide de l'IA
 INSERT into
-    PERSONNE (nom, prenom, role_labo)
+    PERSONNE (username, nom, prenom, password, role_labo)
 VALUES
-    ('Durand', 'Alice', 'Directeur'),
-    ('Martin', 'Lucas', 'Chercheur'),
-    ('Bernard', 'Emma', 'Technicien'),
-    ('Petit', 'Noah', 'Administratif'),
-    ('Robert', 'Léa', 'Chercheur'),
-    ('Richard', 'Louis', 'Technicien'),
-    ('Dubois', 'Chloé', 'Chercheur'),
-    ('Moreau', 'Gabriel', 'Administratif'),
-    ('Laurent', 'Jules', 'Technicien'),
-    ('Simon', 'Manon', 'Chercheur'),
-    ('Michel', 'Tom', 'Directeur'),
-    ('Lefebvre', 'Sarah', 'Technicien'),
-    ('Leroy', 'Raphaël', 'Chercheur'),
-    ('Roux', 'Lina', 'Administratif'),
-    ('David', 'Nathan', 'Technicien'),
-    ('Blanc', 'Eva', 'Chercheur'),
-    ('Garcia', 'Hugo', 'Directeur'),
-    ('Muller', 'Zoé', 'Technicien'),
-    ('Faure', 'Enzo', 'Chercheur'),
-    ('Lopez', 'Camille', 'Administratif');
+    ('adurand', 'Durand', 'Alice', 'pass123', 'Directeur'),
+    ('lmartin', 'Martin', 'Lucas', 'secure456', 'Chercheur'),
+    ('ebernard', 'Bernard', 'Emma', 'mypass789', 'Technicien'),
+    ('npetit', 'Petit', 'Noah', 'password1', 'Administratif'),
+    ('lrobert', 'Robert', 'Léa', 'secret234', 'Chercheur'),
+    ('lrichard', 'Richard', 'Louis', 'login567', 'Technicien'),
+    ('cdubois', 'Dubois', 'Chloé', 'access890', 'Chercheur'),
+    ('gmoreau', 'Moreau', 'Gabriel', 'user123', 'Administratif'),
+    ('jlaurent', 'Laurent', 'Jules', 'pass456', 'Technicien'),
+    ('msimon', 'Simon', 'Manon', 'secure789', 'Chercheur'),
+    ('tmichel', 'Michel', 'Tom', 'mypass012', 'Directeur'),
+    ('slefebvre', 'Lefebvre', 'Sarah', 'password345', 'Technicien'),
+    ('rleroy', 'Leroy', 'Raphaël', 'secret678', 'Chercheur'),
+    ('lroux', 'Roux', 'Lina', 'login901', 'Administratif'),
+    ('ndavid', 'David', 'Nathan', 'access234', 'Technicien'),
+    ('eblanc', 'Blanc', 'Eva', 'user567', 'Chercheur'),
+    ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'Directeur'),
+    ('zmuller', 'Muller', 'Zoé', 'secure123', 'Technicien'),
+    ('efaure', 'Faure', 'Enzo', 'mypass456', 'Chercheur'),
+    ('clopez', 'Lopez', 'Camille', 'password789', 'Administratif');
 
 INSERT into
     PLATEFORME (
@@ -70,53 +70,53 @@ VALUES
     ('radiations', 'Habilitation radiations');
 
 INSERT into
-    HABILITER (id_personne, id_habilitation)
+    HABILITER (username, id_habilitation)
 VALUES
-    (1, 1),
-    (1, 2),
-    (2, 3),
-    (2, 4),
-    (3, 1),
-    (3, 3),
-    (4, 2),
-    (4, 4),
-    (5, 1),
-    (5, 4),
-    (6, 2),
-    (6, 3),
-    (7, 1),
-    (7, 2),
-    (7, 3),
-    (8, 4),
-    (9, 1),
-    (9, 3),
-    (10, 2),
-    (10, 4),
-    (11, 1),
-    (11, 2),
-    (12, 3),
-    (12, 4),
-    (13, 1),
-    (13, 3),
-    (14, 2),
-    (14, 4),
-    (15, 1),
-    (15, 4),
-    (16, 2),
-    (16, 3),
-    (17, 1),
-    (17, 2),
-    (17, 3),
-    (17, 4),
-    (18, 3),
-    (18, 4),
-    (19, 1),
-    (19, 2),
-    (20, 3),
-    (20, 4);
+    ('adurand', 1),
+    ('adurand', 2),
+    ('lmartin', 3),
+    ('lmartin', 4),
+    ('ebernard', 1),
+    ('ebernard', 3),
+    ('npetit', 2),
+    ('npetit', 4),
+    ('lrobert', 1),
+    ('lrobert', 4),
+    ('lrichard', 2),
+    ('lrichard', 3),
+    ('cdubois', 1),
+    ('cdubois', 2),
+    ('cdubois', 3),
+    ('gmoreau', 4),
+    ('jlaurent', 1),
+    ('jlaurent', 3),
+    ('msimon', 2),
+    ('msimon', 4),
+    ('tmichel', 1),
+    ('tmichel', 2),
+    ('slefebvre', 3),
+    ('slefebvre', 4),
+    ('rleroy', 1),
+    ('rleroy', 3),
+    ('lroux', 2),
+    ('lroux', 4),
+    ('ndavid', 1),
+    ('ndavid', 4),
+    ('eblanc', 2),
+    ('eblanc', 3),
+    ('hgarcia', 1),
+    ('hgarcia', 2),
+    ('hgarcia', 3),
+    ('hgarcia', 4),
+    ('zmuller', 3),
+    ('zmuller', 4),
+    ('efaure', 1),
+    ('efaure', 2),
+    ('clopez', 3),
+    ('clopez', 4);
 
 INSERT into
-    CAMPAGNE (date_debut, duree)
+    CAMPAGNE (dateDebut, duree)
 VALUES
     ('2024-01-15', 30),
     ('2024-03-10', 45),
@@ -130,47 +130,47 @@ VALUES
     ('2025-08-30', 50);
 
 INSERT into
-    PARTICIPER (id_campagne, id_personne)
+    PARTICIPER (id_campagne, username)
 VALUES
-    (1, 1),
-    (1, 2),
-    (1, 3),
-    (1, 4),
-    (2, 5),
-    (2, 6),
-    (2, 7),
-    (3, 8),
-    (3, 9),
-    (3, 10),
-    (3, 11),
-    (3, 12),
-    (4, 13),
-    (4, 14),
-    (4, 15),
-    (5, 16),
-    (5, 17),
-    (5, 18),
-    (5, 19),
-    (6, 20),
-    (6, 1),
-    (6, 5),
-    (7, 2),
-    (7, 6),
-    (7, 10),
-    (7, 14),
-    (8, 3),
-    (8, 7),
-    (8, 11),
-    (9, 4),
-    (9, 8),
-    (9, 12),
-    (9, 16),
-    (9, 20),
-    (10, 9),
-    (10, 13),
-    (10, 17),
-    (10, 18),
-    (10, 19);
+    (1, 'adurand'),
+    (1, 'lmartin'),
+    (1, 'ebernard'),
+    (1, 'npetit'),
+    (2, 'lrobert'),
+    (2, 'lrichard'),
+    (2, 'cdubois'),
+    (3, 'gmoreau'),
+    (3, 'jlaurent'),
+    (3, 'msimon'),
+    (3, 'tmichel'),
+    (3, 'slefebvre'),
+    (4, 'rleroy'),
+    (4, 'lroux'),
+    (4, 'ndavid'),
+    (5, 'eblanc'),
+    (5, 'hgarcia'),
+    (5, 'zmuller'),
+    (5, 'efaure'),
+    (6, 'clopez'),
+    (6, 'adurand'),
+    (6, 'lrobert'),
+    (7, 'lmartin'),
+    (7, 'lrichard'),
+    (7, 'msimon'),
+    (7, 'lroux'),
+    (8, 'ebernard'),
+    (8, 'cdubois'),
+    (8, 'tmichel'),
+    (9, 'npetit'),
+    (9, 'gmoreau'),
+    (9, 'slefebvre'),
+    (9, 'eblanc'),
+    (9, 'clopez'),
+    (10, 'jlaurent'),
+    (10, 'rleroy'),
+    (10, 'hgarcia'),
+    (10, 'zmuller'),
+    (10, 'efaure');
 
 INSERT into
     PLANIFIER (id_plateforme, id_campagne)
@@ -227,7 +227,7 @@ VALUES
     (10, 11);
 
 INSERT into
-    ECHANTILLON (seq_nucleotides, commentaires_echant)
+    ECHANTILLON (seqNucleotides, commentairesEchantillon)
 VALUES
     (
         'ATCGATCGATCGATCG',
@@ -255,7 +255,7 @@ VALUES
     ('CTCTCTCTCTCTCTCT', 'Séquence d\'iguanodon');
 
 INSERT into
-    ESPECE (nom_espece, caracteristiques_esp)
+    ESPECE (nomEspece, caracteristiques)
 VALUES
     ('Tyrannosaurus Rex', 'Grand prédateur bipède'),
     ('Triceratops', 'Herbivore à trois cornes'),
@@ -342,33 +342,10 @@ VALUES
     (2025, 9, 17900.25),
     (2025, 10, 23000.50);
 
--- Les insertions sont juste temporaires, les mots de passes seront hashés dans la partie algorithme/flask
-INSERT into
-    LOGIN (username, password, id_personne)
-VALUES
-    ('adurand', 'pass123', 1),
-    ('lmartin', 'secure456', 2),
-    ('ebernard', 'mypass789', 3),
-    ('npetit', 'password1', 4),
-    ('lrobert', 'secret234', 5),
-    ('lrichard', 'login567', 6),
-    ('cdubois', 'access890', 7),
-    ('gmoreau', 'user123', 8),
-    ('jlaurent', 'pass456', 9),
-    ('msimon', 'secure789', 10),
-    ('tmichel', 'mypass012', 11),
-    ('slefebvre', 'password345', 12),
-    ('rleroy', 'secret678', 13),
-    ('lroux', 'login901', 14),
-    ('ndavid', 'access234', 15),
-    ('eblanc', 'user567', 16),
-    ('hgarcia', 'pass890', 17),
-    ('zmuller', 'secure123', 18),
-    ('efaure', 'mypass456', 19),
-    ('clopez', 'password789', 20);
+
 
 INSERT into
-    MATERIEL (nom_materiel, description_materiel)
+    MATERIEL (nom, description)
 VALUES
     (
         'Microscope électronique',
