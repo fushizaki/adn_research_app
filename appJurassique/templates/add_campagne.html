@@ -19,13 +19,11 @@
                 </a>
             </div>
             
-            {% if messages %}
+            {% if message %}
             <div class="mb-6">
-                {% for category, message in messages %}
-                <div class="p-4 rounded {% if category == 'error' %}bg-red-900 border border-red-500 text-red-200{% else %}bg-green-900 border border-green-500 text-green-200{% endif %}">
+                <div class="p-4 rounded {% if message_type == 'error' %}bg-red-900 border border-red-500 text-red-200{% else %}bg-green-900 border border-green-500 text-green-200{% endif %}">
                     {{ message }}
                 </div>
-                {% endfor %}
             </div>
             {% endif %}
             
@@ -97,10 +95,7 @@
                             </div>
                         </div>
                         {% if plateforme_selectionnee %}
-                        <p class="text-xs text-gray-400 mt-2">
-                            <i class="fas fa-info-circle"></i>
-                            Minimum de personnes requises : {{ plateforme_selectionnee.min_nb_personne or 1 }}
-                        </p>
+                    
                         {% endif %}
                     </div>
                 </div>
@@ -130,7 +125,7 @@
 
                 <div style="max-height: 300px; overflow-y: scroll;" class="border border-gray-700 rounded-lg p-2">
                     <div class="space-y-2">
-                        {% for membre, compatible in membres_compatibilite %}
+                        {% for membre, compatible in membres_compatibles %}
                         <label class="block">
                             <div class="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-gray-750 transition cursor-pointer
                                         {% if not compatible %}opacity-50{% endif %}">
