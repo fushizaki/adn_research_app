@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 drop-shadow-button">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-4 text-center text-white">Inscription</h2>
+        <p class="text-white text-center mb-4">Créer un compte afin d’accéder au laboratoire de recherche!</p>
+        <form method="POST" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                <label for="username" class="block text-green-text font-medium mb-2">Identifiant *</label>
+                {{ form.username(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                {% if form.username.errors %}
+                <p class="mt-2 text-sm text-red-400">{{ form.username.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label for="prenom" class="block text-green-text font-medium mb-2">Prénom *</label>
+                    {{ form.prenom(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                    {% if form.prenom.errors %}
+                    <p class="mt-2 text-sm text-red-400">{{ form.prenom.errors[0] }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="nom" class="block text-green-text font-medium mb-2">Nom *</label>
+                    {{ form.nom(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                    {% if form.nom.errors %}
+                    <p class="mt-2 text-sm text-red-400">{{ form.nom.errors[0] }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="role_labo" class="block text-green-text font-medium mb-2">Rôle dans le labo *</label>
+                {{ form.role_labo(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                {% if form.role_labo.errors %}
+                <p class="mt-2 text-sm text-red-400">{{ form.role_labo.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-green-text font-medium mb-2">Mot de passe *</label>
+                {{ form.password(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                {% if form.password.errors %}
+                <p class="mt-2 text-sm text-red-400">{{ form.password.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="mb-6">
+                <label for="confirm_password" class="block text-green-text font-medium mb-2">Confirmer le mot de passe *</label>
+                {{ form.confirm_password(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                {% if form.confirm_password.errors %}
+                <p class="mt-2 text-sm text-red-400">{{ form.confirm_password.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <button type="submit"
+                class="w-full bg-green-button-menu text-white font-medium py-2 px-4 rounded-md hover:bg-green-button-menu-hover transition-colors duration-300">
+                Créer un compte
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

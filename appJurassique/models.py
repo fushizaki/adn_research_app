@@ -10,7 +10,7 @@ class MATERIEL(db.Model):
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
     plateforme = db.relationship('PLATEFORME', back_populates='materiel')
-    habitations = db.relationship('HABITATION', back_populates='materiel')
+    habilitations = db.relationship('HABILITATION', back_populates='materiel')
 
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
@@ -25,6 +25,8 @@ class PLATEFORME(db.Model):
     intervalle_maintenance = db.Column(db.Integer)
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
+    maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
 
     #manque des trucs jsp
 
@@ -39,6 +41,7 @@ class HABILITATION(db.Model):
     description = db.Column(db.String(500))
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='habilitations')
+    habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -59,21 +62,24 @@ class LIEU_FOUILLE(db.Model):
     idLieu = db.Column(db.Integer, primary_key=True)
     nomLieu = db.Column(db.String(100), nullable=False)
     campagnes = db.relationship('CAMPAGNE', back_populates='lieu')
+    sejourner = db.relationship('SEJOURNER', back_populates='lieu', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
 
-class PERSONNE(db.Model):
+class PERSONNE(UserMixin, db.Model):
     __tablename__ = 'PERSONNE'
     username = db.Column(db.String(50), primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role_labo = db.Column(db.String(100), nullable=False)
+    participer = db.relationship('PARTICIPER', back_populates='personne', cascade='all, delete-orphan')
+    habiliter = db.relationship('HABILITER', back_populates='personne', cascade='all, delete-orphan')
 
     def get_id(self):
-        return self.Login
+        return self.username
     
     @login_manager.user_loader
     def load_user(username):
@@ -90,6 +96,10 @@ class CAMPAGNE(db.Model):
     duree = db.Column(db.Integer, nullable=False)
     idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'))
     lieu = db.relationship('LIEU_FOUILLE', back_populates='campagnes')
+    participer = db.relationship('PARTICIPER', back_populates='campagne', cascade='all, delete-orphan')
+    planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
+    sejourner = db.relationship('SEJOURNER', back_populates='campagne', cascade='all, delete-orphan')
+    rapporter = db.relationship('RAPPORTER', back_populates='campagne', cascade='all, delete-orphan')
 
     #pareil
 
@@ -148,6 +158,8 @@ class ECHANTILLON(db.Model):
     idEchantillon = db.Column(db.Integer, primary_key=True)
     seqNucleotides = db.Column(db.String(1000), nullable=False)
     commentairesEnchatillion = db.Column(db.String(500))
+    appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
+    rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<ECHANTILLON {self.idEchantillon}>"
@@ -158,6 +170,7 @@ class ESPECE(db.Model):
     idEspece = db.Column(db.Integer, primary_key=True)
     nomEspece = db.Column(db.String(100), nullable=False)
     caracteristiques = db.Column(db.String(500))
+    appartenir = db.relationship('APPARTENIR', back_populates='espece', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<ESPECE {self.nomEspece}>"
