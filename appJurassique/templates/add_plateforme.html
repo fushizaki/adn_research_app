@@ -2,48 +2,121 @@
 
 {% block main %}
 
-    
-    <div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center">
-       
-        <div class="bg-gray-div h-3/4 w-6/12 rounded-xl ">
-            <i class="fa-solid fa-square-plus text-green-l"></i>
 
-            <form role="form" method="POST" action="{{ url_for ('add_plateforme') }}">
-                <!--if current_user.is_authenticated
-                endif -->
-                {{ form_plateforme.hidden_tag() }}
-                <div>
-                    <div class="form-group pt-4">
-                        <label class="text-green-txt" for="nom_plateforme">Nom*</label>
-                        <input class="form-control" id="nom_plateforme" name="nom_plateforme" required size="15" type="text" value="">
-                    </div>
-                    <div class="p-4">   
-                            <label class="text-green-txt" for="cout_journalier">Cout journalier en euros*</label>
-                                <input class="form-control" id="cout_journalier" name="cout_journalier" required size="15" type="text" value="">
-                            <label class="text-green-txt" for="minimum_personnes">Minimum de personnes*</label>
-                                <input class="form-control" id="minimum_personnes" name="minimum_personnes" required size="15" type="text" value="">
-                    </div>        
-                    <div>
-                        <label class="text-green-txt" for="intervalle_maintenance">Intervalle de maintenance en jours*</label>
-                        <input class="form-control" id="intervalle_maintenance" name="intervalle_maintenance" required size="15" type="text" value="">
-                    </div>   
-                
-                    <div class="p-4">
-                        <div class="flex p-2">
-                            <input class="btn btn-success text-white" type="submit" value="Electrique">
-                            <input class="btn btn-success text-white" type="submit" value="Chimique">
-                        </div>
-                        <div class="flex p-2">
-                            <input class="btn btn-success text-white" type="submit" value="Biologique">
-                            <input class="btn btn-success text-white" type="submit" value="Radiation">
-                        </div>
-                    </div>
+<div
+    class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center">
 
-                </div>
-                
-            </form>
+    <div class="bg-gray-div h-3/4 w-full max-w-2xl rounded-xl ">
+        <div class="flex border-b-2 border-green-line">
+            <div>
+                <i class="fa-solid fa-square-plus text-green-l"></i>
+            </div>
+            <div>
+                <h1 class="text-white">Ajouter une plateforme</h1>
+                <p class="text-green-text">Créer une nouvelle plateforme avec ses habilités</p>
+            </div>
         </div>
-        
+        <form role="form" method="POST" action="{{ url_for ('add_plateforme') }}">
+            <!--if current_user.is_authenticated
+                endif -->
+            {{ form_plateforme.hidden_tag() }}
+            <div>
+                <div>
+
+                    <h2 class="text-green-text"> <i class="fa-solid fa-wrench"></i> Information</h2>
+                    <div>
+                        <label class="text-green-text" for="nom_plateforme">Nom*</label>
+                        {{ form_plateforme.nom_plateforme(class_="w-full text-white rounded-lg border border-transparent
+                        bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none
+                        focus:ring-2 focus:ring-green-button-menu") }}
+                    </div>
+                    <div class="flex">
+                        <div>
+                            <label class="text-green-text" for="cout_journalier">Cout journalier en euros*</label>
+                            {{ form_plateforme.cout_journalier(class_="text-white rounded-lg border border-transparent
+                            bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none
+                            focus:ring-2 focus:ring-green-button-menu") }}
+
+                        </div>
+                        <div>
+                            <label class="text-green-text" for="minimum_personnes">Minimum de personnes*</label>
+                            {{ form_plateforme.minimum_personnes(class_="text-white rounded-lg border border-transparent
+                            bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none
+                            focus:ring-2 focus:ring-green-button-menu") }}
+
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-green-text" for="intervalle_maintenance">Intervalle de maintenance en
+                            jours*</label>
+                        {{ form_plateforme.intervalle_maintenance(class_="w-full text-white rounded-lg border
+                        border-transparent bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu
+                        focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h2 class="text-green-text"> <i class="fa-solid fa-shield text-green-text"></i> Habilitations
+                        requises (en séléctionner au moins une)</h2>
+                    {% if form_plateforme.hab_electrique.errors %}
+                    <div
+                        class="mb-2 rounded-md bg-red-500/20 p-2 text-center text-sm text-red-400 border border-red-500">
+                        {% for error in form_plateforme.hab_electrique.errors %}
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="grid grid-cols-2 gap-4 p-2">
+
+                        <div>
+                            {{ form_plateforme.hab_electrique(class_="peer hidden") }}
+
+                            <label for="{{ form_plateforme.hab_electrique.id }}"
+                                class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-green-button-menu peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-line">
+                                <i class="fa-solid fa-bolt mr-2"></i>Electrique
+                            </label>
+                        </div>
+
+                        <div>
+                            {{ form_plateforme.hab_chimique(class_="peer hidden") }}
+                            <label for="{{ form_plateforme.hab_chimique.id }}"
+                                class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-green-button-menu peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-line">
+                                <i class="fa-solid fa-flask mr-2"></i>Chimique
+                            </label>
+                        </div>
+
+                        <div>
+                            {{ form_plateforme.hab_biologique(class_="peer hidden") }}
+                            <label for="{{ form_plateforme.hab_biologique.id }}"
+                                class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-green-button-menu peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-line">
+                                <i class="fa-solid fa-dna mr-2"></i>Biologique
+                            </label>
+                        </div>
+
+                        <div>
+                            {{ form_plateforme.hab_radiation(class_="peer hidden") }}
+                            <label for="{{ form_plateforme.hab_radiation.id }}"
+                                class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-green-button-menu peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-line">
+                                <i class="fa-solid fa-radiation mr-2"></i>Radiation
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="flex">
+                        <p class="text-white">🛈 Nous vérifierons que la plateforme n'existe pas.</p>
+
+                        <button type="submit"
+                            class="w-full bg-gray-textfield text-white font-medium py-2 px-4 rounded-md hover:bg-gray-button-hover transition-colors duration-300">
+                            <p class="text-white"><i class="fa-solid fa-plus"></i>Ajouter</p>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
     </div>
+
+</div>
 
 {% endblock %}
