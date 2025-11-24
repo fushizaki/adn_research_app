@@ -2,7 +2,7 @@ from flask import render_template, request, url_for, redirect
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import LoginForm, RegisterForm
+from appJurassique.forms import LoginForm, RegisterForm, BudgetForm
 from appJurassique.models import PERSONNE, role_labo_enum
 
 
@@ -10,6 +10,24 @@ from appJurassique.models import PERSONNE, role_labo_enum
 @app.route('/index/')
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
+
+
+@app.route('/dashboard/set_budget/', methods=(
+    'GET',
+    'POST',
+))
+@login_required
+def set_budget():
+    unForm = BudgetForm()
+    if not unForm.is_submitted():
+        unForm.next.data = request.args.get('next')
+    elif unForm.validate_on_submit():
+        # Here you would typically process the budget form data
+        pass
+    return render_template('set_budget.html',
+                           title='Définir le budget',
+                           current_page='dashboard',
+                           form=unForm)
 
 
 @app.route("/login/", methods=(
@@ -41,9 +59,8 @@ def register():
         return redirect(url_for('index'))
 
     form = RegisterForm()
-    role_choices = [('', 'Sélectionner un rôle')] + [
-        (role.value, role.value) for role in role_labo_enum
-    ]
+    role_choices = [('', 'Sélectionner un rôle')
+                    ] + [(role.value, role.value) for role in role_labo_enum]
     form.role_labo.choices = role_choices
 
     if not form.is_submitted():

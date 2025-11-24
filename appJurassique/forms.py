@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField
 from wtforms.validators import DataRequired, EqualTo
 from .models import PERSONNE, role_labo_enum
 from hashlib import sha256
@@ -45,3 +45,9 @@ class RegisterForm(FlaskForm):
             password=m.hexdigest(),
             role_labo=role_labo_enum(self.role_labo.data),
         )
+
+
+class BudgetForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m', validators=[DataRequired()])
+    budget_mensuel = StringField('Montant du budget', validators=[DataRequired()])
+    next = HiddenField()
