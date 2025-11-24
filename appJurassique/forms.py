@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField
+from wtforms import StringField, HiddenField, PasswordField, SelectField
 from wtforms.validators import DataRequired, EqualTo
-from .models import PERSONNE
+from .models import PERSONNE, role_labo_enum
 from hashlib import sha256
 
 class LoginForm(FlaskForm):
-    username = StringField ('Identifiant')
-    password = PasswordField ('Mot de passe')
+    username = StringField ('Identifiant', validators=[DataRequired()])
+    password = PasswordField ('Mot de passe', validators=[DataRequired()])
     next = HiddenField()
 
     def get_authenticated_user (self):
@@ -20,14 +20,18 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('Identifiant', validators=(DataRequired(),))
-    prenom = StringField('Prénom', validators=(DataRequired(),))
-    nom = StringField('Nom', validators=(DataRequired(),))
-    role_labo = StringField('Rôle dans le labo', validators=(DataRequired(),))
-    password = PasswordField('Mot de passe', validators=(DataRequired(),))
+    username = StringField('Identifiant', validators=[DataRequired()])
+    prenom = StringField('Prénom', validators=[DataRequired()])
+    nom = StringField('Nom', validators=[DataRequired()])
+    role_labo = SelectField(
+        'Rôle dans le labo',
+        choices=[],
+        validators=[DataRequired()],
+    )
+    password = PasswordField('Mot de passe', validators=[DataRequired()])
     confirm_password = PasswordField(
         'Confirmer le mot de passe',
-        validators=(DataRequired(), EqualTo('password', message='Les mots de passe doivent correspondre.'),),
+        validators=[DataRequired(), EqualTo('password', message='Les mots de passe doivent correspondre.')],
     )
     next = HiddenField()
 
@@ -39,5 +43,5 @@ class RegisterForm(FlaskForm):
             prenom=self.prenom.data,
             nom=self.nom.data,
             password=m.hexdigest(),
-            role_labo=self.role_labo.data,
+            role_labo=role_labo_enum(self.role_labo.data),
         )

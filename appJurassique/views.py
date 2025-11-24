@@ -3,7 +3,7 @@ from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import LoginForm, RegisterForm
-from appJurassique.models import PERSONNE
+from appJurassique.models import PERSONNE, role_labo_enum
 
 
 @app.route('/')
@@ -41,6 +41,10 @@ def register():
         return redirect(url_for('index'))
 
     form = RegisterForm()
+    role_choices = [('', 'Sélectionner un rôle')] + [
+        (role.value, role.value) for role in role_labo_enum
+    ]
+    form.role_labo.choices = role_choices
 
     if not form.is_submitted():
         form.next.data = request.args.get('next')

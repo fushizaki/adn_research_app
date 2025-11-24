@@ -67,6 +67,14 @@ class LIEU_FOUILLE(db.Model):
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
+class role_labo_enum(enum.Enum):
+    RECHERCHE = "DIRECTION"
+    TECHNICIEN = "TECHNICIEN"
+    ADMINISTRATION = "ADMINISTRATION"
+    CHERCHEURSE = "CHERCHEUR(SE)"
+    
+    def get_roles():
+        return [role.value for role in role_labo_enum]
 
 class PERSONNE(UserMixin, db.Model):
     __tablename__ = 'PERSONNE'
@@ -74,7 +82,7 @@ class PERSONNE(UserMixin, db.Model):
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role_labo = db.Column(db.String(100), nullable=False)
+    role_labo = db.Column(db.Enum(role_labo_enum), nullable=False)
     participer = db.relationship('PARTICIPER', back_populates='personne', cascade='all, delete-orphan')
     habiliter = db.relationship('HABILITER', back_populates='personne', cascade='all, delete-orphan')
 
