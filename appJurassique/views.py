@@ -2,8 +2,8 @@ from flask import render_template, request, url_for, redirect
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import LoginForm, RegisterForm, BudgetForm
-from appJurassique.models import PERSONNE, role_labo_enum
+from appJurassique.forms import LoginForm, RegisterForm, BudgetForm, MaintenanceForm
+from appJurassique.models import PERSONNE, role_labo_enum, PLATEFORME
 
 
 @app.route('/')
@@ -14,6 +14,59 @@ def index():
 @app.route('/add_campagne/')
 def add_campagne():
     return render_template('add_campagne.html', title='Ajouter une Campagne')
+
+@app.route('/maintenance/', methods=['GET', 'POST'])
+def maintenance():
+    plateformes = PLATEFORME.query.all()
+    form = MaintenanceForm()
+    form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+        (p.idPlateforme, p.nom) for p in plateformes]
+    
+    formdata = request.form if request.method == 'POST' else request.args
+    if formdata:
+        form.process(formdata=formdata)
+    message = request.args.get('error') or request.args.get('success')
+    message_type = 'error' if request.args.get('error') else (
+        'success' if request.args.get('success') else None
+    )
+    return render_template(
+        'maintenance.html',
+        title='Prévoir une maintenance',
+        plateformes=plateformes,
+        form=form,
+        message=message,
+        message_type=message_type
+    )
+
+@app.route('/creer_maintenance/', methods=['POST'])
+def creer_maintenance():
+    try:
+        plateformes = PLATEFORME.query.all()
+        form = MaintenanceForm()
+        form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+            (p.idPlateforme, p.nom) for p in plateformes
+        ]
+        form.process(formdata=request.form)
+        if not form.validate():
+            first_error = next(iter(form.errors.values()))[0]
+            return redirect(url_for('maintenance', error=first_error))
+
+        maintenance = form.build_maintenance()
+        db.session.add(maintenance)
+        db.session.commit()
+
+        return redirect(url_for(
+            'maintenance',
+            success='Maintenance créée avec succès !',
+            idPlateforme=form.idPlateforme.data or '',
+            dateDebut=form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '',
+            duree=form.duree.data or ''
+        ))
+
+    except ValueError as e:
+        return redirect(url_for('maintenance', error=f'Erreur de validation : {str(e)}'))
+    except Exception as e:
+        return redirect(url_for('maintenance', error=f'Erreur : {str(e)}'))
 
 @app.route('/login/')
 def login():

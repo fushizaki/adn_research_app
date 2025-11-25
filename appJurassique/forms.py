@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField
-from wtforms.validators import DataRequired, EqualTo
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, IntegerField
+from wtforms.validators import DataRequired, EqualTo, NumberRange
+from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL, MAINTENANCE, PLATEFORME, statut
 from hashlib import sha256
 
 
@@ -67,3 +67,37 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+
+
+class MaintenanceForm(FlaskForm):
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=int,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+
+    duree = IntegerField(
+        "Durée en heures",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+        ],
+    )
+
+    next = HiddenField()
+
+    def build_maintenance(self):
+        return MAINTENANCE(
+            dateMaintenance=self.dateDebut.data,
+            duree_maintenance=self.duree.data,
+            idPlateforme=self.idPlateforme.data,
+            statut=statut.PLANIFIEE,
+        )
+
