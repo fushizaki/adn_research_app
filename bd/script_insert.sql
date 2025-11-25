@@ -43,7 +43,7 @@ VALUES
     ('Plateforme Kappa', 3, 165.25, 56);
 
 INSERT into
-    LIEU (nomLieu)
+    LIEU_FOUILLE (nomLieu)
 VALUES
     ('Site de Lourinhã'),
     ('Carrière de Holzmaden'),
@@ -62,7 +62,7 @@ VALUES
     ('Formation Cedar Mountain');
 
 INSERT into
-    HABILITATION (nom_habilitation, description_hab)
+    HABILITATION (nom_habilitation, description)
 VALUES
     ('électrique', 'Habilitation électrique'),
     ('chimique', 'Habilitation chimique'),
@@ -70,7 +70,7 @@ VALUES
     ('radiations', 'Habilitation radiations');
 
 INSERT into
-    HABILITER (username, id_habilitation)
+    HABILITER (username, idHabilitation)
 VALUES
     ('adurand', 1),
     ('adurand', 2),
@@ -130,7 +130,7 @@ VALUES
     ('2025-08-30', 50);
 
 INSERT into
-    PARTICIPER (id_campagne, username)
+    PARTICIPER (idCampagne, username)
 VALUES
     (1, 'adurand'),
     (1, 'lmartin'),
@@ -173,7 +173,7 @@ VALUES
     (10, 'efaure');
 
 INSERT into
-    PLANIFIER (id_plateforme, id_campagne)
+    PLANIFIER (idPlateforme, idCampagne)
 VALUES
     (1, 1),
     (2, 1),
@@ -200,7 +200,7 @@ VALUES
     (3, 10);
 
 INSERT into
-    SEJOURNER (id_campagne, id_lieu)
+    SEJOURNER (idCampagne, idLieu)
 VALUES
     (1, 1),
     (1, 2),
@@ -274,7 +274,7 @@ VALUES
     ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
 INSERT into
-    APPARTENIR (id_espece, id_echant)
+    APPARTENIR (idEspece, idEchant)
 VALUES
     (9, 1),
     (2, 2),
@@ -293,7 +293,7 @@ VALUES
     (14, 15);
 
 INSERT into
-    RAPPORTER (id_echant, id_campagne)
+    RAPPORTER (idEchant, idCampagne)
 VALUES
     (1, 1),
     (2, 1),
@@ -403,7 +403,7 @@ VALUES
     );
 
 INSERT into
-    UTILISER (id_materiel, id_plateforme, quantite)
+    UTILISER (idMateriel, idPlateforme, quantite)
 VALUES
     (1, 1, 2),
     (2, 1, 1),
@@ -437,7 +437,7 @@ VALUES
     (15, 10, 1);
 
 INSERT into
-    NECESSITER (id_materiel, id_habilitation)
+    NECESSITER (idMateriel, idHabilitation)
 VALUES
     (1, 1),
     (2, 1),
@@ -461,4 +461,4 @@ VALUES
     (14, 1),
     (14, 3),
     (15, 1),
-    (15, 2);
+    (15, 4);

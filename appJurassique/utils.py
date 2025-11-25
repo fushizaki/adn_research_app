@@ -21,8 +21,6 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
     """
     Crée une nouvelle campagne avec toutes les validations nécessaires.
     Les triggers SQL géreront les validations de disponibilité et d'habilitations.
-    
-    Note: le paramètre titre est accepté pour compatibilité mais n'est pas stocké en base.
     """
     try:
         plateforme = PLATEFORME.query.get(id_plateforme)
@@ -62,7 +60,6 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
             idLieu=id_lieu
         )
         db.session.add(sejour)
-
         db.session.commit()
 
         return nouvelle_campagne, None
@@ -89,7 +86,6 @@ def obtenir_membres_compatibles(id_plateforme):
             return []
         
         tous_membres = PERSONNE.query.all()
-        
         utilisations = UTILISER.query.filter_by(idPlateforme=id_plateforme).all()
         
         if not utilisations:
@@ -118,7 +114,7 @@ def obtenir_membres_compatibles(id_plateforme):
         return membres_compatibles
     
     except Exception as e:
-        print(f"Error in obtenir_membres_compatibles: {str(e)}")
+        print(f"erreur dans la fonction obtenir_membres_compatibles: {str(e)}")
         import traceback
         traceback.print_exc()
         return []
