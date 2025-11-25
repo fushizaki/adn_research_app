@@ -3,6 +3,7 @@ from wtforms import StringField, HiddenField, BooleanField
 from wtforms.validators import DataRequired
 
 class Form_plateforme(FlaskForm):
+    id_plateforme = HiddenField('id_plateforme')
     nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
     cout_journalier = StringField('cout_journalier', validators = [DataRequired()])
     minimum_personnes = StringField('minimum_personnes', validators = [DataRequired()])
