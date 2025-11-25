@@ -11,37 +11,11 @@ from appJurassique.models import PERSONNE, role_labo_enum
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
+@app.route('/add_campagne/')
+def add_campagne():
+    return render_template('add_campagne.html', title='Ajouter une Campagne')
 
-@app.route('/dashboard/set_budget/', methods=(
-    'GET',
-    'POST',
-))
-@login_required
-def set_budget():
-    unForm = BudgetForm()
-    if not unForm.is_submitted():
-        unForm.next.data = request.args.get('next')
-    elif unForm.validate_on_submit():
-        unBudget = unForm.build_budget()
-        db.session.add(unBudget)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            unForm.date.errors.append(
-                "Une erreur est survenue, merci de réessayer.")
-        else:
-            return redirect(unForm.next.data or url_for('index'))
-    return render_template('set_budget.html',
-                           title='Définir le budget',
-                           current_page='dashboard',
-                           form=unForm)
-
-
-@app.route("/login/", methods=(
-    "GET",
-    "POST",
-))
+@app.route('/login/')
 def login():
     unForm = LoginForm()
     unUser = None
@@ -101,5 +75,3 @@ def logout():
     return redirect(url_for('index'))
 
 
-if __name__ == "__main__":
-    app.run()

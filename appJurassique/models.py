@@ -9,8 +9,8 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
-    habilitations = db.relationship('HABILITATION', back_populates='materiel')
+    plateforme = db.relationship('UTILISER', back_populates='materiel')
+    habilitations = db.relationship('NECESSITER', back_populates='materiel')
 
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
@@ -23,12 +23,9 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
-    planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
-    maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
-
-    #manque des trucs jsp
+    materiel = db.relationship('UTILISER', back_populates='plateforme')
+    planifier = db.relationship('PLANIFIER', back_populates='plateforme')
+    maintenance = db.relationship('MAINTENANCE', back_populates='plateforme')
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
@@ -39,9 +36,8 @@ class HABILITATION(db.Model):
     idHabilitation = db.Column(db.Integer, primary_key=True)
     nom_habilitation = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='habilitations')
-    habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
+    materiel = db.relationship('NECESSITER', back_populates='habilitation')
+    habiliter = db.relationship('HABILITER', back_populates='habilitation')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -61,8 +57,7 @@ class LIEU_FOUILLE(db.Model):
     __tablename__ = 'LIEU_FOUILLE'
     idLieu = db.Column(db.Integer, primary_key=True)
     nomLieu = db.Column(db.String(100), nullable=False)
-    campagnes = db.relationship('CAMPAGNE', back_populates='lieu')
-    sejourner = db.relationship('SEJOURNER', back_populates='lieu', cascade='all, delete-orphan')
+    sejourner = db.relationship('SEJOURNER', back_populates='lieu')
 
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
@@ -82,9 +77,9 @@ class PERSONNE(UserMixin, db.Model):
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role_labo = db.Column(db.Enum(role_labo_enum), nullable=False)
-    participer = db.relationship('PARTICIPER', back_populates='personne', cascade='all, delete-orphan')
-    habiliter = db.relationship('HABILITER', back_populates='personne', cascade='all, delete-orphan')
+    role_labo = db.Column(db.String(100), nullable=False)
+    participer = db.relationship('PARTICIPER', back_populates='personne')
+    habiliter = db.relationship('HABILITER', back_populates='personne')
 
     def get_id(self):
         return self.username
@@ -92,7 +87,7 @@ class PERSONNE(UserMixin, db.Model):
     @login_manager.user_loader
     def load_user(username):
         return PERSONNE.query.get(username)
-    #a rajouter des liaisons
+    
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
 
@@ -102,14 +97,10 @@ class CAMPAGNE(db.Model):
     idCampagne = db.Column(db.Integer, primary_key=True)
     dateDebut = db.Column(db.Date, nullable=False)
     duree = db.Column(db.Integer, nullable=False)
-    idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'))
-    lieu = db.relationship('LIEU_FOUILLE', back_populates='campagnes')
-    participer = db.relationship('PARTICIPER', back_populates='campagne', cascade='all, delete-orphan')
-    planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
-    sejourner = db.relationship('SEJOURNER', back_populates='campagne', cascade='all, delete-orphan')
-    rapporter = db.relationship('RAPPORTER', back_populates='campagne', cascade='all, delete-orphan')
-
-    #pareil
+    participer = db.relationship('PARTICIPER', back_populates='campagne')
+    planifier = db.relationship('PLANIFIER', back_populates='campagne')
+    sejourner = db.relationship('SEJOURNER', back_populates='campagne')
+    rapporter = db.relationship('RAPPORTER', back_populates='campagne')
 
     def __repr__(self):
         return f"<CAMPAGNE ({self.idCampagne}) {self.dateDebut}>"
@@ -165,9 +156,9 @@ class ECHANTILLON(db.Model):
     __tablename__ = 'ECHANTILLON'
     idEchantillon = db.Column(db.Integer, primary_key=True)
     seqNucleotides = db.Column(db.String(1000), nullable=False)
-    commentairesEnchatillion = db.Column(db.String(500))
-    appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
-    rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
+    commentairesEchantillon = db.Column(db.String(500))
+    appartenir = db.relationship('APPARTENIR', back_populates='echantillon')
+    rapporter = db.relationship('RAPPORTER', back_populates='echantillon')
 
     def __repr__(self):
         return f"<ECHANTILLON {self.idEchantillon}>"
@@ -178,7 +169,7 @@ class ESPECE(db.Model):
     idEspece = db.Column(db.Integer, primary_key=True)
     nomEspece = db.Column(db.String(100), nullable=False)
     caracteristiques = db.Column(db.String(500))
-    appartenir = db.relationship('APPARTENIR', back_populates='espece', cascade='all, delete-orphan')
+    appartenir = db.relationship('APPARTENIR', back_populates='espece')
 
     def __repr__(self):
         return f"<ESPECE {self.nomEspece}>"
@@ -237,9 +228,12 @@ class UTILISER(db.Model):
     idPlateforme = db.Column(db.Integer,
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
+    quantite = db.Column(db.Integer)
+    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
 
     def __repr__(self):
-        return f"<UTILISER Plateforme {self.idPlateforme} in Campagne {self.idCampagne}>"
+        return f"<UTILISER Materiel {self.idMateriel} sur Plateforme {self.idPlateforme}>"
 
 
 class NECESSITER(db.Model):
@@ -250,6 +244,8 @@ class NECESSITER(db.Model):
     idMateriel = db.Column(db.Integer,
                            db.ForeignKey('MATERIEL.idMateriel'),
                            primary_key=True)
+    materiel = db.relationship('MATERIEL', back_populates='habilitations')
+    habilitation = db.relationship('HABILITATION', back_populates='materiel')
 
     def __repr__(self):
         return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
