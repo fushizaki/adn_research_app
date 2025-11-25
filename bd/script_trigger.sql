@@ -6,25 +6,24 @@ FOR EACH ROW
 BEGIN
     declare disponible int;
 
-    declare date_debut_camp_insert date;
-    declare date_fin_camp_insert date;
-    declare duree_camp_insert int;
+    declare dateDebutCampInsert date;
+    declare dateFinCampInsert date;
+    declare dureeCampInsert int;
 
-    SELECT date_debut, duree into date_debut_camp_insert, duree_camp_insert
+    SELECT dateDebut, duree into dateDebutCampInsert, dureeCampInsert
     FROM CAMPAGNE
-    WHERE id_campagne = NEW.id_campagne;
+    WHERE idCampagne = NEW.idCampagne;
 
-    -- https://www.w3schools.com/sql/func_mysql_date_add.asp
-    set date_fin_camp_insert = DATE_ADD(date_debut_camp_insert, INTERVAL duree_camp_insert DAY);
+    set dateFinCampInsert = DATE_ADD(dateDebutCampInsert, INTERVAL dureeCampInsert DAY);
     
     SELECT count(*) into disponible
     FROM PLATEFORME NATURAL JOIN PLANIFIER NATURAL JOIN CAMPAGNE
-    WHERE id_plateforme = NEW.id_plateforme and 
-            (date_debut_camp_insert >= date_debut and date_fin_camp_insert <= DATE_ADD(date_debut, INTERVAL duree DAY)) 
+    WHERE idPlateforme = NEW.idPlateforme and 
+            (dateDebutCampInsert >= dateDebut and dateFinCampInsert <= DATE_ADD(dateDebut, INTERVAL duree DAY)) 
             or
-            (date_debut_camp_insert <= date_debut and date_fin_camp_insert >= date_debut)
+            (dateDebutCampInsert <= dateDebut and dateFinCampInsert >= dateDebut)
             or
-            (date_debut_camp_insert >= date_debut and date_fin_camp_insert >= DATE_ADD(date_debut, INTERVAL duree DAY)); 
+            (dateDebutCampInsert >= dateDebut and dateFinCampInsert >= DATE_ADD(dateDebut, INTERVAL duree DAY)); 
 
     IF (disponible>0) THEN
         SIGNAL SQLSTATE '45000'
@@ -79,16 +78,16 @@ CREATE TRIGGER verif_maintenance_necessaire
 BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
-    DECLARE temps_avant_maintenance INT;
-    DECLARE intervalle_requis INT;
+    DECLARE tempsAvantMaintenance INT;
+    DECLARE intervalleRequis INT;
     
-    SET temps_avant_maintenance = temps_restant_avant_maintenance(NEW.id_plateforme);
+    SET tempsAvantMaintenance = temps_restant_avant_maintenance(NEW.idPlateforme);
     
-    SELECT intervalle_maintenance into intervalle_requis
+    SELECT intervalle_maintenance into intervalleRequis
     FROM PLATEFORME 
-    WHERE id_plateforme = NEW.id_plateforme;
+    WHERE idPlateforme = NEW.idPlateforme;
     
-    IF temps_avant_maintenance >= intervalle_requis THEN
+    IF tempsAvantMaintenance >= intervalleRequis THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erreur : Maintenance requise avant utilisation de la plateforme.';
     END IF;
@@ -214,22 +213,22 @@ CREATE TRIGGER verif_personnes_libres
 BEFORE INSERT ON PARTICIPER
 FOR EACH ROW
 BEGIN
-    declare date_debutC date;
+    declare dateDebutC date;
     declare dureeC int default 0;
-    declare date_finC date;
+    declare dateFinC date;
     declare libre int default 0;
 
-    select date_debut, duree into date_debutC, dureeC
+    select dateDebut, duree into dateDebutC, dureeC
     from CAMPAGNE
-    where id_campagne = new.id_campagne;
+    where idCampagne = new.idCampagne;
 
-    set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
+    set dateFinC = DATE_ADD(dateDebutC, INTERVAL dureeC DAY);
 
     select count(*) into libre
     from CAMPAGNE natural join PARTICIPER
-    where id_personne = new.id_personne and id_campagne != new.id_campagne
-            and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
-            and date_finC > date_debut;
+    where username = new.username and idCampagne != new.idCampagne
+            and dateDebutC < DATE_ADD(dateDebut, INTERVAL duree DAY) 
+            and dateFinC > dateDebut;
 
     if (libre > 0) then
         SIGNAL SQLSTATE '45000'
@@ -332,26 +331,25 @@ DELIMITER |
 create or replace trigger verif_habilite_personnes
 before insert on PLANIFIER
 for each row
-begin
-    declare hab_requises INT;
-    declare hab_possedees INT;
+BEGIN
+    declare habRequises INT;
+    declare habPossedees INT;
 
-    select COUNT(DISTINCT id_habilitation) into hab_requises
+    select COUNT(DISTINCT idHabilitation) into habRequises
     FROM UTILISER NATURAL JOIN NECESSITER 
-    WHERE id_plateforme = NEW.id_plateforme;
+    WHERE idPlateforme = NEW.idPlateforme;
 
-    select COUNT(DISTINCT id_habilitation) into hab_possedees
+    select COUNT(DISTINCT idHabilitation) into habPossedees
     FROM PARTICIPER NATURAL JOIN HABILITER
-    WHERE id_campagne = NEW.id_campagne
+    WHERE idCampagne = NEW.idCampagne
     and idHabilitation in 
-    
     (
-        select distinct id_habilitation
+        select distinct idHabilitation
         FROM UTILISER NATURAL JOIN NECESSITER
-        WHERE id_plateforme = NEW.id_plateforme
+        WHERE idPlateforme = NEW.idPlateforme
     );
 
-    IF hab_possedees < hab_requises THEN
+    IF habPossedees < habRequises THEN
         SIGNAL SQLSTATE '45000'
         set MESSAGE_TEXT = 'Erreur : Léquipe ne possède pas toutes les habilitations requises';
     end if;
@@ -383,22 +381,22 @@ CREATE OR REPLACE TRIGGER verif_budget_mensuel
 BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
-    DECLARE date_debut_camp_insert DATE;
-    DECLARE cout_total DECIMAL(10,2);
-    DECLARE budget_mensuel_restant DECIMAL(10,2);
+    DECLARE dateDebutCampInsert DATE;
+    DECLARE coutTotal DECIMAL(10,2);
+    DECLARE budgetMensuelRestant DECIMAL(10,2);
     DECLARE depassement DECIMAL(10,2);
     DECLARE res varchar(500) default '';
     
-    SET cout_total = calcul_cout_total_campagne_non_planifie(new.id_campagne, new.id_plateforme);
+    SET coutTotal = calcul_cout_total_campagne_non_planifie(new.idCampagne, new.idPlateforme);
 
-    SELECT date_debut INTO date_debut_camp_insert
+    SELECT dateDebut INTO dateDebutCampInsert
     FROM CAMPAGNE 
-    WHERE id_campagne = new.id_campagne;
+    WHERE idCampagne = new.idCampagne;
 
-    SET budget_mensuel_restant = calcul_budget_mensuel_restant(MONTH(date_debut_camp_insert), YEAR(date_debut_camp_insert));
+    SET budgetMensuelRestant = calcul_budget_mensuel_restant(MONTH(dateDebutCampInsert), YEAR(dateDebutCampInsert));
 
-    IF budget_mensuel_restant - cout_total < 0 THEN
-        SET depassement = cout_total - budget_mensuel_restant;
+    IF budgetMensuelRestant - coutTotal < 0 THEN
+        SET depassement = coutTotal - budgetMensuelRestant;
         SET res = CONCAT(res, 'Erreur : Le budget de la campagne dépasse le budget mensuel restant de : ', depassement, ' euros');
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = res;
