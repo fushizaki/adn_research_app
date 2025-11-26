@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block main %}
+<div
+    class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center drop-shadow-button">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md border-green-button border ">
+        <h2 class="text-2xl font-bold mb-4 text-center text-white">Choix du budget mensuel</h2>
+        <p class="text-white text-center mb-4">🛈 Le budget mensuel limite le nombre de campagnes possibles</p>
+        <form method="POST" action="{{ url_for('set_budget') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                <label for="date" class="block text-green-text font-medium mb-2">Date *</label>
+                {{ form.date(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3
+                text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu")
+                }}
+            </div>
+            <div class="mb-6">
+                <label for="budget_mensuel" class="block text-green-text font-medium mb-2">Montant du budget *</label>
+                {{ form.budget_mensuel(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
+                focus:ring-green-button-menu") }}
+            </div>
+            <div class="flex justify-center">
+                <button type="submit"
+                    class="w-full bg-green-button-menu text-white font-medium py-2 px-4 rounded-md hover:bg-green-button-menu-hover transition-colors duration-300">
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
