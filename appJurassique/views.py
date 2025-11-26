@@ -1,9 +1,9 @@
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, jsonify
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import LoginForm, RegisterForm, BudgetForm
-from appJurassique.models import PERSONNE, role_labo_enum
+from appJurassique.forms import LoginForm, RegisterForm, BudgetForm, ADNForm
+from appJurassique.models import PERSONNE, role_labo_enum, ECHANTILLON
 
 
 @app.route('/')
@@ -100,6 +100,8 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
-if __name__ == "__main__":
-    app.run()
+@app.route('/traitements_adn/', methods=['GET', 'POST'])
+def traitements_adn():
+    return render_template('traitements_adn.html',
+                           title='Traitements ADN',
+                           current_page='traitements_adn')    

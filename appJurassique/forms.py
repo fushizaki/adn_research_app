@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField
-from wtforms.validators import DataRequired, EqualTo
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, FloatField, IntegerField, SelectMultipleField
+from wtforms.validators import DataRequired, EqualTo, NumberRange
+from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL, ECHANTILLON
 from hashlib import sha256
 
 
@@ -67,3 +67,21 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+
+class ADNForm(FlaskForm):
+    echantillons = SelectMultipleField(
+        'Sélectionner des échantillons',
+        coerce=int,
+        validators=[DataRequired()]
+    )
+    traitement = SelectField(
+        'Type de traitement',
+        choices=[
+            ('mutations_remplacements', 'Mutations par remplacements'),
+            ('mutations_insertion', 'Mutations par insertion'),
+            ('mutations_deletion', 'Mutations par délétion'),
+            ('distance_levenshtein', 'Distance de Levenshtein'),
+            ('estimation_distance_mutation', 'Estimation distance mutation'),
+        ],
+        validators=[DataRequired()]
+    )
