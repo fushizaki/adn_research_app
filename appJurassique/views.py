@@ -125,6 +125,17 @@ def ajouter_personnel():
     # TODO
     return "Ajouter un personnel - Fonctionnalité à implémenter"
 
+
+@app.route("campagnes/")
+@login_required
+def liste_campagnes():
+    campagnes = CAMPAGNE.query.all()
+    return render_template("liste_campagnes.html",
+                           title="Liste des campagnes",
+                           current_page="campagnes",
+                           campagnes=campagnes)
+
+
 @app.route("/login/", methods=(
     "GET",
     "POST",
