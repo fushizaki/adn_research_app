@@ -38,6 +38,31 @@ def set_budget():
                            form=unForm)
 
 
+@app.route("/personnels/")
+@login_required
+def liste_personnels():
+    personnels = PERSONNE.query.all()
+    return render_template("liste_personnels.html",
+                           title="Liste des personnels",
+                           current_page="personnels",
+                           personnels=personnels)
+
+
+@app.route("/personnels/<string:username>/supprimer/")
+@login_required
+def supprimer_personnel(username):
+    personnel = PERSONNE.query.filter_by(username=username).first()
+    if personnel:
+        db.session.delete(personnel)
+        db.session.commit()
+    return redirect(url_for('liste_personnels'))
+
+@app.route("/personnels/ajouter/")
+@login_required
+def ajouter_personnel():
+    # TODO
+    return "Ajouter un personnel - Fonctionnalité à implémenter"
+
 @app.route("/login/", methods=(
     "GET",
     "POST",
