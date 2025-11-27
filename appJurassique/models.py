@@ -164,8 +164,8 @@ class SEJOURNER(db.Model):
 class ECHANTILLON(db.Model):
     __tablename__ = 'ECHANTILLON'
     idEchantillon = db.Column(db.Integer, primary_key=True)
-    seqNucleotides = db.Column(db.String(1000), nullable=False)
-    commentairesEnchatillion = db.Column(db.String(500))
+    fichierAdn = db.Column(db.String(100))
+    commentairesEchantillion = db.Column(db.String(500))
     appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
     rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
 

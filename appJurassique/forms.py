@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField
+from wtforms import (StringField, HiddenField, PasswordField, SelectField,
+                     DateField, MultipleFileField, SubmitField)
 from wtforms.validators import DataRequired, EqualTo
 from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
 from hashlib import sha256
@@ -67,3 +68,9 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+
+
+class AssociateFilesForm(FlaskForm):
+    file = MultipleFileField("Fichiers d'échantillon",
+                             validators=[DataRequired()])
+    submit = SubmitField('Associer les fichiers')
