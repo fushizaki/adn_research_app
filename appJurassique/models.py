@@ -9,7 +9,7 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
+    plateforme = db.relationship('UTILISER', back_populates='materiel')
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
 
     def __repr__(self):
@@ -23,8 +23,7 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    materiel = db.relationship('UTILISER', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
 
@@ -229,6 +228,8 @@ class UTILISER(db.Model):
     idPlateforme = db.Column(db.Integer,
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
+    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
 
     def __repr__(self):
         return f"<UTILISER Plateforme {self.idPlateforme} in Campagne {self.idCampagne}>"

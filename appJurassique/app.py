@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager 
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,6 +9,8 @@ load_dotenv()
 app = Flask(__name__)
 
 app.config.from_object('config')
+
+login_manager = LoginManager(app)
 
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
