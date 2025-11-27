@@ -92,7 +92,7 @@ class PERSONNE(UserMixin, db.Model):
     @login_manager.user_loader
     def load_user(username):
         return PERSONNE.query.get(username)
-    #a rajouter des liaisons
+    
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
 
@@ -108,8 +108,6 @@ class CAMPAGNE(db.Model):
     planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
     sejourner = db.relationship('SEJOURNER', back_populates='campagne', cascade='all, delete-orphan')
     rapporter = db.relationship('RAPPORTER', back_populates='campagne', cascade='all, delete-orphan')
-
-    #pareil
 
     def __repr__(self):
         return f"<CAMPAGNE ({self.idCampagne}) {self.dateDebut}>"
@@ -145,7 +143,6 @@ class PLANIFIER(db.Model):
         return f"<PLANIFIER Plateforme {self.idPlateforme} for Campagne {self.idCampagne}>"
 
 
-# Entree campagne et lieu
 class SEJOURNER(db.Model):
     __tablename__ = 'SEJOURNER'
     idCampagne = db.Column(db.Integer,
@@ -237,9 +234,12 @@ class UTILISER(db.Model):
     idPlateforme = db.Column(db.Integer,
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
+    quantite = db.Column(db.Integer)
+    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
 
     def __repr__(self):
-        return f"<UTILISER Plateforme {self.idPlateforme} in Campagne {self.idCampagne}>"
+        return f"<UTILISER Materiel {self.idMateriel} sur Plateforme {self.idPlateforme}>"
 
 
 class NECESSITER(db.Model):
@@ -250,6 +250,8 @@ class NECESSITER(db.Model):
     idMateriel = db.Column(db.Integer,
                            db.ForeignKey('MATERIEL.idMateriel'),
                            primary_key=True)
+    materiel = db.relationship('MATERIEL', back_populates='habilitations')
+    habilitation = db.relationship('HABILITATION', back_populates='materiel')
 
     def __repr__(self):
         return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
