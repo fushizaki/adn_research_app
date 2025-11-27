@@ -11,6 +11,8 @@ class MATERIEL(db.Model):
     description = db.Column(db.String(500))
     plateforme = db.relationship('PLATEFORME', back_populates='materiel')
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
+    utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
@@ -27,6 +29,7 @@ class PLATEFORME(db.Model):
     materiel = db.relationship('MATERIEL', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
+    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
 
     #manque des trucs jsp
 
@@ -42,6 +45,7 @@ class HABILITATION(db.Model):
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='habilitations')
     habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='habilitation', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -235,8 +239,8 @@ class UTILISER(db.Model):
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
     quantite = db.Column(db.Integer)
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
+    materiel = db.relationship('MATERIEL', back_populates='utilisations')
+    plateforme = db.relationship('PLATEFORME', back_populates='utilisations')
 
     def __repr__(self):
         return f"<UTILISER Materiel {self.idMateriel} sur Plateforme {self.idPlateforme}>"
@@ -250,8 +254,8 @@ class NECESSITER(db.Model):
     idMateriel = db.Column(db.Integer,
                            db.ForeignKey('MATERIEL.idMateriel'),
                            primary_key=True)
-    materiel = db.relationship('MATERIEL', back_populates='habilitations')
-    habilitation = db.relationship('HABILITATION', back_populates='materiel')
+    materiel = db.relationship('MATERIEL', back_populates='necessites')
+    habilitation = db.relationship('HABILITATION', back_populates='necessites')
 
     def __repr__(self):
         return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
