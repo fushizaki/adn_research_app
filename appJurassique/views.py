@@ -28,8 +28,6 @@ def add_plateforme():
             db.session.add(nouvelle_plateforme)
             db.session.commit()
 
-            # TODO: associer les habilitations sélectionnées au modèle lorsque la structure sera disponible
-
             return redirect(url_for('index'))
 
     if request.method == 'POST':
