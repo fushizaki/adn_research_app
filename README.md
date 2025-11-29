@@ -24,8 +24,11 @@ soon...
 ### .env
 
 Create a .env file and add
-```bash
 
+```bash
+DB_USER = "ur username"
+DB_PASSWORD = "ur password"
+DB_NAME = "ur database name" ( ex: jurassique_db )
 ```
 
 ### Structure du projet
@@ -52,7 +55,7 @@ SAE_Dev_Web/
     └── requirements.txt                 # Dépendances Python
 ```
 
-### Lancement de l'application
+### Lancement de l'application Gestion ADN
 
 ####
 
@@ -62,6 +65,7 @@ python app.py
 ```
 
 Cette application vous permet de :
+
 - Générer des séquences ADN aléatoires
 - Simuler des mutations (remplacements, insertions, délétions)
 - Calculer les distances entre séquences
