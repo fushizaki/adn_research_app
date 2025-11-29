@@ -14,6 +14,7 @@ module.exports = {
         'green-button-menu': 'rgba(36, 98, 20, 1)',
         'green-button-menu-hover': 'rgba(36, 98, 20, 0.8)',
         'gray-textfield': 'rgba(88, 88, 88, 1)',
+        'gray-textfield-dark': 'rgba(120, 120, 120, 1)',
         'green-ext-radial': 'rgba(0, 179, 54 ,1)',
         'green-center-radial': 'rgba(0, 91, 27, 1)',
       },

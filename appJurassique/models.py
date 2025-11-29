@@ -9,11 +9,10 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
     utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
     necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
-
+    
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
 
@@ -25,8 +24,6 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
     utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')

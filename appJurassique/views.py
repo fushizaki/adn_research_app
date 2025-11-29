@@ -3,9 +3,9 @@ from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm)
+                                 AssociateFilesForm, Form_materiel)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER)
+                                  ECHANTILLON, RAPPORTER, MATERIEL, UTILISER)
 from pathlib import Path
 
 
@@ -188,3 +188,35 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route("/add_materiel/", methods=("GET", "POST"))
+def add_materiel():
+    
+    materiel_utilise = db.session.query(MATERIEL).join(UTILISER)
+    mat_dispo = db.session.query(MATERIEL).except_(materiel_utilise).all()
+    
+    form_mat = Form_materiel()
+
+    if form_mat.validate_on_submit():
+        nouveau_mat = MATERIEL(
+            nom=form_mat.nom_materiel.data,
+            description=form_mat.description_mat.data,
+        )
+
+        for item in form_mat.habilitations.data:
+            print(item)
+
+        # TODO: parcourir les habilitations et les ajouter à la l'association NECESSITE
+        # TODO: parcourir les habilitations et les ajouter à la l'association UTILISER
+
+        db.session.add(nouveau_mat)
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        return render_template(
+            "add_materiel.html",
+            form_materiel=form_mat,
+            message="Veuillez corriger les erreurs indiquées ci-dessous.",
+            message_type='error')
+
+    return render_template("add_materiel.html", form_materiel=form_mat, materiel_dispo= mat_dispo)
