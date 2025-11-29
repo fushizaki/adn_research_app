@@ -1,5 +1,6 @@
 from flask import render_template, request, url_for, redirect, jsonify
 from .app import app, db
+import algo
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import LoginForm, RegisterForm, BudgetForm, ADNForm
@@ -11,11 +12,9 @@ from appJurassique.models import PERSONNE, role_labo_enum, ECHANTILLON
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
-
 @app.route('/dashboard/set_budget/', methods=(
     'GET',
-    'POST',
-))
+    'POST',))
 @login_required
 def set_budget():
     unForm = BudgetForm()
@@ -36,7 +35,6 @@ def set_budget():
                            title='Définir le budget',
                            current_page='dashboard',
                            form=unForm)
-
 
 @app.route("/login/", methods=(
     "GET",
@@ -94,7 +92,6 @@ def register():
 
     return render_template("register.html", form=form)
 
-
 @app.route("/logout/")
 def logout():
     logout_user()
@@ -102,6 +99,19 @@ def logout():
 
 @app.route('/traitements_adn/', methods=['GET', 'POST'])
 def traitements_adn():
+    echantillons =  ECHANTILLON.query.all()
+
     return render_template('traitements_adn.html',
                            title='Traitements ADN',
-                           current_page='traitements_adn')    
+                           current_page='traitements_adn',
+                           echantillons=echantillons)    
+
+
+@app.route('/gerer_adn/', methods=['GET', 'POST'])
+def gerer_adn():
+    echantillons =  ECHANTILLON.query.all()
+    
+    return render_template('gerer_adn.html',
+                           title='Gérer les fichiers ADN',
+                           current_page='gerer_adn',
+                           echantillons=echantillons)    

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block main %}
+
+<div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center drop-shadow-button">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md border-green-button border ">
+        <form method="POST">
+            <div class="flex gap-3 mb-8">
+                <div class="bg-green-500 rounded-lg p-2">
+                    <div class="bg-green-500 rounded-lg p-2 h-8 w-8 flex items-center justify-center">
+                        <p class="text-3xl font-bold">+</p>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h1 >Gérer les fichiers ADN</h1>
+                    <p class="text-green-400 text-sm">Sélectionnez les fichiers ADN/p>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label>Fichiers ADN disponibles</label>
+                <div class="bg-gray-800 rounded-lg p-4 border border-green-400 max-h-48 overflow-y-auto">
+                    {% for echantillon in echantillons %}
+                        <label class="flex items-center text-green-400 mb-2 cursor-pointer hover:text-green-300">
+                            <input type="checkbox" name="adn_files" value="{{ echantillon.nom_fichier }}" >
+                            <span>{{ echantillon.nom_fichier }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" >
+                </button>
+                <a href="{{ url_for('traitements_adn') }}" ">
+                    Accéder aux traitements spécialisés
+                </a>
+            </div>
+        </form>
+
+        {% if arbre_phylogenetique %}
+        <div >
+            <h2 >Arbre ...</h2>
+            <div>
+                <div id="arbre-container" >
+                    {{ render_espece(arbre_phylogenetique, 0) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
