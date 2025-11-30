@@ -5,8 +5,9 @@ from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
                                  AssociateFilesForm, Form_materiel)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER, MATERIEL, UTILISER)
+                                  ECHANTILLON, RAPPORTER, MATERIEL, UTILISER, PLATEFORME, NECESSITER)
 from pathlib import Path
+from .utils import update_qte
 
 
 @app.route('/')
@@ -188,35 +189,69 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route("/add_materiel/", methods=("GET", "POST"))
-def add_materiel():
+@app.route("/add_materiel/<idPlateforme>/", methods=("GET", "POST"))
+def add_materiel(idPlateforme):
     
-    materiel_utilise = db.session.query(MATERIEL).join(UTILISER)
-    mat_dispo = db.session.query(MATERIEL).except_(materiel_utilise).all()
+    mat_dispo = db.session.query(MATERIEL).filter(MATERIEL.quantite > 0)
+    
+    la_plateforme = PLATEFORME.query.get(idPlateforme)
     
     form_mat = Form_materiel()
+    
+    if request.form.get("mat_id"):
+            print("here")
+            id_mat = request.form.get("mat_id", type=int)
+            quantite_add = request.form.get("mat_qte", type=int)
+            if quantite_add and id_mat and quantite_add > 0:
+                update_qte(quantite_add, id_mat, la_plateforme.idPlateforme, retirer=True)
+                db.session.commit()
+                return redirect(url_for('add_materiel', idPlateforme=la_plateforme.idPlateforme))
 
-    if form_mat.validate_on_submit():
+    elif form_mat.validate_on_submit():
         nouveau_mat = MATERIEL(
             nom=form_mat.nom_materiel.data,
             description=form_mat.description_mat.data,
+            quantite=form_mat.quantite_mat.data
         )
-
-        for item in form_mat.habilitations.data:
-            print(item)
-
-        # TODO: parcourir les habilitations et les ajouter à la l'association NECESSITE
-        # TODO: parcourir les habilitations et les ajouter à la l'association UTILISER
-
         db.session.add(nouveau_mat)
         db.session.commit()
-        return redirect(url_for('index'))
+        
+        necessite = None
+        for item in form_mat.habilitations.data:
+            match item:
+                case "electrique":
+                    necessite = NECESSITER(idHabilitation=1, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "chimique":
+                    necessite = NECESSITER(idHabilitation=2, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "biologique":
+                    necessite = NECESSITER(idHabilitation=3, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "radiations":
+                    necessite = NECESSITER(idHabilitation=4, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                
+                
+        utilise = UTILISER(idMateriel=nouveau_mat.idMateriel, idPlateforme=idPlateforme, quantite=form_mat.quantite_mat.data)
+        db.session.add(utilise)
+        db.session.commit()
 
-    if request.method == 'POST':
+        
+        return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo)
+    if not request.form.get("mat_id") and request.method == 'POST':
         return render_template(
             "add_materiel.html",
             form_materiel=form_mat,
-            message="Veuillez corriger les erreurs indiquées ci-dessous.",
-            message_type='error')
+            message_type='error',
+            plateforme=la_plateforme,
+            materiel_dispo= mat_dispo)
 
-    return render_template("add_materiel.html", form_materiel=form_mat, materiel_dispo= mat_dispo)
+    return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo)
+    
+    
+    

@@ -118,6 +118,7 @@ CREATE TABLE
         PRIMARY KEY (idMateriel),
         idMateriel int NOT NULL AUTO_INCREMENT,
         nom varchar(100) NOT NULL,
+        quantite int NOT NULL,
         description varchar(500)
     );
 

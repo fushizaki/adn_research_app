@@ -6,7 +6,7 @@
 <div
     class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center">
 
-    <div class="rounded-4xl bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full max-w-3xl mx-4 ">
+    <div class="rounded-4xl bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full mx-4 ">
         <div class="flex gap-3 mb-4">
             <div class="bg-green-500 rounded-lg p-2">
                 <div class="bg-green-500 rounded-lg p-2 h-8 w-8 flex items-center justify-center">
@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-white">Ajouter du materiel à la plateforme : NomPlat</h1>
+                <h1 class="text-2xl font-bold text-white">Ajouter du materiel à la plateforme : {{ plateforme.nom }}</h1>
                 <p class="text-green-400 text-sm">place holder</p>
             </div>
             <a href="{{ url_for('index') }}" class="ml-auto text-gray-400 hover:text-white text-2xl">
@@ -23,117 +23,116 @@
         </div>
 
         <hr class="border-t border-green-500 my-6">
-        <form role="form" method="POST" action="{{ url_for ('add_materiel') }}">
-            <!--if current_user.is_authenticated
-                endif -->
-            {{ form_materiel.hidden_tag() }}
-            <div>
-                <div class="">
+        <div class="flex">
+            <form role="form" method="POST" action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
+                <!--if current_user.is_authenticated
+                    endif -->
+                {{ form_materiel.hidden_tag() }}
+                <div class="max-w-3xl">
+                    <div class="">
 
-                    <div class="mb-8">
-                        <div class="flex items-center gap-2 mb-6">
-                            <i class="fas fa-info-circle text-green-text text-xl"></i>
-                            <h2 class="text-xl font-bold text-white">Informations du materiel</h2>
-                        </div>
-                        <div class="flex">
+                        <div class="mb-8">
+                            <div class="flex items-center gap-2 mb-6">
+                                <i class="fas fa-info-circle text-green-text text-xl"></i>
+                                <h2 class="text-xl font-bold text-white">Informations du materiel</h2>
+                            </div>
+                            <div class="flex">
+                                <div>
+                                    <label class="block text-green-text text-sm font-semibold mb-2" for="nom_materiel">Nom
+                                        du materiel</label>
+                                    {{ form_materiel.nom_materiel(class_="text-white rounded-lg border
+                                    border-transparent
+                                    bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu
+                                    focus:outline-none
+                                    focus:ring-2 focus:ring-green-button-menu"
+                                    ) }}
+                                </div>
+
+                                <div>
+                                    <label class="block text-green-text text-sm font-semibold mb-2"
+                                        for="quantite_mat">Quantité disponible</label>
+                                    {{ form_materiel.quantite_mat(class_="text-white rounded-lg border
+                                    border-transparent bg-gray-textfield px-4 py-3 text-gray-900
+                                    focus:border-green-button-menu
+                                    focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
+                                </div>
+                            </div>
                             <div>
-                                <label class="block text-green-text text-sm font-semibold mb-2" for="nom_materiel">Nom
-                                    du materiel</label>
-                                {{ form_materiel.nom_materiel(class_="text-white rounded-lg border
+                                <label class="block text-green-text text-sm font-semibold mb-2"
+                                    for="description_mat">Description du materiel (non requise)</label>
+                                {{ form_materiel.description_mat(class_="text-white rounded-lg border
                                 border-transparent
                                 bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu
                                 focus:outline-none
-                                focus:ring-2 focus:ring-green-button-menu"
-                                ) }}
-                                {% if form_materiel.nom_materiel.errors %}
-                                <p class="mt-2 text-sm text-red-400">
-                                    {% for error in form_materiel.nom_materiel.errors %}
-                                    <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ error }}
-                                    {% endfor %}
-                                </p>
-                                {% endif %}
-                            </div>
+                                focus:ring-2 focus:ring-green-button-menu") }}
 
-                            <div>
-                                <label class="block text-green-text text-sm font-semibold mb-2"
-                                    for="quantite_mat">Quantité disponible</label>
-                                {{ form_materiel.quantite_mat(class_="text-white rounded-lg border
-                                border-transparent bg-gray-textfield px-4 py-3 text-gray-900
-                                focus:border-green-button-menu
-                                focus:outline-none focus:ring-2 focus:ring-green-button-menu") }}
-                                {% if form_materiel.quantite_mat.errors %}
-                                <p class="mt-2 text-sm text-red-400">
-                                    {% for error in form_materiel.quantite_mat.errors %}
-                                    <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ error }}
-                                    {% endfor %}
-                                </p>
-                                {% endif %}
+
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-green-text text-sm font-semibold mb-2"
-                                for="description_mat">Description du materiel (non requise)</label>
-                            {{ form_materiel.description_mat(class_="text-white rounded-lg border
-                            border-transparent
-                            bg-gray-textfield px-4 py-3 text-gray-900 focus:border-green-button-menu
-                            focus:outline-none
-                            focus:ring-2 focus:ring-green-button-menu") }}
-                            {% if form_materiel.description_mat.errors %}
-                            <p class="mt-2 text-sm text-red-400">
-                                {% for error in form_materiel.description_mat.errors %}
-                                <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ error }}
+                        <div class="p-4">
+                            <h2 class="block text-green-text text-sm font-semibold mb-2"> <i
+                                    class="fa-solid fa-shield text-green-text"></i> Habilitations
+                                requises (en séléctionner au moins une)</h2>
+                            {% if form_materiel.habilitations.errors %}
+                            <div
+                                class="mb-2 rounded-md bg-red-500/20 p-2 text-center text-sm text-red-400 border border-red-500">
+                                {% for error in form_materiel.habilitations.errors %}
+                                <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ error }}
                                 {% endfor %}
-                            </p>
-                            {% endif %}
-
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h2 class="block text-green-text text-sm font-semibold mb-2"> <i
-                                class="fa-solid fa-shield text-green-text"></i> Habilitations
-                            requises (en séléctionner au moins une)</h2>
-                        {% if form_materiel.habilitations.errors %}
-                        <div
-                            class="mb-2 rounded-md bg-red-500/20 p-2 text-center text-sm text-red-400 border border-red-500">
-                            {% for error in form_materiel.habilitations.errors %}
-                            <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ error }}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        <div class="grid grid-cols-2 gap-4 p-2">
-
-                            {% for subfield in form_materiel.habilitations %}
-                            <div>
-                                {{ subfield(class_="peer hidden") }}
-
-                                <label for="{{ subfield.id }}"
-                                    class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-gray-textfield-dark peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-button">
-                                    {{ subfield.label.text }}
-                                </label>
                             </div>
-                            {% endfor %}
+                            {% endif %}
+                            <div class="grid grid-cols-2 gap-4 p-2">
 
-                        </div>
-                        <div>
-                            <select name="pets" id="pet-select">
-                                <option value="">--Please choose an option--</option>
-                                {% for materiel in materiel_dispo %}
-                                    <option value="{{ materiel.idMateriel }}">{{ materiel.nom }}</option>
-                                {% endfor %}   
-                            </select>
+                                {% for subfield in form_materiel.habilitations %}
+                                <div>
+                                    {{ subfield(class_="peer hidden") }}
 
+                                    <label for="{{ subfield.id }}"
+                                        class="block w-full cursor-pointer select-none rounded-md bg-gray-textfield py-2 px-4 text-center font-medium text-white transition-colors duration-300 hover:bg-gray-button-hover peer-checked:bg-gray-textfield-dark peer-checked:text-black peer-checked:ring-2 peer-checked:ring-green-button">
+                                        {{ subfield.label.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                            <div class="">
+                                <button type="submit"
+                                    class="w-full bg-gray-textfield text-white font-medium py-2 px-4 rounded-md hover:bg-gray-button-hover transition-colors duration-300">
+                                    <p class="text-white"><i class="fa-solid fa-plus"></i>Ajouter et créer</p>
+                                </button>
+                            </div>
                         </div>
-                        <div class="">
-                            <button type="submit"
-                                class="w-full bg-gray-textfield text-white font-medium py-2 px-4 rounded-md hover:bg-gray-button-hover transition-colors duration-300">
-                                <p class="text-white"><i class="fa-solid fa-plus"></i>Ajouter</p>
-                            </button>
-                        </div>
+
                     </div>
-
-                </div>
-
-        </form>
+            </form>
+        </div>  
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-white">Nom</th>
+                        <th class="text-white">Quantité disponible</th>
+                        <th class="text-white">Quantité à ajouter</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for materiel in materiel_dispo %}
+                        <tr>
+                            <td class="text-white">{{ materiel.nom }}</td>
+                            <td class="text-white">{{ materiel.quantite }}</td>
+                            <td class="text-white">
+                                <form class="ajout_mat_form" method="POST" action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
+                                    {{ form_materiel.hidden_tag() }}
+                                    <input type="hidden" name="mat_id" value="{{ materiel.idMateriel }}">
+                                    <input type="number" min="1" name="mat_qte" class="qte-input text-black rounded px-2 py-1 w-24" required>
+                                    <button type="submit" class="btn-submit bg-green-600 text-white px-3 py-1 rounded">Ajouter</button>
+                                </form>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>  
     </div>
 
 </div>

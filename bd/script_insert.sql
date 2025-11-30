@@ -345,61 +345,81 @@ VALUES
 
 
 INSERT into
-    MATERIEL (nom, description)
+    MATERIEL (nom, description, quantite)
 VALUES
     (
         'Microscope électronique',
-        'Microscope haute résolution pour analyse cellulaire'
+        'Microscope haute résolution pour analyse cellulaire',
+        15
     ),
     (
         'Centrifugeuse',
-        'Équipement de séparation par force centrifuge'
+        'Équipement de séparation par force centrifuge',
+        16
     ),
     (
         'Séquenceur ADN',
-        'Appareil de séquençage génétique automatisé'
+        'Appareil de séquençage génétique automatisé',
+        17
     ),
     (
         'Spectromètre de masse',
-        'Analyse de composition moléculaire'
+        'Analyse de composition moléculaire',
+        18
     ),
     (
         'PCR Thermocycleur',
-        'Amplification de séquences d''ADN'
+        'Amplification de séquences d''ADN',
+        19
     ),
     (
         'Électrophorèse',
-        'Séparation de molécules par migration électrique'
+        'Séparation de molécules par migration électrique',
+        20
     ),
     (
         'Autoclave',
-        'Stérilisation haute pression et température'
+        'Stérilisation haute pression et température',
+        21
     ),
     (
         'Hotte chimique',
-        'Protection contre les vapeurs toxiques'
+        'Protection contre les vapeurs toxiques',
+        22
     ),
     (
         'Balance analytique',
-        'Pesée de précision micrométrique'
+        'Pesée de précision micrométrique',
+        23
     ),
-    ('pH-mètre', 'Mesure du pH des solutions'),
-    ('Incubateur', 'Contrôle température et humidité'),
+    (   'pH-mètre', 
+        'Mesure du pH des solutions',
+        24
+    ),
+    (
+        'Incubateur', 
+        'Contrôle température et humidité',
+        25
+    ),
     (
         'Agitateur magnétique',
-        'Mélange homogène des solutions'
+        'Mélange homogène des solutions',
+        26
     ),
     (
         'Pipette automatique',
-        'Prélèvement précis de volumes'
+        'Prélèvement précis de volumes',
+        27
     ),
     (
         'Congélateur -80°C',
-        'Conservation échantillons biologiques'
+        'Conservation échantillons biologiques',
+        28
     ),
     (
         'Chromatographe',
-        'Séparation et analyse de composés'
+        'Séparation et analyse de composés',
+        29
     );
 
 INSERT into

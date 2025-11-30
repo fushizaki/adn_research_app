@@ -81,6 +81,7 @@ class MultiCheckboxField(SelectMultipleField):
     
 class Form_materiel(FlaskForm):
     idMateriel = HiddenField()
+    idPlateforme = HiddenField()
     nom_materiel = StringField('nom_materiel', validators=[DataRequired()])
     description_mat = StringField('description_mat')
     quantite_mat = IntegerField('quantite_mat', validators=[DataRequired()])                     
