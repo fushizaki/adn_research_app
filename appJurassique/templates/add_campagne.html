@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% block main %}
 
-    <div class="h-full w-full flex items-center justify-center min-h-screen" style="background: radial-gradient(circle at center, rgba(0, 179, 54, 1) 0%, rgba(0, 91, 27, 1) 20%, rgba(0, 0, 0, 1) 50%);">
-        <div class="rounded-4xl bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full max-w-3xl mx-4">                
+    <div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center min-h-screen drop-shadow-button">
+        <div class="rounded-[40px] bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full max-w-3xl mx-4">                
             <form method="POST" action="{{ url_for('creer_nouvelle_campagne') }}">
                 {{ form.hidden_tag() }}
                 <div class="flex gap-3 mb-8">
-                    <div class="bg-green-500 rounded-lg p-2">
-                        <div class="bg-green-500 rounded-lg p-2 h-8 w-8 flex items-center justify-center">
+                    <div class="bg-green-button rounded-lg p-2">
+                        <div class=" rounded-lg p-2 h-8 w-8 flex items-center justify-center">
                             <p class="text-3xl font-bold">+</p>
                         </div>
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-white">Ajouter une campagne</h1>
-                        <p class="text-green-400 text-sm">Créer une nouvelle campagne de fouille</p>
+                        <p class="text-green-button text-sm">Créer une nouvelle campagne de fouille</p>
                     </div>
                     <a href="{{ url_for('index') }}" class="ml-auto text-gray-400 hover:text-white text-2xl">
                         <i class="fas fa-times"></i>
@@ -32,34 +32,34 @@
 
                 <div class="mb-8">
                     <div class="flex items-center gap-2 mb-6">
-                        <i class="fas fa-info-circle text-green-400 text-xl"></i>
+                        <i class="fas fa-info-circle text-green-button text-xl"></i>
                         <h2 class="text-xl font-bold text-white">Informations</h2>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <p class="block text-green-400 text-sm font-semibold mb-2">Titre</p>
+                            <p class="block text-green-button text-sm font-semibold mb-2">Titre</p>
                             <input type="text" name="titre" placeholder="Campagne Dinosaurus AX1" 
                                 class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600" 
                                 value="{{ form.titre.data or '' }}">
                         </div>
                         
                         <div>
-                            <p class="block text-green-400 text-sm font-semibold mb-2">Date de début *</p>
+                            <p class="block text-green-button text-sm font-semibold mb-2">Date de début *</p>
                             <input type="date" name="dateDebut" required
                                 class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600" 
                                 value="{{ form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '' }}">
                         </div>
                         
                         <div>
-                            <p class="block text-green-400 text-sm font-semibold mb-2">Durée en heures *</p>
+                            <p class="block text-green-button text-sm font-semibold mb-2">Durée en heures *</p>
                             <input type="number" name="duree" placeholder="72" required min="1"
                                 class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600"
                                 value="{{ form.duree.data or '' }}">
                         </div>
                         
                         <div>
-                            <p class="block text-green-400 text-sm font-semibold mb-2">Lieu de fouille *</p>
+                            <p class="block text-green-button text-sm font-semibold mb-2">Lieu de fouille *</p>
                             <select name="idLieu" required class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600">
                                 <option value="">Sélectionner un lieu</option>
                                 {% for lieu in lieux %}
@@ -73,7 +73,7 @@
                         <div class="col-span-2">
                             <div class="flex items-center gap-3">
                                 <div class="flex-1">
-                                    <p class="block text-green-400 text-sm font-semibold mb-2">Plateforme *</p>
+                                    <p class="block text-green-button text-sm font-semibold mb-2">Plateforme *</p>
                                     <select name="idPlateforme" id="plateforme-select" required 
                                             class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600">
                                         <option value="">Sélectionner une plateforme</option>
@@ -107,7 +107,7 @@
             <div class="mb-8">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-users text-green-400 text-xl"></i>
+                            <i class="fas fa-users text-green-button text-xl"></i>
                             <h2 class="text-xl font-bold text-white">Membres de la campagne</h2>
                         </div>
                     </div>
@@ -143,7 +143,7 @@
                                             <i class="fas fa-exclamation-triangle"></i> Habilitations manquantes
                                         </div>
                                         {% else %}
-                                        <div class="text-green-400 text-xs">
+                                        <div class="text-green-button text-xs">
                                             <i class="fas fa-check-circle"></i> Habilité
                                         </div>
                                         {% endif %}
@@ -165,7 +165,7 @@
                 <hr class="border-t border-green-500 my-6">
 
                 <div class="flex gap-4 justify-end">
-                    <a href="{{ url_for('index') }}" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded transition">
+                    <a href="{{ url_for('liste_campagnes') }}" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded transition">
                         Annuler
                     </a>
                     <button type="submit" class="bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-6 rounded transition">

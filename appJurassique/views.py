@@ -245,7 +245,7 @@ def ajouter_personnel():
     return "Ajouter un personnel - Fonctionnalité à implémenter"
 
 
-@app.route("campagnes/")
+@app.route("/campagnes/")
 @login_required
 def liste_campagnes():
     campagnes = CAMPAGNE.query.all()
