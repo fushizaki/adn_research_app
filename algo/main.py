@@ -1,10 +1,11 @@
 import random
-import math
+from pathlib import Path
+import algo.Espece as Espece
+import algo.constants as constants
 
-from Espece import Espece
-import constants as constants
+DATA_DIR = Path(__file__).resolve().parent / "data"
 
-def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
+def sauvegarder_sequence(sequence: str, nom_fichier: str, dossier: Path | str | None = None) -> None:
     """
     Sauvegarde une séquence ADN dans un fichier .adn
     
@@ -13,9 +14,11 @@ def sauvegarder_sequence(sequence: str, nom_fichier: str) -> None:
         nom_fichier (str): Le nom du fichier (sans extension)
     """
     try:
-        with open(f"./data/{nom_fichier}.adn", 'w') as fichier:
-            fichier.write(sequence)
-        print(f"Séquence sauvegardée dans {nom_fichier}.adn")
+        base_dir = Path(dossier) if dossier else DATA_DIR
+        base_dir.mkdir(parents=True, exist_ok=True)
+        chemin = base_dir / f"{nom_fichier}.adn"
+        chemin.write_text(sequence)
+        print(f"Séquence sauvegardée dans {chemin.name}")
     except OSError:
         print(f"Erreur lors de la sauvegarde du fichier : {nom_fichier}")
 
