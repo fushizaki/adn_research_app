@@ -19,7 +19,6 @@ db_name = os.getenv("DB_NAME")
 
 app.config[
     "SQLALCHEMY_DATABASE_URI"] = f"mysql://{db_user}:{db_password}@localhost/{db_name}"
-app.config['SECRET_KEY'] = 'change-this-secret-key'
 db = SQLAlchemy(app)
 
 with app.app_context():
