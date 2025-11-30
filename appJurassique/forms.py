@@ -73,7 +73,7 @@ class MaintenanceForm(FlaskForm):
     idPlateforme = SelectField(
         "Plateforme",
         choices=[],
-        coerce=int,
+        coerce=str,
         validators=[DataRequired(message="La plateforme est obligatoire.")],
     )
 
@@ -97,7 +97,7 @@ class MaintenanceForm(FlaskForm):
         return MAINTENANCE(
             dateMaintenance=self.dateDebut.data,
             duree_maintenance=self.duree.data,
-            idPlateforme=self.idPlateforme.data,
+            idPlateforme=int(self.idPlateforme.data),
             statut=statut.PLANIFIEE,
         )
 

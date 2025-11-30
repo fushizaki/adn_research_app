@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 {% block main %}
-<div
+<section
     class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center drop-shadow-button">
-    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md border-green-button border ">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md border-green-button border relative">
+        <a href="{{ url_for('index') }}" class=" top-4 right-6 text-gray-400 hover:text-white text-2xl" aria-label="Retour à l'accueil">
+            &times;
+        </a>
         <h2 class="text-2xl font-bold mb-4 text-center text-white">Prévoir une maintenance</h2>
-        <form method="POST" action="{{ url_for('maintenance') }}">
+        {% if message %}
+        <aside class="mb-6 px-4 py-3 rounded-lg text-sm {% if message_type == 'error' %}bg-red-900/40 border border-red-500 text-red-200{% else %}bg-green-900/40 border border-green-500 text-green-200{% endif %}" role="status">
+            {{ message }}
+        </aside>
+        {% endif %}
+        <form method="POST" action="{{ url_for('creer_maintenance') }}">
             {{ form.hidden_tag() }}
             <div class="mb-4">
                 <label for="date" class="block text-green-text font-medium mb-2">Plateforme *</label>
@@ -33,5 +41,5 @@
             </div>
         </form>
     </div>
-</div>
+</section>
 {% endblock %}
