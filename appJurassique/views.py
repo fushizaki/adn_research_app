@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
                                  AssociateFilesForm, CampagneForm)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER, LIEU_FOUILLE, PLATEFORME)
+                                  ECHANTILLON, RAPPORTER, LIEU_FOUILLE, PLATEFORME, MATERIEL)
 from .utils import creer_campagne, obtenir_membres_compatibles
 
 
@@ -266,6 +266,28 @@ def liste_campagnes():
                            title="Liste des campagnes",
                            current_page="campagne",
                            campagnes=campagnes)
+
+
+@app.route("/materiels/")
+@login_required
+def liste_materiels():
+    materiels = MATERIEL.query.all()
+    return render_template(
+        "liste_materiels.html",
+        title="Liste des matériels",
+        current_page="materiels",
+        materiels=materiels,
+    )
+
+
+@app.route("/materiels/<int:idMateriel>/supprimer/")
+@login_required
+def supprimer_materiel(idMateriel: int):
+    materiel = db.session.get(MATERIEL, idMateriel)
+    if materiel:
+        db.session.delete(materiel)
+        db.session.commit()
+    return redirect(url_for('liste_materiels'))
 
 
 @app.route("/login/", methods=(
