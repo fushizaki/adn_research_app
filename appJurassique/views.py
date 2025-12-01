@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
                                  AssociateFilesForm)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER)
+                                  ECHANTILLON, RAPPORTER, PLATEFORME, MATERIEL)
 from pathlib import Path
 
 
@@ -40,6 +40,7 @@ def set_budget():
                            current_page='dashboard',
                            form=unForm)
 
+
 @app.route('/campagnes/<int:idCampagne>/view/')
 @login_required
 def view_campagnes(idCampagne):
@@ -53,8 +54,9 @@ def view_campagnes(idCampagne):
                            campagne=campagne,
                            upload_form=upload_form)
 
-@app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
-    'POST',))
+
+@app.route('/campagnes/<int:idCampagne>/view/associer-fichier',
+           methods=('POST', ))
 @login_required
 def associer_fichier(idCampagne):
     campagne = db.session.get(CAMPAGNE, idCampagne)
@@ -100,6 +102,26 @@ def associer_fichier(idCampagne):
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
 
 
+@app.route("/plateformes/")
+@login_required
+def liste_plateformes():
+    plateformes = PLATEFORME.query.all()
+    return render_template("liste_plateformes.html",
+                           title="Liste des plateformes",
+                           current_page="plateformes",
+                           plateformes=plateformes)
+
+
+@app.route("/plateformes/<int:idPlateforme>/supprimer/")
+@login_required
+def supprimer_plateforme(idPlateforme):
+    plateforme = PLATEFORME.query.filter_by(idPlateforme=idPlateforme).first()
+    if plateforme:
+        db.session.delete(plateforme)
+        db.session.commit()
+    return redirect(url_for('liste_plateformes'))
+
+
 @app.route("/personnels/")
 @login_required
 def liste_personnels():
@@ -119,11 +141,13 @@ def supprimer_personnel(username):
         db.session.commit()
     return redirect(url_for('liste_personnels'))
 
+
 @app.route("/personnels/ajouter/")
 @login_required
 def ajouter_personnel():
     # TODO
     return "Ajouter un personnel - Fonctionnalité à implémenter"
+
 
 @app.route("/login/", methods=(
     "GET",
@@ -186,5 +210,3 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
-
-
