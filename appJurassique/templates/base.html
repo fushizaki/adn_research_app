@@ -69,6 +69,11 @@
                     <i class="text-2xl fas fa-user-group w-6 text-center"></i>
                     <span class="font-medium">Personnels</span>
                 </a>
+                <a href="{{ url_for('liste_lieux') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'lieux' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-map w-6 text-center"></i>
+                    <span class="font-medium">Lieux</span>
+                </a>
                 <a href="{{ url_for('set_budget') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'budget' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-sack-dollar w-6 text-center"></i>
