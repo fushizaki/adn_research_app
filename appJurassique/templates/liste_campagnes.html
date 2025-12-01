@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block main %}
+<div
+    class="min-h-screen w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center px-6 py-12 drop-shadow-button">
+    <section
+        class="w-full max-w-5xl bg-gray-div/90 border border-green-button rounded-[40px] shadow-lg backdrop-blur-sm">
+        <div class="flex flex-col gap-6 px-10 py-10">
+            <header
+                class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between border-b border-green-button/40 pb-6">
+                <div class="flex flex-col gap-2">
+                    <h2 class="text-3xl font-bold text-white font-exo">Gestion des campagnes</h2>
+                    <p class="text-green-text font-medium flex items-center gap-2">
+                        <i class="fas fa-user-group text-xs"></i>
+                        {{ campagnes|length }} campagnes enregistrés
+                    </p>
+                </div>
+                <a href="{{ url_for('add_campagne') }}"
+                    class="inline-flex items-center justify-center gap-3 rounded bg-green-button-menu px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white transition-colors duration-300 hover:bg-green-button-menu-hover">
+                    <i class="fas fa-plus text-base"></i>
+                    Ajouter une campagne
+                </a>
+            </header>
+
+            <div class="flex flex-col gap-3">
+                <label for="searchBarCampagne"
+                    class="text-sm font-semibold uppercase tracking-widest text-green-text">Rechercher</label>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-sm text-green-button"></i>
+                    <input id="searchBarCampagne" type="text" onkeyup="searchByID()" placeholder="Chercher par ID..."
+                        class="w-full rounded-full border border-green-button/30 bg-gray-div px-12 py-3 text-sm text-white placeholder:text-gray-300 focus:border-green-button focus:outline-none focus:ring-2 focus:ring-green-button/50">
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-3xl border border-green-button/40 bg-black/40 max-h-96">
+                <div class="overflow-x-auto overflow-y-auto max-h-96">
+                    <table id="tableCampagne" class="sortable min-w-full divide-y divide-white/5 font-nunito">
+                        <thead class="bg-black/30 text-left uppercase text-green-text">
+                            <tr>
+                                <th scope="col" class="unselectable px-6 py-4">ID</th>
+                                <th scope="col" class="unselectable px-6 py-4">Date début</th>
+                                <th scope="col" class="unselectable px-6 py-4">Durée</th>
+                                <th scope="col" class="unselectable px-6 py-4">Lieu</th>
+                                <th scope="col" class="unselectable px-6 py-4">Echantillons</th>
+                                <th scope="col" class="unselectable sorttable_nosort px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class=" text-sm text-white">
+                            {% for campagne in campagnes %}
+                            <tr class="transition-colors duration-200 hover:bg-white/5">
+                                <td class="px-6 py-5 font-medium">{{ campagne.idCampagne }}</td>
+                                <td class="px-6 py-5">{{ campagne.dateDebut }}</td>
+                                <td class="px-6 py-5 text-green-button font-semibold">{{ campagne.duree }}</td>
+                                <td class="px-6 py-5 text-white/70">{{ campagne.lieu }}</td>
+                                <td class="px-6 py-5">{{ campagne.rapporter|length }}</td>
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-4 text-base">
+                                        <a href="{{ url_for('supprimer_campagne', idCampagne=campagne.idCampagne) }}"
+                                            class="text-red-400 transition-colors hover:text-red-500" title="Supprimer">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                        <a href="{{url_for('view_campagnes', idCampagne=campagne.idCampagne)}}"
+                                            class="text-white transition-colors hover:text-white/80" title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="{{ url_for('static', filename='js/search-bar-function.js') }}"></script>
+<script>
+    function searchByID() {
+        searchBarFunctionCampagnes(0);
+    }
+</script>
+{% endblock %}
