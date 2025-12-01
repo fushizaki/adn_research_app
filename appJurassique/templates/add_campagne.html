@@ -39,7 +39,7 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <p class="block text-green-button text-sm font-semibold mb-2">Titre</p>
-                            <input type="text" name="titre" placeholder="Campagne Dinosaurus AX1" 
+                            <input type="text" name="titre" placeholder="ex : Campagne Dinosaurus AX1" 
                                 class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
                                 py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
                                  focus:ring-green-button-menu" 
@@ -56,8 +56,8 @@
                         </div>
                         
                         <div>
-                            <p class="block text-green-button text-sm font-semibold mb-2">Durée en heures *</p>
-                            <input type="number" name="duree" placeholder="72" required min="1"
+                            <p class="block text-green-button text-sm font-semibold mb-2">Durée en jours *</p>
+                            <input type="number" name="duree" placeholder="30" required min="1"
                                 class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
                                 py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
                                  focus:ring-green-button-menu"
@@ -145,29 +145,27 @@
                         <div class="space-y-2">
                             {% if membres_compatibles %}
                                 {% for membre, compatible in membres_compatibles %}
-                                <label class="block">
-                                    <div class="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-gray-750 transition cursor-pointer
-                                                {% if not compatible %}opacity-50{% endif %}">
-                                        <div class="flex items-center gap-3 flex-1">
-                                            <input type="checkbox" name="membres" value="{{ membre.username }}" 
-                                                class="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-                                                {% if not compatible %}disabled{% endif %}
-                                                {% if membre.username in membres_selectionnes %}checked{% endif %}>
-                                            <div class="bg-green-500 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-                                                <i class="fas fa-user text-black"></i>
+                                    {% if compatible %}
+                                    <label class="block">
+                                        <div class="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-gray-750 transition cursor-pointer">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <input type="checkbox" name="membres" value="{{ membre.username }}" 
+                                                    class="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                                                    {% if membre.username in membres_selectionnes %}checked{% endif %}>
+                                                <div class="bg-green-500 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-user text-black"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="text-white font-semibold">{{ membre.nom }} {{ membre.prenom }}</p>
+                                                    <p class="text-gray-400 text-xs">{{ membre.role_labo }}</p>
+                                                </div>
+                                                <div class="text-green-button text-xs">
+                                                    <i class="fas fa-check-circle"></i> Habilité
+                                                </div>
                                             </div>
-                                            <div class="flex-1">
-                                                <p class="text-white font-semibold">{{ membre.nom }} {{ membre.prenom }}</p>
-                                                <p class="text-gray-400 text-xs">{{ membre.role_labo }}</p>
-                                            </div>
-                                            {% if compatible %}
-                                            <div class="text-green-button text-xs">
-                                                <i class="fas fa-check-circle"></i> Habilité
-                                            </div>
-                                            {% endif %}
                                         </div>
-                                    </div>
-                                </label>
+                                    </label>
+                                    {% endif %}
                                 {% endfor %}
                             {% else %}
                                 <div class="text-gray-400 text-center py-4">

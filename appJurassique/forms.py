@@ -86,10 +86,10 @@ class CampagneForm(FlaskForm):
         validators=[DataRequired(message="La date de début est obligatoire.")],
     )
     duree = IntegerField(
-        "Durée en heures",
+        "Durée en jours",
         validators=[
             DataRequired(message="La durée est obligatoire."),
-            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
         ],
     )
     idLieu = SelectField(

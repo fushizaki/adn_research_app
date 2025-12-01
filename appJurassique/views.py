@@ -51,15 +51,12 @@ def add_campagne():
             plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
             if plateforme_selectionnee:
                 membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
-                # Mettre à jour les choix du formulaire pour les membres
                 form.membres.choices = [
                     (membre.username, f"{membre.nom} {membre.prenom}")
                     for membre, compatible in membres_compatibles
                 ]
                 if form.duree.data:
-                    duree_temp = max(1, form.duree.data // 24)
-                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_temp)
-                # Récupère les membres sélectionnés du formulaire s'ils existent
+                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, form.duree.data)
                 if form.membres.data:
                     membres_selectionnes = form.membres.data
         except ValueError:
@@ -67,7 +64,6 @@ def add_campagne():
             message_type = 'error'
 
     if request.method == 'POST':
-        # Vérifie si c'est une action "Charger les membres"
         if request.form.get('action') == 'load_members':
             return render_template(
                 'add_campagne.html',
@@ -93,7 +89,7 @@ def add_campagne():
             try:
                 titre = (form.titre.data or '').strip() or None
                 date_debut = form.dateDebut.data
-                duree_heures = form.duree.data
+                duree_jours = form.duree.data
                 id_lieu = int(form.idLieu.data)
                 id_plateforme_int = int(form.idPlateforme.data)
                 membres_usernames = form.membres.data
@@ -105,7 +101,6 @@ def add_campagne():
                     message = 'Vous devez sélectionner au moins un membre habilité'
                     message_type = 'error'
                 else:
-                    duree_jours = max(1, duree_heures // 24)
                     if not plateforme_selectionnee or plateforme_selectionnee.idPlateforme != id_plateforme_int:
                         plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
                     budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_jours)
