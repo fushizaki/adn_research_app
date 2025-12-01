@@ -59,7 +59,7 @@
                     <i class="text-2xl fas fa-calendar w-6 text-center"></i>
                     <span class="font-medium">Campagnes</span>
                 </a>
-                <a href="#"
+                <a href="{{ url_for('liste_plateformes') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'plateforme' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-suitcase w-6 text-center"></i>
                     <span class="font-medium">Plateforme</span>
