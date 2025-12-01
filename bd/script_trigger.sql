@@ -6,25 +6,24 @@ FOR EACH ROW
 BEGIN
     declare disponible int;
 
-    declare date_debut_camp_insert date;
-    declare date_fin_camp_insert date;
-    declare duree_camp_insert int;
+    declare dateDebutCampInsert date;
+    declare dateFinCampInsert date;
+    declare dureeCampInsert int;
 
-    SELECT date_debut, duree into date_debut_camp_insert, duree_camp_insert
+    SELECT dateDebut, duree into dateDebutCampInsert, dureeCampInsert
     FROM CAMPAGNE
-    WHERE id_campagne = NEW.id_campagne;
+    WHERE idCampagne = NEW.idCampagne;
 
-    -- https://www.w3schools.com/sql/func_mysql_date_add.asp
-    set date_fin_camp_insert = DATE_ADD(date_debut_camp_insert, INTERVAL duree_camp_insert DAY);
+    set dateFinCampInsert = DATE_ADD(dateDebutCampInsert, INTERVAL dureeCampInsert DAY);
     
     SELECT count(*) into disponible
     FROM PLATEFORME NATURAL JOIN PLANIFIER NATURAL JOIN CAMPAGNE
-    WHERE id_plateforme = NEW.id_plateforme and 
-            (date_debut_camp_insert >= date_debut and date_fin_camp_insert <= DATE_ADD(date_debut, INTERVAL duree DAY)) 
+    WHERE idPlateforme = NEW.idPlateforme and 
+            (dateDebutCampInsert >= dateDebut and dateFinCampInsert <= DATE_ADD(dateDebut, INTERVAL duree DAY)) 
             or
-            (date_debut_camp_insert <= date_debut and date_fin_camp_insert >= date_debut)
+            (dateDebutCampInsert <= dateDebut and dateFinCampInsert >= dateDebut)
             or
-            (date_debut_camp_insert >= date_debut and date_fin_camp_insert >= DATE_ADD(date_debut, INTERVAL duree DAY)); 
+            (dateDebutCampInsert >= dateDebut and dateFinCampInsert >= DATE_ADD(dateDebut, INTERVAL duree DAY)); 
 
     IF (disponible>0) THEN
         SIGNAL SQLSTATE '45000'
@@ -82,11 +81,11 @@ BEGIN
     DECLARE temps_avant_maintenance INT;
     DECLARE intervalle_requis INT;
     
-    SET temps_avant_maintenance = temps_restant_avant_maintenance(NEW.id_plateforme);
+    SET temps_avant_maintenance = temps_restant_avant_maintenance(NEW.idPlateforme);
     
     SELECT intervalle_maintenance into intervalle_requis
     FROM PLATEFORME 
-    WHERE id_plateforme = NEW.id_plateforme;
+    WHERE idPlateforme = NEW.idPlateforme;
     
     IF temps_avant_maintenance >= intervalle_requis THEN
         SIGNAL SQLSTATE '45000'
@@ -214,22 +213,22 @@ CREATE TRIGGER verif_personnes_libres
 BEFORE INSERT ON PARTICIPER
 FOR EACH ROW
 BEGIN
-    declare date_debutC date;
+    declare dateDebutC date;
     declare dureeC int default 0;
-    declare date_finC date;
+    declare dateFinC date;
     declare libre int default 0;
 
-    select date_debut, duree into date_debutC, dureeC
+    select dateDebut, duree into dateDebutC, dureeC
     from CAMPAGNE
-    where id_campagne = new.id_campagne;
+    where idCampagne = new.idCampagne;
 
-    set date_finC = DATE_ADD(date_debutC, INTERVAL dureeC DAY);
+    set dateFinC = DATE_ADD(dateDebutC, INTERVAL dureeC DAY);
 
     select count(*) into libre
     from CAMPAGNE natural join PARTICIPER
-    where id_personne = new.id_personne and id_campagne != new.id_campagne
-            and date_debutC < DATE_ADD(date_debut, INTERVAL duree DAY) 
-            and date_finC > date_debut;
+    where username = new.username and idCampagne != new.idCampagne
+            and dateDebutC < DATE_ADD(dateDebut, INTERVAL duree DAY) 
+            and dateFinC > dateDebut;
 
     if (libre > 0) then
         SIGNAL SQLSTATE '45000'
@@ -336,19 +335,18 @@ begin
     declare hab_requises INT;
     declare hab_possedees INT;
 
-    select COUNT(DISTINCT id_habilitation) into hab_requises
+    select COUNT(DISTINCT idHabilitation) into hab_requises
     FROM UTILISER NATURAL JOIN NECESSITER 
-    WHERE id_plateforme = NEW.id_plateforme;
+    WHERE idPlateforme = NEW.idPlateforme;
 
-    select COUNT(DISTINCT id_habilitation) into hab_possedees
+    select COUNT(DISTINCT idHabilitation) into hab_possedees
     FROM PARTICIPER NATURAL JOIN HABILITER
-    WHERE id_campagne = NEW.id_campagne
+    WHERE idCampagne = NEW.idCampagne
     and idHabilitation in 
-    
     (
-        select distinct id_habilitation
+        select distinct idHabilitation
         FROM UTILISER NATURAL JOIN NECESSITER
-        WHERE id_plateforme = NEW.id_plateforme
+        WHERE idPlateforme = NEW.idPlateforme
     );
 
     IF hab_possedees < hab_requises THEN
@@ -383,19 +381,19 @@ CREATE OR REPLACE TRIGGER verif_budget_mensuel
 BEFORE INSERT ON PLANIFIER
 FOR EACH ROW
 BEGIN
-    DECLARE date_debut_camp_insert DATE;
+    DECLARE dateDebutCampInsert DATE;
     DECLARE cout_total DECIMAL(10,2);
     DECLARE budget_mensuel_restant DECIMAL(10,2);
     DECLARE depassement DECIMAL(10,2);
     DECLARE res varchar(500) default '';
     
-    SET cout_total = calcul_cout_total_campagne_non_planifie(new.id_campagne, new.id_plateforme);
+    SET cout_total = calcul_cout_total_campagne_non_planifie(new.idCampagne, new.idPlateforme);
 
-    SELECT date_debut INTO date_debut_camp_insert
+    SELECT dateDebut INTO dateDebutCampInsert
     FROM CAMPAGNE 
-    WHERE id_campagne = new.id_campagne;
+    WHERE idCampagne = new.idCampagne;
 
-    SET budget_mensuel_restant = calcul_budget_mensuel_restant(MONTH(date_debut_camp_insert), YEAR(date_debut_camp_insert));
+    SET budget_mensuel_restant = calcul_budget_mensuel_restant(MONTH(dateDebutCampInsert), YEAR(dateDebutCampInsert));
 
     IF budget_mensuel_restant - cout_total < 0 THEN
         SET depassement = cout_total - budget_mensuel_restant;
