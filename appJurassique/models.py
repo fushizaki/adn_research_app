@@ -8,7 +8,6 @@ class MATERIEL(db.Model):
     __tablename__ = 'MATERIEL'
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
-    quantite = db.Column(db.Integer(), nullable=False)
     description = db.Column(db.String(500))
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
     utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')

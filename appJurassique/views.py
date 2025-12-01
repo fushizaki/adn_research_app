@@ -192,9 +192,13 @@ def logout():
 @app.route("/add_materiel/<idPlateforme>/", methods=("GET", "POST"))
 def add_materiel(idPlateforme):
     
-    mat_dispo = db.session.query(MATERIEL).filter(MATERIEL.quantite > 0)
+    mat_dispo = db.session.query(MATERIEL).all()
     
     la_plateforme = PLATEFORME.query.get(idPlateforme)
+    
+    mat_plat = mat_plat = db.session.query(UTILISER).filter(UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+    
+    print(mat_plat)
     
     form_mat = Form_materiel()
     
@@ -203,7 +207,7 @@ def add_materiel(idPlateforme):
             id_mat = request.form.get("mat_id", type=int)
             quantite_add = request.form.get("mat_qte", type=int)
             if quantite_add and id_mat and quantite_add > 0:
-                update_qte(quantite_add, id_mat, la_plateforme.idPlateforme, retirer=True)
+                update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
                 db.session.commit()
                 return redirect(url_for('add_materiel', idPlateforme=la_plateforme.idPlateforme))
 
@@ -211,7 +215,6 @@ def add_materiel(idPlateforme):
         nouveau_mat = MATERIEL(
             nom=form_mat.nom_materiel.data,
             description=form_mat.description_mat.data,
-            quantite=form_mat.quantite_mat.data
         )
         db.session.add(nouveau_mat)
         db.session.commit()
@@ -242,16 +245,17 @@ def add_materiel(idPlateforme):
         db.session.commit()
 
         
-        return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo)
+        return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
     if not request.form.get("mat_id") and request.method == 'POST':
         return render_template(
             "add_materiel.html",
             form_materiel=form_mat,
             message_type='error',
             plateforme=la_plateforme,
-            materiel_dispo= mat_dispo)
+            materiel_dispo= mat_dispo,
+            materiel_plateforme=mat_plat)
 
-    return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo)
+    return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
     
     
     

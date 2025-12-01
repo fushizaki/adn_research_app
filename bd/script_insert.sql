@@ -2,26 +2,26 @@
 INSERT into
     PERSONNE (username, nom, prenom, password, role_labo)
 VALUES
-    ('adurand', 'Durand', 'Alice', 'pass123', 'Directeur'),
-    ('lmartin', 'Martin', 'Lucas', 'secure456', 'Chercheur'),
-    ('ebernard', 'Bernard', 'Emma', 'mypass789', 'Technicien'),
-    ('npetit', 'Petit', 'Noah', 'password1', 'Administratif'),
-    ('lrobert', 'Robert', 'Léa', 'secret234', 'Chercheur'),
-    ('lrichard', 'Richard', 'Louis', 'login567', 'Technicien'),
-    ('cdubois', 'Dubois', 'Chloé', 'access890', 'Chercheur'),
-    ('gmoreau', 'Moreau', 'Gabriel', 'user123', 'Administratif'),
-    ('jlaurent', 'Laurent', 'Jules', 'pass456', 'Technicien'),
-    ('msimon', 'Simon', 'Manon', 'secure789', 'Chercheur'),
-    ('tmichel', 'Michel', 'Tom', 'mypass012', 'Directeur'),
-    ('slefebvre', 'Lefebvre', 'Sarah', 'password345', 'Technicien'),
-    ('rleroy', 'Leroy', 'Raphaël', 'secret678', 'Chercheur'),
-    ('lroux', 'Roux', 'Lina', 'login901', 'Administratif'),
-    ('ndavid', 'David', 'Nathan', 'access234', 'Technicien'),
-    ('eblanc', 'Blanc', 'Eva', 'user567', 'Chercheur'),
-    ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'Directeur'),
-    ('zmuller', 'Muller', 'Zoé', 'secure123', 'Technicien'),
-    ('efaure', 'Faure', 'Enzo', 'mypass456', 'Chercheur'),
-    ('clopez', 'Lopez', 'Camille', 'password789', 'Administratif');
+    ('adurand', 'Durand', 'Alice', 'pass123', 'DIRECTION'),
+    ('lmartin', 'Martin', 'Lucas', 'secure456', 'CHERCHEUR'),
+    ('ebernard', 'Bernard', 'Emma', 'mypass789', 'TECHNICIEN'),
+    ('npetit', 'Petit', 'Noah', 'password1', 'ADMINISTRATION'),
+    ('lrobert', 'Robert', 'Léa', 'secret234', 'CHERCHEUR'),
+    ('lrichard', 'Richard', 'Louis', 'login567', 'TECHNICIEN'),
+    ('cdubois', 'Dubois', 'Chloé', 'access890', 'CHERCHEUR'),
+    ('gmoreau', 'Moreau', 'Gabriel', 'user123', 'ADMINISTRATION'),
+    ('jlaurent', 'Laurent', 'Jules', 'pass456', 'TECHNICIEN'),
+    ('msimon', 'Simon', 'Manon', 'secure789', 'CHERCHEUR'),
+    ('tmichel', 'Michel', 'Tom', 'mypass012', 'DIRECTION'),
+    ('slefebvre', 'Lefebvre', 'Sarah', 'password345', 'TECHNICIEN'),
+    ('rleroy', 'Leroy', 'Raphaël', 'secret678', 'CHERCHEUR'),
+    ('lroux', 'Roux', 'Lina', 'login901', 'ADMINISTRATION'),
+    ('ndavid', 'David', 'Nathan', 'access234', 'TECHNICIEN'),
+    ('eblanc', 'Blanc', 'Eva', 'user567', 'CHERCHEUR'),
+    ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'DIRECTION'),
+    ('zmuller', 'Muller', 'Zoé', 'secure123', 'TECHNICIEN'),
+    ('efaure', 'Faure', 'Enzo', 'mypass456', 'CHERCHEUR'),
+    ('clopez', 'Lopez', 'Camille', 'password789', 'ADMINISTRATION');
 
 INSERT into
     PLATEFORME (
@@ -274,7 +274,7 @@ VALUES
     ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
 INSERT into
-    APPARTENIR (idEspece, idEchant)
+    APPARTENIR (idEspece, idEchantillon)
 VALUES
     (9, 1),
     (2, 2),
@@ -345,81 +345,61 @@ VALUES
 
 
 INSERT into
-    MATERIEL (nom, description, quantite)
+    MATERIEL (nom, description)
 VALUES
     (
         'Microscope électronique',
-        'Microscope haute résolution pour analyse cellulaire',
-        15
+        'Microscope haute résolution pour analyse cellulaire'
     ),
     (
         'Centrifugeuse',
-        'Équipement de séparation par force centrifuge',
-        16
+        'Équipement de séparation par force centrifuge'
     ),
     (
         'Séquenceur ADN',
-        'Appareil de séquençage génétique automatisé',
-        17
+        'Appareil de séquençage génétique automatisé'
     ),
     (
         'Spectromètre de masse',
-        'Analyse de composition moléculaire',
-        18
+        'Analyse de composition moléculaire'
     ),
     (
         'PCR Thermocycleur',
-        'Amplification de séquences d''ADN',
-        19
+        'Amplification de séquences d''ADN'
     ),
     (
         'Électrophorèse',
-        'Séparation de molécules par migration électrique',
-        20
+        'Séparation de molécules par migration électrique'
     ),
     (
         'Autoclave',
-        'Stérilisation haute pression et température',
-        21
+        'Stérilisation haute pression et température'
     ),
     (
         'Hotte chimique',
-        'Protection contre les vapeurs toxiques',
-        22
+        'Protection contre les vapeurs toxiques'
     ),
     (
         'Balance analytique',
-        'Pesée de précision micrométrique',
-        23
+        'Pesée de précision micrométrique'
     ),
-    (   'pH-mètre', 
-        'Mesure du pH des solutions',
-        24
-    ),
-    (
-        'Incubateur', 
-        'Contrôle température et humidité',
-        25
-    ),
+    ('pH-mètre', 'Mesure du pH des solutions'),
+    ('Incubateur', 'Contrôle température et humidité'),
     (
         'Agitateur magnétique',
-        'Mélange homogène des solutions',
-        26
+        'Mélange homogène des solutions'
     ),
     (
         'Pipette automatique',
-        'Prélèvement précis de volumes',
-        27
+        'Prélèvement précis de volumes'
     ),
     (
         'Congélateur -80°C',
-        'Conservation échantillons biologiques',
-        28
+        'Conservation échantillons biologiques'
     ),
     (
         'Chromatographe',
-        'Séparation et analyse de composés',
-        29
+        'Séparation et analyse de composés'
     );
 
 INSERT into

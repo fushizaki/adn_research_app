@@ -14,7 +14,8 @@
                 </div>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-white">Ajouter du materiel à la plateforme : {{ plateforme.nom }}</h1>
+                <h1 class="text-2xl font-bold text-white">Ajouter du materiel à la plateforme : {{ plateforme.nom }}
+                </h1>
                 <p class="text-green-400 text-sm">place holder</p>
             </div>
             <a href="{{ url_for('index') }}" class="ml-auto text-gray-400 hover:text-white text-2xl">
@@ -24,7 +25,8 @@
 
         <hr class="border-t border-green-500 my-6">
         <div class="flex">
-            <form role="form" method="POST" action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
+            <form role="form" method="POST"
+                action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
                 <!--if current_user.is_authenticated
                     endif -->
                 {{ form_materiel.hidden_tag() }}
@@ -38,7 +40,8 @@
                             </div>
                             <div class="flex">
                                 <div>
-                                    <label class="block text-green-text text-sm font-semibold mb-2" for="nom_materiel">Nom
+                                    <label class="block text-green-text text-sm font-semibold mb-2"
+                                        for="nom_materiel">Nom
                                         du materiel</label>
                                     {{ form_materiel.nom_materiel(class_="text-white rounded-lg border
                                     border-transparent
@@ -105,34 +108,43 @@
 
                     </div>
             </form>
-        </div>  
+        </div>
         <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="text-white">Nom</th>
-                        <th class="text-white">Quantité disponible</th>
-                        <th class="text-white">Quantité à ajouter</th>
-                        
-                    </tr>
-                </thead>
-                <tbody>
+            <div>
+                <form class="ajout_mat_form" method="POST"
+                    action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
+                    <select name="mat_id" id="mat_select" class="text-white bg-gray-textfield rounded px-2 py-1"
+                        required>
+                    <option value="">--Selectionner le materiel--</option>
                     {% for materiel in materiel_dispo %}
-                        <tr>
-                            <td class="text-white">{{ materiel.nom }}</td>
-                            <td class="text-white">{{ materiel.quantite }}</td>
-                            <td class="text-white">
-                                <form class="ajout_mat_form" method="POST" action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
-                                    {{ form_materiel.hidden_tag() }}
-                                    <input type="hidden" name="mat_id" value="{{ materiel.idMateriel }}">
-                                    <input type="number" min="1" name="mat_qte" class="qte-input text-black rounded px-2 py-1 w-24" required>
-                                    <button type="submit" class="btn-submit bg-green-600 text-white px-3 py-1 rounded">Ajouter</button>
-                                </form>
-                        </tr>
+                        <option value="{{ materiel.idMateriel }}">{{ materiel.nom }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>  
+                    </select>
+                    <input type="number" min="1" name="mat_qte" class="text-black rounded px-2 py-1 w-24" required>
+                    <button type="submit" class="btn-submit bg-green-600 text-white px-3 py-1 rounded">Ajouter</button>
+                </form>
+            </div>
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-white">Nom</th>
+                            <th class="text-white">Description</th>
+                            <th class="text-white">Quantité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for utilisation in materiel_plateforme %}
+                        <tr>
+                            <td class="text-white">{{ utilisation.materiel.nom }}</td>
+                            <td class="text-white">{{ utilisation.materiel.description }}</td>
+                            <td class="text-white">{{ utilisation.quantite }}</td>
+                        {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
 </div>

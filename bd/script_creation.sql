@@ -17,7 +17,7 @@ CREATE TABLE
         nom varchar(100) NOT NULL,
         prenom varchar(100) NOT NULL,
         password varchar(255) NOT NULL,
-        role_labo varchar(100) NOT NULL
+        role_labo ENUM('DIRECTION', 'TECHNICIEN', 'ADMINISTRATION', 'CHERCHEUR') NOT NULL
     );
 
 CREATE TABLE
@@ -118,7 +118,6 @@ CREATE TABLE
         PRIMARY KEY (idMateriel),
         idMateriel int NOT NULL AUTO_INCREMENT,
         nom varchar(100) NOT NULL,
-        quantite int NOT NULL,
         description varchar(500)
     );
 
@@ -176,7 +175,5 @@ ALTER TABLE PARTICIPER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username)
 ALTER TABLE HABILITER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username);
 
 ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
-
-
 
 ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
