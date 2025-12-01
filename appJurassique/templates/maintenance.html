@@ -12,26 +12,26 @@
             {{ message }}
         </aside>
         {% endif %}
-        <form method="POST" action="{{ url_for('creer_maintenance') }}">
+        <form method="POST" action="{{ url_for('maintenance') }}">
             {{ form.hidden_tag() }}
             <div class="mb-4">
-                <label for="date" class="block text-green-text font-medium mb-2">Plateforme *</label>
+                <label for="idPlateforme" class="block text-green-text font-medium mb-2">Plateforme *</label>
                 {{ form.idPlateforme(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
                 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
-                focus:ring-green-button-menu") }}
+                focus:ring-green-button-menu", required=True) }}
             </div>
             <div class="mb-6">
-                <label for="plan_maintenance" class="block text-green-text font-medium mb-2">Date*</label>
-
+                <label for="dateDebut" class="block text-green-text font-medium mb-2">Date *</label>
+                {% set today = now().strftime('%Y-%m-%d') %}
                 {{ form.dateDebut(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3
-                text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu")
-                }}
+                text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu",
+                required=True, min=today) }}
             </div>
             <div class="mb-6">
-                <label for="plan_maintenance" class="block text-green-text font-medium mb-2">Durée *</label>
+                <label for="duree" class="block text-green-text font-medium mb-2">Durée (jours) *</label>
                 {{ form.duree(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
                 py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
-                focus:ring-green-button-menu") }}
+                focus:ring-green-button-menu", required=True, min=1, type="number") }}
             </div>
             <div class="flex justify-center">
                 <button type="submit"

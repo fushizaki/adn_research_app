@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_login import LoginManager
+from datetime import datetime
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ app.config[
     "SQLALCHEMY_DATABASE_URI"] = f"mysql://{db_user}:{db_password}@localhost/{db_name}"
 app.config['SECRET_KEY'] = 'change-this-secret-key'
 db = SQLAlchemy(app)
+app.jinja_env.globals['now'] = datetime.now
 
 with app.app_context():
     db.create_all()

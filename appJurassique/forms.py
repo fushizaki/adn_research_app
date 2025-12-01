@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, IntegerField
-from wtforms.validators import DataRequired, EqualTo, NumberRange
+from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError
 from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL, MAINTENANCE, PLATEFORME, statut
 from hashlib import sha256
+from datetime import date
 
 
 class LoginForm(FlaskForm):
@@ -84,14 +85,18 @@ class MaintenanceForm(FlaskForm):
     )
 
     duree = IntegerField(
-        "Durée en heures",
+        "Durée (en jours)",
         validators=[
             DataRequired(message="La durée est obligatoire."),
-            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
         ],
     )
 
     next = HiddenField()
+
+    def validate_dateDebut(self, field):
+        if field.data and field.data < date.today():
+            raise ValidationError("La date ne peut pas être dans le passé.")
 
     def build_maintenance(self):
         return MAINTENANCE(
