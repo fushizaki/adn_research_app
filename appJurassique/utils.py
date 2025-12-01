@@ -2,8 +2,21 @@ from datetime import timedelta
 from .app import db
 from .models import (
     CAMPAGNE, PLATEFORME, PERSONNE, PARTICIPER,
-    PLANIFIER, SEJOURNER, NECESSITER, HABILITATION, UTILISER, MATERIEL
+    PLANIFIER, SEJOURNER, NECESSITER, HABILITATION,
+    UTILISER, MATERIEL, MAINTENANCE, BUDGET_MENSUEL
 )
+
+def calculer_date_fin(date_debut, duree_jours):
+    """Retourne la date de fin incluse."""
+    if not date_debut:
+        return None
+    jours = max(1, int(duree_jours))
+    return date_debut + timedelta(days=jours - 1)
+
+
+def periodes_se_chevauchent(debut_a, fin_a, debut_b, fin_b):
+    """Détermine si deux intervalles se superposent."""
+    return not (fin_a < debut_b or fin_b < debut_a)
 
 
 def verifier_nombre_membres(plateforme, membres):
@@ -34,6 +47,25 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
         ok, erreur = verifier_nombre_membres(plateforme, membres)
         if not ok:
             return None, erreur
+
+        date_fin = calculer_date_fin(date_debut, duree_jours)
+
+        # COMMENT: Vérifications relatives aux triggers SQL - désactivées pour test
+        # ok, erreur = verifier_disponibilite_plateforme(plateforme.idPlateforme, date_debut, date_fin)
+        # if not ok:
+        #     return None, erreur
+
+        # ok, erreur = verifier_disponibilite_membres(membres, date_debut, date_fin)
+        # if not ok:
+        #     return None, erreur
+
+        # ok, erreur = verifier_habilitations_membres(plateforme.idPlateforme, membres)
+        # if not ok:
+        #     return None, erreur
+
+        # ok, erreur = verifier_maintenance_plateforme(plateforme, date_debut, date_fin)
+        # if not ok:
+        #     return None, erreur
 
         nouvelle_campagne = CAMPAGNE(
             dateDebut=date_debut,
@@ -118,3 +150,87 @@ def obtenir_membres_compatibles(id_plateforme):
         import traceback
         traceback.print_exc()
         return []
+
+#====== FONCTIONS QUI VERIFIE COMME NOS TRIGGERS SQL ======
+# COMMENTED: Ces fonctions sont mises en commentaire pour les tests
+
+# def verifier_disponibilite_plateforme(id_plateforme, date_debut, date_fin):
+#     """Vérifie que la plateforme n'est pas déjà utilisée sur la période."""
+#     campagnes = (CAMPAGNE.query
+#                  .join(PLANIFIER, PLANIFIER.idCampagne == CAMPAGNE.idCampagne)
+#                  .filter(PLANIFIER.idPlateforme == id_plateforme)
+#                  .all())
+#     for campagne in campagnes:
+#         fin_existante = calculer_date_fin(campagne.dateDebut, campagne.duree)
+#         if periodes_se_chevauchent(date_debut, date_fin, campagne.dateDebut, fin_existante):
+#             return False, (
+#                 f"La plateforme est déjà mobilisée du {campagne.dateDebut.strftime('%d/%m/%Y')} "
+#                 f"au {fin_existante.strftime('%d/%m/%Y')}.")
+#     return True, None
+
+
+# def verifier_disponibilite_membres(membres, date_debut, date_fin):
+#     """S'assure qu'aucun membre n'est engagé sur une autre campagne."""
+#     for membre in membres:
+#         campagnes = (CAMPAGNE.query
+#                      .join(PARTICIPER, PARTICIPER.idCampagne == CAMPAGNE.idCampagne)
+#                      .filter(PARTICIPER.username == membre.username)
+#                      .all())
+#         for campagne in campagnes:
+#             fin_existante = calculer_date_fin(campagne.dateDebut, campagne.duree)
+#             if periodes_se_chevauchent(date_debut, date_fin, campagne.dateDebut, fin_existante):
+#                 return False, (
+#                     f"{membre.prenom} {membre.nom} participe déjà à une campagne du "
+#                     f"{campagne.dateDebut.strftime('%d/%m/%Y')} au {fin_existante.strftime('%d/%m/%Y')}.")
+#     return True, None
+
+
+# def verifier_habilitations_membres(id_plateforme, membres):
+#     """Confirme que tous les membres sélectionnés sont habilités pour la plateforme."""
+#     compatibles = obtenir_membres_compatibles(id_plateforme)
+#     habilites = {m.username for m, ok in compatibles if ok}
+#     non_habilites = [m for m in membres if m.username not in habilites]
+#     if non_habilites:
+#         noms = ", ".join(f"{m.prenom} {m.nom}" for m in non_habilites)
+#         return False, f"Les membres suivants n'ont pas les habilitations requises : {noms}."
+#     return True, None
+
+
+# def verifier_maintenance_plateforme(plateforme, date_debut, date_fin):
+#     """Vérifie que l'intervalle de maintenance est respecté."""
+#     intervalle = plateforme.intervalle_maintenance
+#     if not intervalle:
+#         return True, None
+
+#     derniere_maintenance = (MAINTENANCE.query
+#                             .filter(MAINTENANCE.idPlateforme == plateforme.idPlateforme)
+#                             .filter(MAINTENANCE.dateMaintenance <= date_debut)
+#                             .order_by(MAINTENANCE.dateMaintenance.desc())
+#                             .first())
+#     if not derniere_maintenance:
+#         return True, None
+
+#     limite = derniere_maintenance.dateMaintenance + timedelta(days=intervalle)
+#     if date_fin > limite:
+#         return False, (
+#             "La durée de la campagne dépasse l'intervalle de maintenance. "
+#             f"Dernière maintenance effectuée le {derniere_maintenance.dateMaintenance.strftime('%d/%m/%Y')}.")
+#     return True, None
+
+
+def recuperer_budget_mensuel(date_objet):
+    """Retourne le budget du mois correspondant à la date donnée."""
+    if not date_objet:
+        return None
+    return BUDGET_MENSUEL.query.filter_by(
+        annee=date_objet.year,
+        mois=date_objet.month
+    ).first()
+
+
+def estimer_cout_campagne(plateforme, duree_jours):
+    """Calcule le coût estimé en fonction du coût journalier."""
+    if not plateforme or not plateforme.cout_journalier:
+        return None
+    jours = max(1, int(duree_jours))
+    return round(plateforme.cout_journalier * jours, 2)

@@ -462,3 +462,21 @@ VALUES
     (14, 3),
     (15, 1),
     (15, 4);
+
+INSERT into
+    MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)
+VALUES
+    (1, '2024-12-15', 2, 'TERMINEE'),
+    (1, '2025-01-15', 2, 'PLANIFIEE'),
+    (2, '2024-11-20', 1, 'TERMINEE'),
+    (2, '2025-01-05', 1, 'PLANIFIEE'),
+    (3, '2024-10-15', 3, 'TERMINEE'),
+    (3, '2025-01-10', 3, 'PLANIFIEE'),
+    (4, '2024-09-20', 2, 'TERMINEE'),
+    (5, '2024-11-30', 1, 'TERMINEE'),
+    (5, '2025-01-02', 1, 'PLANIFIEE'),
+    (6, '2024-10-25', 2, 'TERMINEE'),
+    (7, '2024-08-10', 4, 'TERMINEE'),
+    (8, '2024-12-01', 1, 'TERMINEE'),
+    (9, '2024-10-30', 2, 'TERMINEE'),
+    (10, '2024-11-15', 2, 'TERMINEE');

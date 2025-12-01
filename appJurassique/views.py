@@ -3,11 +3,9 @@ from flask import (render_template, request, url_for, redirect, current_app)
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm, CampagneForm)
-from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER, LIEU_FOUILLE, PLATEFORME)
-from .utils import creer_campagne, obtenir_membres_compatibles
+from appJurassique.forms import *
+from appJurassique.models import *
+from .utils import *
 
 
 @app.route('/')
@@ -15,11 +13,12 @@ from .utils import creer_campagne, obtenir_membres_compatibles
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
-@app.route('/add_campagne/', methods=['GET', 'POST'])
+@app.route('/add_campagne/', methods=['POST', 'GET'])
 def add_campagne():
-    """Affiche le formulaire d'ajout de campagne."""
+    """Crée une nouvelle campagne avec validation des habilitations."""
     lieux = LIEU_FOUILLE.query.all()
     plateformes = PLATEFORME.query.all()
+
     form = CampagneForm()
     form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
         (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
@@ -32,107 +31,114 @@ def add_campagne():
     if formdata:
         form.process(formdata=formdata)
 
-    plateforme_selectionnee = None
-    membres_compatibles = []
-    membres_selectionnes = form.membres.data or []
     message = request.args.get('error') or request.args.get('success')
     message_type = 'error' if request.args.get('error') else (
         'success' if request.args.get('success') else None
     )
 
-    id_plateforme = form.idPlateforme.data
+    plateforme_selectionnee = None
+    membres_compatibles = []
+    membres_selectionnes = []
+    budget_mensuel = recuperer_budget_mensuel(form.dateDebut.data)
+    budget_estime = None
 
+    id_plateforme = form.idPlateforme.data or request.values.get('idPlateforme')
+    if id_plateforme is not None and id_plateforme != form.idPlateforme.data:
+        form.idPlateforme.data = id_plateforme
     if id_plateforme:
         try:
             id_plateforme_int = int(id_plateforme)
             plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
-
             if plateforme_selectionnee:
                 membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
+                # Mettre à jour les choix du formulaire pour les membres
+                form.membres.choices = [
+                    (membre.username, f"{membre.nom} {membre.prenom}")
+                    for membre, compatible in membres_compatibles
+                ]
+                if form.duree.data:
+                    duree_temp = max(1, form.duree.data // 24)
+                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_temp)
+                # Récupère les membres sélectionnés du formulaire s'ils existent
+                if form.membres.data:
+                    membres_selectionnes = form.membres.data
         except ValueError:
-            pass
+            message = "Plateforme sélectionnée invalide."
+            message_type = 'error'
+
+    if request.method == 'POST':
+        # Vérifie si c'est une action "Charger les membres"
+        if request.form.get('action') == 'load_members':
+            return render_template(
+                'add_campagne.html',
+                title='Ajouter une campagne',
+                current_page='campagnes',
+                form=form,
+                lieux=lieux,
+                plateformes=plateformes,
+                plateforme_selectionnee=plateforme_selectionnee,
+                membres_compatibles=membres_compatibles,
+                membres_selectionnes=membres_selectionnes,
+                budget_mensuel=budget_mensuel,
+                budget_estime=budget_estime,
+                message=message,
+                message_type=message_type,
+            )
+        
+        if not form.validate():
+            first_error = next(iter(form.errors.values()))[0]
+            message = first_error
+            message_type = 'error'
+        else:
+            try:
+                titre = (form.titre.data or '').strip() or None
+                date_debut = form.dateDebut.data
+                duree_heures = form.duree.data
+                id_lieu = int(form.idLieu.data)
+                id_plateforme_int = int(form.idPlateforme.data)
+                membres_usernames = form.membres.data
+            except ValueError as exc:
+                message = f'Erreur de validation : {exc}'
+                message_type = 'error'
+            else:
+                if not membres_usernames:
+                    message = 'Vous devez sélectionner au moins un membre habilité'
+                    message_type = 'error'
+                else:
+                    duree_jours = max(1, duree_heures // 24)
+                    if not plateforme_selectionnee or plateforme_selectionnee.idPlateforme != id_plateforme_int:
+                        plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
+                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_jours)
+                    campagne, error = creer_campagne(
+                        date_debut=date_debut,
+                        duree_jours=duree_jours,
+                        id_lieu=id_lieu,
+                        id_plateforme=id_plateforme_int,
+                        noms_utilisateurs_membres=membres_usernames,
+                        titre=titre
+                    )
+
+                    if error:
+                        message = error
+                        message_type = 'error'
+                    else:
+                        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
 
     return render_template(
         'add_campagne.html',
-        title='Ajouter une Campagne',
+        title='Ajouter une campagne',
+        current_page='campagnes',
+        form=form,
         lieux=lieux,
         plateformes=plateformes,
         plateforme_selectionnee=plateforme_selectionnee,
         membres_compatibles=membres_compatibles,
         membres_selectionnes=membres_selectionnes,
-        form=form,
+        budget_mensuel=budget_mensuel,
+        budget_estime=budget_estime,
         message=message,
         message_type=message_type
     )
-
-@app.route('/create_campagne/', methods=['POST'])
-
-def creer_nouvelle_campagne():
-    """Crée une nouvelle campagne avec validation des habilitations."""
-    try:
-        lieux = LIEU_FOUILLE.query.all()
-        plateformes = PLATEFORME.query.all()
-        form = CampagneForm()
-        form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
-            (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
-        ]
-        form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
-            (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes
-        ]
-        form.process(formdata=request.form)
-
-        if not form.validate():
-            first_error = next(iter(form.errors.values()))[0]
-            return redirect(url_for('add_campagne', error=first_error, 
-                                    ))
-
-        titre = (form.titre.data or '').strip() or None
-        date_debut = form.dateDebut.data
-        duree_heures = form.duree.data
-        id_lieu = int(form.idLieu.data)
-        id_plateforme = int(form.idPlateforme.data)
-        membres_usernames = form.membres.data
-
-        if not membres_usernames:
-            return redirect(
-                url_for(
-                    'add_campagne',
-                    error='Vous devez sélectionner au moins un membre habilité',
-                    titre=form.titre.data or '',
-                    dateDebut=form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '',
-                    duree=form.duree.data or '',
-                    idLieu=form.idLieu.data or '',
-                    idPlateforme=form.idPlateforme.data or ''
-                )
-            )
-
-        duree_jours = max(1, duree_heures // 24)
-
-        campagne, error = creer_campagne(
-            date_debut=date_debut,
-            duree_jours=duree_jours,
-            id_lieu=id_lieu,
-            id_plateforme=id_plateforme,
-            noms_utilisateurs_membres=membres_usernames,
-            titre=titre
-        )
-
-        if error:
-            return redirect(url_for(
-                'add_campagne',
-                error=error,
-                titre=form.titre.data or '',
-                dateDebut=form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '',
-                duree=form.duree.data or '',
-                idLieu=form.idLieu.data or '',
-                idPlateforme=form.idPlateforme.data or ''
-            ))
-        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
-
-    except ValueError as e:
-        return redirect(url_for('add_campagne', error=f'Erreur de validation : {str(e)}'))
-    except Exception as e:
-        return redirect(url_for('add_campagne', error=f'Erreur : {str(e)}'))
 
 @app.route('/dashboard/set_budget/', methods=(
     'GET',
