@@ -205,8 +205,15 @@ def add_personne():
         
         
         
-        if personne_existe:        
+        if not personne_existe:        
             habiliter = None
+            nouvelle_personne = PERSONNE(nom= form_pers.nom.data,
+                                         prenom= form_pers.prenom.data,
+                                         username= form_pers.username.data,
+                                         password= form_pers.password.data,
+                                         role_labo= form_pers.role_labo.data)
+            db.session.add(nouvelle_personne)
+            db.session.commit()
             for item in form_pers.habilitations.data:
                 match item:
                     case "electrique":
@@ -228,7 +235,7 @@ def add_personne():
                 
             return redirect(url_for('index'))
         else:
-            return render_template("add_personne.html", form_personne=form_pers, message_type='error', message="La personne que vous essayez d'ajouter n'existe pas")
+            return render_template("add_personne.html", form_personne=form_pers, message_type='error', message="Le pseudo est déjà utilisé")
             
     if request.method == 'POST':
         return render_template(

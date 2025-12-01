@@ -72,7 +72,7 @@ class LIEU_FOUILLE(db.Model):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
 class role_labo_enum(enum.Enum):
-    RECHERCHE = "DIRECTION"
+    DIRECTION = "DIRECTION"
     TECHNICIEN = "TECHNICIEN"
     ADMINISTRATION = "ADMINISTRATION"
     CHERCHEURSE = "CHERCHEUR(SE)"

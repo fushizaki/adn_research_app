@@ -84,6 +84,7 @@ class FormPersonne(FlaskForm):
     nom = StringField('nom', validators=[DataRequired()])
     prenom = StringField('prenom', validators=[DataRequired()])
     username = StringField('username', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
     role_labo = SelectField(
         'Rôle dans le labo',
         choices=[],
