@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, HiddenField, PasswordField, SelectField,
-                     DateField, MultipleFileField, SubmitField)
-from wtforms.validators import DataRequired, EqualTo
+                     DateField, MultipleFileField, SubmitField, IntegerField, SelectMultipleField)
+from wtforms.validators import DataRequired, EqualTo, NumberRange,Optional
 from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
 from hashlib import sha256
 
@@ -74,3 +74,38 @@ class AssociateFilesForm(FlaskForm):
     file = MultipleFileField("Fichiers d'échantillon",
                              validators=[DataRequired()])
     submit = SubmitField('Associer les fichiers')
+
+
+class CampagneForm(FlaskForm):
+    """Formulaire WTForms pour la création d'une campagne."""
+
+    titre = StringField("Titre", validators=[Optional()])
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+    duree = IntegerField(
+        "Durée en heures",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+        ],
+    )
+    idLieu = SelectField(
+        "Lieu de fouille",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+    )
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+    membres = SelectMultipleField(
+        "Membres",
+        choices=[],
+        coerce=str,
+    )

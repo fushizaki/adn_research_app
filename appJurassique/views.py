@@ -1,12 +1,14 @@
+from pathlib import Path
 from flask import (render_template, request, url_for, redirect, current_app)
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm)
+                                 AssociateFilesForm, CampagneForm)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER, PLATEFORME, MATERIEL)
+                                  ECHANTILLON, RAPPORTER, PLATEFORME, MATERIEL,LIEU_FOUILLE, PLATEFORME)
 from pathlib import Path
+from .utils import creer_campagne, obtenir_membres_compatibles
 
 
 @app.route('/')
@@ -14,6 +16,124 @@ from pathlib import Path
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
+@app.route('/add_campagne/', methods=['GET', 'POST'])
+def add_campagne():
+    """Affiche le formulaire d'ajout de campagne."""
+    lieux = LIEU_FOUILLE.query.all()
+    plateformes = PLATEFORME.query.all()
+    form = CampagneForm()
+    form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
+        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
+    ]
+    form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+        (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes
+    ]
+
+    formdata = request.form if request.method == 'POST' else request.args
+    if formdata:
+        form.process(formdata=formdata)
+
+    plateforme_selectionnee = None
+    membres_compatibles = []
+    membres_selectionnes = form.membres.data or []
+    message = request.args.get('error') or request.args.get('success')
+    message_type = 'error' if request.args.get('error') else (
+        'success' if request.args.get('success') else None
+    )
+
+    id_plateforme = form.idPlateforme.data
+
+    if id_plateforme:
+        try:
+            id_plateforme_int = int(id_plateforme)
+            plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
+
+            if plateforme_selectionnee:
+                membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
+        except ValueError:
+            pass
+
+    return render_template(
+        'add_campagne.html',
+        title='Ajouter une Campagne',
+        lieux=lieux,
+        plateformes=plateformes,
+        plateforme_selectionnee=plateforme_selectionnee,
+        membres_compatibles=membres_compatibles,
+        membres_selectionnes=membres_selectionnes,
+        form=form,
+        message=message,
+        message_type=message_type
+    )
+
+@app.route('/create_campagne/', methods=['POST'])
+
+def creer_nouvelle_campagne():
+    """Crée une nouvelle campagne avec validation des habilitations."""
+    try:
+        lieux = LIEU_FOUILLE.query.all()
+        plateformes = PLATEFORME.query.all()
+        form = CampagneForm()
+        form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
+            (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
+        ]
+        form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+            (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes
+        ]
+        form.process(formdata=request.form)
+
+        if not form.validate():
+            first_error = next(iter(form.errors.values()))[0]
+            return redirect(url_for('add_campagne', error=first_error, 
+                                    ))
+
+        titre = (form.titre.data or '').strip() or None
+        date_debut = form.dateDebut.data
+        duree_heures = form.duree.data
+        id_lieu = int(form.idLieu.data)
+        id_plateforme = int(form.idPlateforme.data)
+        membres_usernames = form.membres.data
+
+        if not membres_usernames:
+            return redirect(
+                url_for(
+                    'add_campagne',
+                    error='Vous devez sélectionner au moins un membre habilité',
+                    titre=form.titre.data or '',
+                    dateDebut=form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '',
+                    duree=form.duree.data or '',
+                    idLieu=form.idLieu.data or '',
+                    idPlateforme=form.idPlateforme.data or ''
+                )
+            )
+
+        duree_jours = max(1, duree_heures // 24)
+
+        campagne, error = creer_campagne(
+            date_debut=date_debut,
+            duree_jours=duree_jours,
+            id_lieu=id_lieu,
+            id_plateforme=id_plateforme,
+            noms_utilisateurs_membres=membres_usernames,
+            titre=titre
+        )
+
+        if error:
+            return redirect(url_for(
+                'add_campagne',
+                error=error,
+                titre=form.titre.data or '',
+                dateDebut=form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '',
+                duree=form.duree.data or '',
+                idLieu=form.idLieu.data or '',
+                idPlateforme=form.idPlateforme.data or ''
+            ))
+        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
+
+    except ValueError as e:
+        return redirect(url_for('add_campagne', error=f'Erreur de validation : {str(e)}'))
+    except Exception as e:
+        return redirect(url_for('add_campagne', error=f'Erreur : {str(e)}'))
 
 @app.route('/dashboard/set_budget/', methods=(
     'GET',
@@ -37,7 +157,7 @@ def set_budget():
             return redirect(unForm.next.data or url_for('index'))
     return render_template('set_budget.html',
                            title='Définir le budget',
-                           current_page='dashboard',
+                           current_page='budget',
                            form=unForm)
 
 
@@ -55,8 +175,20 @@ def view_campagnes(idCampagne):
                            upload_form=upload_form)
 
 
-@app.route('/campagnes/<int:idCampagne>/view/associer-fichier',
-           methods=('POST', ))
+@app.route('/campagnes/<int:idCampagne>/supprimer/')
+@login_required
+def supprimer_campagne(idCampagne):
+    campagne = db.session.get(CAMPAGNE, idCampagne)
+    if campagne is None:
+        return render_template('404.html', message="Campagne non trouvée"), 404
+    if campagne:
+        db.session.delete(campagne)
+        db.session.commit()
+    return redirect(url_for('liste_campagnes'))
+    
+
+@app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
+    'POST',))
 @login_required
 def associer_fichier(idCampagne):
     campagne = db.session.get(CAMPAGNE, idCampagne)
@@ -147,6 +279,16 @@ def supprimer_personnel(username):
 def ajouter_personnel():
     # TODO
     return "Ajouter un personnel - Fonctionnalité à implémenter"
+
+
+@app.route("/campagnes/")
+@login_required
+def liste_campagnes():
+    campagnes = CAMPAGNE.query.all()
+    return render_template("liste_campagnes.html",
+                           title="Liste des campagnes",
+                           current_page="campagne",
+                           campagnes=campagnes)
 
 
 @app.route("/login/", methods=(
