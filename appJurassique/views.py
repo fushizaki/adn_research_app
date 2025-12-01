@@ -127,7 +127,7 @@ def creer_nouvelle_campagne():
                 idLieu=form.idLieu.data or '',
                 idPlateforme=form.idPlateforme.data or ''
             ))
-        return redirect(url_for('index', success='Campagne créée avec succès !'))
+        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
 
     except ValueError as e:
         return redirect(url_for('add_campagne', error=f'Erreur de validation : {str(e)}'))
