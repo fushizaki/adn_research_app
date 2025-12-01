@@ -62,12 +62,12 @@ VALUES
     ('Formation Cedar Mountain');
 
 INSERT into
-    HABILITATION (nom_habilitation, description)
+    HABILITATION (nom_habilitation, description, idMateriel)
 VALUES
-    ('électrique', 'Habilitation électrique'),
-    ('chimique', 'Habilitation chimique'),
-    ('biologique', 'Habilitation biologique'),
-    ('radiations', 'Habilitation radiations');
+    ('électrique', 'Habilitation électrique', 1),
+    ('chimique', 'Habilitation chimique', 2),
+    ('biologique', 'Habilitation biologique', 3),
+    ('radiations', 'Habilitation radiations', 4);
 
 INSERT into
     HABILITER (username, idHabilitation)
