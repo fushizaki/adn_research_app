@@ -1,5 +1,5 @@
 from zipfile import Path
-from flask import flash, render_template, request, url_for, redirect, jsonify
+from flask import flash, render_template, request, session, url_for, redirect, jsonify
 from werkzeug.utils import secure_filename
 from algo import constants
 from algo.main import *
@@ -104,25 +104,6 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/traitements_adn/', methods=['GET', 'POST'])
-def traitements_adn():
-    echantillons =  ECHANTILLON.query.all()
-
-    return render_template('traitements_adn.html',
-                           title='Traitements ADN',
-                           current_page='traitements_adn',
-                           echantillons=echantillons)    
-
-
-@app.route('/gerer_adn/', methods=['GET', 'POST'])
-def gerer_adn():
-    echantillons =  ECHANTILLON.query.all()
-    
-    return render_template('gerer_adn.html',
-                           title='Gérer les fichiers ADN',
-                           current_page='gerer_adn',
-                           echantillons=echantillons)    
-
 
 #===================== PARTIE ADN  ====================
 
@@ -167,6 +148,11 @@ def charger_sequence_fichier(nom_fichier: str) -> str:
     if not chemin.exists():
         raise FileNotFoundError(f"Le fichier {nom_fichier} est introuvable")
     return chemin.read_text().strip().upper()
+
+
+
+
+#============== GERER ADN ==============
 
 
 @app.route('/gerer_adn/', methods=['GET', 'POST'])
@@ -234,3 +220,132 @@ def gerer_adn():
                            form_choisir=form_choisir,
                            sequence_creee=sequence_creee,
                            fichier_charge=fichier_charge)
+
+
+
+#============== TRAITEMEMENTS  ADN ==============
+
+
+@app.route('/traitements_adn/', methods=['GET', 'POST'])
+def traitements_adn():
+    fichiers_adn = lister_fichiers_adn()
+    choix_fichiers = [(f['nom'], f['nom']) for f in fichiers_adn]
+    preselection = [nom for nom in request.args.get('fichiers', '').split(',') if nom]
+
+    form_traitement = TraitementAdnForm()
+    form_traitement.sequence_base.choices = choix_fichiers
+    form_traitement.sequence_lev_a.choices = [('', 'Choisir un fichier')] + choix_fichiers
+    form_traitement.sequence_lev_b.choices = [('', 'Choisir un fichier')] + choix_fichiers
+
+    if not form_traitement.sequence_base.data and preselection:
+        form_traitement.sequence_base.data = preselection[0]
+    if not form_traitement.sequence_lev_a.data and preselection:
+        form_traitement.sequence_lev_a.data = preselection[0]
+    if not form_traitement.sequence_lev_b.data and len(preselection) > 1:
+        form_traitement.sequence_lev_b.data = preselection[1]
+
+    if form_traitement.validate_on_submit():
+        if not choix_fichiers:
+            notifier('Aucun fichier ADN disponible.', 'erreur')
+            return redirect(url_for('gerer_adn'))
+
+        try:
+            sequence_depart = charger_sequence_fichier(form_traitement.sequence_base.data)
+        except FileNotFoundError:
+            notifier('Impossible de lire la séquence de base.', 'erreur')
+            return redirect(url_for('traitements_adn'))
+
+        proba = form_traitement.proba.data or 0.0
+        mutations_cochees = [
+            form_traitement.mutation_remplacement.data,
+            form_traitement.mutation_insertion.data,
+            form_traitement.mutation_deletion.data,
+            form_traitement.calcul_levenshtein.data,
+        ]
+        if not any(mutations_cochees):
+            notifier('Choisissez au moins une mutation ou un calcul.', 'erreur')
+            return redirect(url_for('traitements_adn'))
+
+        sequence_en_cours = sequence_depart
+        liste_mutations = []
+        compte_mutations = {'remplacement': 0, 'insertion': 0, 'deletion': 0}
+
+        if form_traitement.mutation_remplacement.data:
+            sequence_avant = sequence_en_cours
+            sequence_en_cours = simuler_mutations_remplacements(sequence_avant, proba)
+            delta = estimation_distance_mutation(sequence_avant, sequence_en_cours)
+            compte_mutations['remplacement'] = delta
+            liste_mutations.append({
+                'nom': 'Mutation par remplacement',
+                'taille_avant': len(sequence_avant),
+                'taille_apres': len(sequence_en_cours),
+                'delta': delta,
+                'sequence': sequence_en_cours,
+            })
+
+        if form_traitement.mutation_insertion.data:
+            sequence_avant = sequence_en_cours
+            sequence_en_cours = mutation_par_insertion(sequence_avant, proba)
+            delta = max(len(sequence_en_cours) - len(sequence_avant), 0)
+            compte_mutations['insertion'] = delta
+            liste_mutations.append({
+                'nom': 'Mutation par insertion',
+                'taille_avant': len(sequence_avant),
+                'taille_apres': len(sequence_en_cours),
+                'delta': delta,
+                'sequence': sequence_en_cours,
+            })
+
+        if form_traitement.mutation_deletion.data:
+            sequence_avant = sequence_en_cours
+            sequence_en_cours = mutation_par_deletion(sequence_avant, proba)
+            delta = max(len(sequence_avant) - len(sequence_en_cours), 0)
+            compte_mutations['deletion'] = delta
+            liste_mutations.append({
+                'nom': 'Mutation par deletion',
+                'taille_avant': len(sequence_avant),
+                'taille_apres': len(sequence_en_cours),
+                'delta': delta,
+                'sequence': sequence_en_cours,
+            })
+
+        distance_info = None
+        if form_traitement.calcul_levenshtein.data:
+            fichier_a = form_traitement.sequence_lev_a.data
+            fichier_b = form_traitement.sequence_lev_b.data
+            if not fichier_a or not fichier_b:
+                notifier('Choisissez deux fichiers pour le calcul de distance.', 'erreur')
+                return redirect(url_for('traitements_adn'))
+            try:
+                seq_a = charger_sequence_fichier(fichier_a)
+                seq_b = charger_sequence_fichier(fichier_b)
+                distance_info = {
+                    'valeur': distance_de_levenshtein(seq_a, seq_b),
+                    'fichier_a': fichier_a,
+                    'fichier_b': fichier_b,
+                }
+            except FileNotFoundError:
+                notifier('Impossible de charger les fichiers pour le calcul.', 'erreur')
+                return redirect(url_for('traitements_adn'))
+
+        resultat = {
+            'fichier_base': form_traitement.sequence_base.data,
+            'sequence_depart': sequence_depart,
+            'probabilite': proba,
+            'mutations': liste_mutations,
+            'compte_mutations': compte_mutations,
+            'sequence_finale': sequence_en_cours,
+            'distance': distance_info,
+            'horodatage': datetime.utcnow().isoformat(),
+        }
+
+        session['resultat_adn'] = resultat
+        notifier('Traitements appliqués.', 'succes')
+        return redirect(url_for('resultat'))
+
+    return render_template('traitements_adn.html',
+                           title='Traitements ADN',
+                           current_page='traitements_adn',
+                           fichiers=fichiers_adn,
+                           preselection=preselection,
+                           form_traitement=form_traitement)

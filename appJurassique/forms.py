@@ -104,11 +104,11 @@ class SauvegarderSequenceForm(FlaskForm):
     nom_sequence = StringField('Nom du fichier', validators=[DataRequired()])
     submit_sauvegarder = SubmitField('Sauvegarder la sequence')
 
-
-class AjouterHistoriqueForm(FlaskForm):
+class ResultatTraitemement(FlaskForm):
+    telecharger_resultat =BooleanField('Télécharger les résultats')
+    telecharger_sequences_mutees = BooleanField('Sauvegarder les séquences mutées')
     note = StringField('Note', validators=[Optional()])
     submit_historique = SubmitField('Ajouter a l\'historique')
-
 
 class ReinitialiserResultatForm(FlaskForm):
     submit_reinitialiser = SubmitField('Reinitialiser les resultats')
