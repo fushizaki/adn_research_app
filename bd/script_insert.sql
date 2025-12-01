@@ -463,20 +463,36 @@ VALUES
     (15, 1),
     (15, 4);
 
-INSERT into
+INSERT IGNORE into
     MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)
 VALUES
-    (1, '2024-12-15', 2, 'TERMINEE'),
-    (1, '2025-01-15', 2, 'PLANIFIEE'),
-    (2, '2024-11-20', 1, 'TERMINEE'),
-    (2, '2025-01-05', 1, 'PLANIFIEE'),
-    (3, '2024-10-15', 3, 'TERMINEE'),
-    (3, '2025-01-10', 3, 'PLANIFIEE'),
-    (4, '2024-09-20', 2, 'TERMINEE'),
-    (5, '2024-11-30', 1, 'TERMINEE'),
-    (5, '2025-01-02', 1, 'PLANIFIEE'),
-    (6, '2024-10-25', 2, 'TERMINEE'),
-    (7, '2024-08-10', 4, 'TERMINEE'),
-    (8, '2024-12-01', 1, 'TERMINEE'),
-    (9, '2024-10-30', 2, 'TERMINEE'),
-    (10, '2024-11-15', 2, 'TERMINEE');
+    -- Maintenances pour Plateforme Alpha (intervalle 30 jours) - avant les campagnes
+    (1, '2024-01-01', 2, 'TERMINEE'),
+    (1, '2025-01-01', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Beta (intervalle 45 jours)
+    (2, '2023-12-20', 1, 'TERMINEE'),
+    (2, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Gamma (intervalle 21 jours)
+    (3, '2024-01-01', 3, 'TERMINEE'),
+    (3, '2024-12-01', 3, 'TERMINEE'),
+    -- Maintenances pour Plateforme Delta (intervalle 60 jours)
+    (4, '2023-11-20', 2, 'TERMINEE'),
+    (4, '2024-11-20', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Epsilon (intervalle 28 jours)
+    (5, '2024-01-01', 1, 'TERMINEE'),
+    (5, '2024-12-01', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Zeta (intervalle 35 jours)
+    (6, '2023-12-25', 2, 'TERMINEE'),
+    (6, '2024-12-25', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Eta (intervalle 90 jours)
+    (7, '2023-10-01', 4, 'TERMINEE'),
+    (7, '2024-10-01', 4, 'TERMINEE'),
+    -- Maintenances pour Plateforme Theta (intervalle 14 jours)
+    (8, '2024-01-01', 1, 'TERMINEE'),
+    (8, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Iota (intervalle 42 jours)
+    (9, '2024-01-01', 2, 'TERMINEE'),
+    (9, '2024-12-10', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Kappa (intervalle 56 jours)
+    (10, '2023-12-01', 2, 'TERMINEE'),
+    (10, '2024-12-01', 2, 'TERMINEE');
