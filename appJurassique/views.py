@@ -4,7 +4,7 @@ from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm, CampagneForm)
+                                 AssociateFilesForm, CampagneForm, LieuForm)
 from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
                                   ECHANTILLON, RAPPORTER, LIEU_FOUILLE, PLATEFORME)
 from .utils import creer_campagne, obtenir_membres_compatibles
@@ -292,6 +292,28 @@ def supprimer_lieu(idLieu):
     db.session.delete(lieu)
     db.session.commit()
     return redirect(url_for('liste_lieux'))
+
+@app.route('/lieux/ajouter/', methods=['GET', 'POST'])
+@login_required
+def ajouter_lieu():
+    unForm = LieuForm()
+
+    if unForm.validate_on_submit():
+        unLieu = unForm.build_lieu()
+        db.session.add(unLieu)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unForm.nom.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
+
+    return render_template('add_lieu.html',
+                           title='Ajouter un lieu',
+                           current_page='lieux',
+                           form=unForm)
 
 
 @app.route("/login/", methods=(

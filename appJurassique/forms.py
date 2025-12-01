@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, HiddenField, PasswordField, SelectField,
                      DateField, MultipleFileField, SubmitField, IntegerField, SelectMultipleField)
 from wtforms.validators import DataRequired, EqualTo, NumberRange,Optional
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL, LIEU_FOUILLE
 from hashlib import sha256
 
 
@@ -109,3 +109,14 @@ class CampagneForm(FlaskForm):
         choices=[],
         coerce=str,
     )
+    
+
+class LieuForm(FlaskForm):
+    
+    nomLieu = StringField("Nom du lieu", validators=[DataRequired()])
+    next = HiddenField()
+    
+    def build_lieu(self):
+        return LIEU_FOUILLE(
+            nomLieu=self.nomLieu.data
+        )
