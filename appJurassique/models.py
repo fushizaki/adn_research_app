@@ -72,10 +72,10 @@ class LIEU_FOUILLE(db.Model):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
 class role_labo_enum(enum.Enum):
-    Directeur = "Directeur"
-    Technicien = "Technicien"
-    Administratif = "Administratif"
-    Chercheur = "Chercheur"
+    DIRECTION = "DIRECTION"
+    TECHNICIEN = "TECHNICIEN"
+    ADMINISTRATION = "ADMINISTRATION"
+    CHERCHEUR = "CHERCHEUR"
     
     def get_roles():
         return [role.value for role in role_labo_enum]

@@ -151,7 +151,7 @@ def set_budget():
             return redirect(unForm.next.data or url_for('index'))
     return render_template('set_budget.html',
                            title='Définir le budget',
-                           current_page='dashboard',
+                           current_page='budget',
                            form=unForm)
 
 @app.route('/campagnes/<int:idCampagne>/view/')
@@ -166,6 +166,19 @@ def view_campagnes(idCampagne):
                            current_page='campagne',
                            campagne=campagne,
                            upload_form=upload_form)
+
+
+@app.route('/campagnes/<int:idCampagne>/supprimer/')
+@login_required
+def supprimer_campagne(idCampagne):
+    campagne = db.session.get(CAMPAGNE, idCampagne)
+    if campagne is None:
+        return render_template('404.html', message="Campagne non trouvée"), 404
+    if campagne:
+        db.session.delete(campagne)
+        db.session.commit()
+    return redirect(url_for('liste_campagnes'))
+    
 
 @app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
     'POST',))
@@ -246,7 +259,7 @@ def liste_campagnes():
     campagnes = CAMPAGNE.query.all()
     return render_template("liste_campagnes.html",
                            title="Liste des campagnes",
-                           current_page="campagnes",
+                           current_page="campagne",
                            campagnes=campagnes)
 
 
