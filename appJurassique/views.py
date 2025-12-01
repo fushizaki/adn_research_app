@@ -1,11 +1,122 @@
-from flask import render_template, request, url_for, redirect
+from pathlib import Path
+from flask import current_app, render_template, request, url_for, redirect
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import LoginForm, RegisterForm, BudgetForm, MaintenanceForm
-from appJurassique.models import PERSONNE, role_labo_enum, PLATEFORME
+from appJurassique.forms import AssociateFilesForm, LoginForm, RegisterForm, BudgetForm, MaintenanceForm
+from appJurassique.models import CAMPAGNE, ECHANTILLON, PERSONNE, RAPPORTER, role_labo_enum, PLATEFORME
 from appJurassique.utils import verifier_chevauchement_campagne
 
+
+@app.route('/dashboard/set_budget/', methods=(
+    'GET',
+    'POST',
+))
+@login_required
+def set_budget():
+    unForm = BudgetForm()
+    if not unForm.is_submitted():
+        unForm.next.data = request.args.get('next')
+    elif unForm.validate_on_submit():
+        unBudget = unForm.build_budget()
+        db.session.add(unBudget)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unForm.date.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(unForm.next.data or url_for('index'))
+    return render_template('set_budget.html',
+                           title='Définir le budget',
+                           current_page='dashboard',
+                           form=unForm)
+
+@app.route('/campagnes/<int:idCampagne>/view/')
+@login_required
+def view_campagnes(idCampagne):
+    campagne = db.session.get(CAMPAGNE, idCampagne)
+    if campagne is None:
+        return render_template('404.html', message="Campagne non trouvée"), 404
+    upload_form = AssociateFilesForm()
+    return render_template('view_campagne.html',
+                           title=f'Campagne {campagne.idCampagne}',
+                           current_page='campagne',
+                           campagne=campagne,
+                           upload_form=upload_form)
+
+@app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
+    'POST',))
+@login_required
+def associer_fichier(idCampagne):
+    campagne = db.session.get(CAMPAGNE, idCampagne)
+    if campagne is None:
+        return render_template('404.html', message="Campagne non trouvée"), 404
+
+    form = AssociateFilesForm()
+    if not form.validate_on_submit():
+        return render_template('view_campagne.html',
+                               title=f'Campagne {idCampagne}',
+                               current_page='campagne',
+                               campagne=campagne,
+                               upload_form=form), 400
+
+    upload_folder = current_app.config.get('ECHANTILLON_UPLOAD_FOLDER')
+    if not upload_folder:
+        upload_folder = Path(current_app.root_path) / 'data' / 'adn'
+
+    try:
+        for storage in form.file.data:
+            if storage is None or storage.filename is None:
+                continue
+            filename = storage.filename
+            if not filename:
+                continue
+
+            target_path = Path(upload_folder) / filename
+
+            storage.save(target_path)
+
+            echantillon = ECHANTILLON(fichierAdn=target_path.name)
+            db.session.add(echantillon)
+            db.session.flush()
+
+            rapport = RAPPORTER(idEchantillon=echantillon.idEchantillon,
+                                idCampagne=idCampagne)
+            db.session.add(rapport)
+        db.session.commit()
+    except Exception as e:
+        print("Erreur lors de l'association des fichiers:", e)
+        db.session.rollback()
+
+    return redirect(url_for('view_campagnes', idCampagne=idCampagne))
+
+
+@app.route("/personnels/")
+@login_required
+def liste_personnels():
+    personnels = PERSONNE.query.all()
+    return render_template("liste_personnels.html",
+                           title="Liste des personnels",
+                           current_page="personnels",
+                           personnels=personnels)
+
+
+@app.route("/personnels/<string:username>/supprimer/")
+@login_required
+def supprimer_personnel(username):
+    personnel = PERSONNE.query.filter_by(username=username).first()
+    if personnel:
+        db.session.delete(personnel)
+        db.session.commit()
+    return redirect(url_for('liste_personnels'))
+
+@app.route("/personnels/ajouter/")
+@login_required
+def ajouter_personnel():
+    # TODO
+    return "Ajouter un personnel - Fonctionnalité à implémenter"
 
 @app.route('/')
 @app.route('/index/')

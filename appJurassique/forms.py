@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, IntegerField
+from wtforms import *
 from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL, MAINTENANCE, PLATEFORME, statut
+from .models import *
 from hashlib import sha256
 from datetime import date
 
@@ -68,6 +68,11 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+    
+class AssociateFilesForm(FlaskForm):
+    file = MultipleFileField("Fichiers d'échantillon",
+                             validators=[DataRequired()])
+    submit = SubmitField('Associer les fichiers')
 
 
 class MaintenanceForm(FlaskForm):

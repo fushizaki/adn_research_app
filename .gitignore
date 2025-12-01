@@ -208,4 +208,8 @@ __marimo__/
 node_modules/
 
 # Tailwind CSS
+
 output.css
+
+# data
+data/adn/*
