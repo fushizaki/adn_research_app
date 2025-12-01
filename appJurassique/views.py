@@ -15,17 +15,15 @@ def index():
 
 @app.route('/add_campagne/', methods=['POST', 'GET'])
 def add_campagne():
-    """Crée une nouvelle campagne avec validation des habilitations."""
+    """Crée une nouvelle campagne."""
     lieux = LIEU_FOUILLE.query.all()
     plateformes = PLATEFORME.query.all()
 
     form = CampagneForm()
     form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
-        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
-    ]
+        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux]
     form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
-        (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes
-    ]
+        (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes]
 
     formdata = request.form if request.method == 'POST' else request.args
     if formdata:
@@ -33,8 +31,7 @@ def add_campagne():
 
     message = request.args.get('error') or request.args.get('success')
     message_type = 'error' if request.args.get('error') else (
-        'success' if request.args.get('success') else None
-    )
+        'success' if request.args.get('success') else None)
 
     plateforme_selectionnee = None
     membres_compatibles = []
@@ -53,8 +50,7 @@ def add_campagne():
                 membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
                 form.membres.choices = [
                     (membre.username, f"{membre.nom} {membre.prenom}")
-                    for membre, compatible in membres_compatibles
-                ]
+                    for membre, compatible in membres_compatibles]
                 if form.duree.data:
                     budget_estime = estimer_cout_campagne(plateforme_selectionnee, form.duree.data)
                 if form.membres.data:
@@ -78,8 +74,7 @@ def add_campagne():
                 budget_mensuel=budget_mensuel,
                 budget_estime=budget_estime,
                 message=message,
-                message_type=message_type,
-            )
+                message_type=message_type,)
         
         if not form.validate():
             first_error = next(iter(form.errors.values()))[0]
@@ -110,9 +105,7 @@ def add_campagne():
                         id_lieu=id_lieu,
                         id_plateforme=id_plateforme_int,
                         noms_utilisateurs_membres=membres_usernames,
-                        titre=titre
-                    )
-
+                        titre=titre)
                     if error:
                         message = error
                         message_type = 'error'
@@ -132,8 +125,9 @@ def add_campagne():
         budget_mensuel=budget_mensuel,
         budget_estime=budget_estime,
         message=message,
-        message_type=message_type
-    )
+        message_type=message_type)
+
+
 
 @app.route('/dashboard/set_budget/', methods=(
     'GET',

@@ -1,13 +1,9 @@
 from datetime import timedelta
 from .app import db
-from .models import (
-    CAMPAGNE, PLATEFORME, PERSONNE, PARTICIPER,
-    PLANIFIER, SEJOURNER, NECESSITER, HABILITATION,
-    UTILISER, MATERIEL, MAINTENANCE, BUDGET_MENSUEL
-)
+from .models import *
 
 def calculer_date_fin(date_debut, duree_jours):
-    """Retourne la date de fin incluse."""
+
     if not date_debut:
         return None
     jours = max(1, int(duree_jours))
@@ -15,7 +11,7 @@ def calculer_date_fin(date_debut, duree_jours):
 
 
 def periodes_se_chevauchent(debut_a, fin_a, debut_b, fin_b):
-    """Détermine si deux intervalles se superposent."""
+
     return not (fin_a < debut_b or fin_b < debut_a)
 
 
@@ -33,21 +29,19 @@ def verifier_nombre_membres(plateforme, membres):
 def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisateurs_membres, titre=None):
     """
     Crée une nouvelle campagne avec toutes les validations nécessaires.
-    Les triggers SQL géreront les validations de disponibilité et d'habilitations.
     """
     try:
         plateforme = PLATEFORME.query.get(id_plateforme)
         if not plateforme:
             return None, f"Plateforme avec l'ID {id_plateforme} introuvable."
-
+        
         membres = PERSONNE.query.filter(PERSONNE.username.in_(noms_utilisateurs_membres)).all()
         if len(membres) != len(noms_utilisateurs_membres):
             return None, "Un ou plusieurs membres n'ont pas été trouvés."
-
+        
         ok, erreur = verifier_nombre_membres(plateforme, membres)
         if not ok:
             return None, erreur
-
         date_fin = calculer_date_fin(date_debut, duree_jours)
 
         # ok, erreur = verifier_disponibilite_plateforme(id_plateforme, date_debut, date_fin)
@@ -101,16 +95,13 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
 
 def obtenir_membres_compatibles(id_plateforme, date_debut=None, date_fin=None):
     """
-    Retourne la liste des membres compatibles avec une plateforme donnée.
     Filtre les membres habilités ET disponibles pour les dates données.
-    
     Args:
-        id_plateforme: ID de la plateforme
-        date_debut: Date de début de la campagne (optionnel)
-        date_fin: Date de fin de la campagne (optionnel)
-    
+        id_plateforme: ID 
+        date_debut: Date de début 
+        date_fin: Date de fin 
     Returns:
-        list: liste de tuples (PERSONNE, bool) où bool indique si compatible et disponible
+        list: liste de tuples (PERSONNE, bool)
     """
     
     try:
@@ -166,12 +157,13 @@ def obtenir_membres_compatibles(id_plateforme, date_debut=None, date_fin=None):
         import traceback
         traceback.print_exc()
         return []
+    
 
-#====== FONCTIONS QUI VERIFIE LES CONDITIONS REQUISES ======
+
+#====== fonctions qui verifient. elles sont commentées car pas assez d'insert  ======
 
 def verifier_disponibilite_plateforme(id_plateforme, date_debut, date_fin):
     """Vérifie que la plateforme n'est pas déjà utilisée sur la période."""
-    # Désactivé : la disponibilité est maintenant contrôlée par des triggers SQL.
     # campagnes = (CAMPAGNE.query
     #              .join(PLANIFIER, PLANIFIER.idCampagne == CAMPAGNE.idCampagne)
     #              .filter(PLANIFIER.idPlateforme == id_plateforme)
@@ -187,7 +179,6 @@ def verifier_disponibilite_plateforme(id_plateforme, date_debut, date_fin):
 
 def verifier_disponibilite_membres(membres, date_debut, date_fin):
     """S'assure qu'aucun membre n'est engagé sur une autre campagne."""
-    # Désactivé : la disponibilité des membres est maintenant vérifiée côté base.
     # for membre in membres:
     #     campagnes = (CAMPAGNE.query
     #                  .join(PARTICIPER, PARTICIPER.idCampagne == CAMPAGNE.idCampagne)
@@ -204,7 +195,6 @@ def verifier_disponibilite_membres(membres, date_debut, date_fin):
 
 def verifier_habilitations_membres(id_plateforme, membres):
     """Confirme que tous les membres sélectionnés sont habilités pour la plateforme."""
-    # Désactivé : les triggers garantissent les habilitations nécessaires.
     # compatibles = obtenir_membres_compatibles(id_plateforme)
     # habilites = {m.username for m, ok in compatibles if ok}
     # non_habilites = [m for m in membres if m.username not in habilites]
@@ -216,7 +206,6 @@ def verifier_habilitations_membres(id_plateforme, membres):
 
 def verifier_maintenance_plateforme(plateforme, date_debut, date_fin):
     """Vérifie que l'intervalle de maintenance n'arrive pas à expiration."""
-    # Désactivé : la base valide déjà les contraintes de maintenance.
     # intervalle = plateforme.intervalle_maintenance
     # if not intervalle:
     #     return True, None
@@ -240,43 +229,35 @@ def verifier_maintenance_plateforme(plateforme, date_debut, date_fin):
     return True, None
 
 
-#====== FIN DES VÉRIFICATIONS ======
+
+#==== getters
+
 
 def obtenir_plateformes_disponibles(date_debut, duree_jours):
     """
     Retourne la liste des plateformes disponibles pour une date et durée donnée.
-    Une plateforme est disponible si:
-    - Elle n'est pas mobilisée par une autre campagne
-    - Son intervalle de maintenance n'arrive pas à expiration
-    
     Args:
         date_debut: Date de début de la campagne
         duree_jours: Durée en jours
-    
     Returns:
         list: IDs des plateformes disponibles
     """
     if not date_debut or not duree_jours:
         return []
-    
+
     try:
         date_fin = calculer_date_fin(date_debut, duree_jours)
         toutes_plateformes = PLATEFORME.query.all()
         plateformes_disponibles = []
         
         for plateforme in toutes_plateformes:
-            # Vérifier la disponibilité
             ok, _ = verifier_disponibilite_plateforme(plateforme.idPlateforme, date_debut, date_fin)
             if not ok:
                 continue
-            
-            # Vérifier la maintenance
             ok, _ = verifier_maintenance_plateforme(plateforme, date_debut, date_fin)
             if not ok:
                 continue
-            
             plateformes_disponibles.append(plateforme.idPlateforme)
-        
         return plateformes_disponibles
     
     except Exception as e:
@@ -285,7 +266,7 @@ def obtenir_plateformes_disponibles(date_debut, duree_jours):
 
 
 def recuperer_budget_mensuel(date_objet):
-    """Retourne le budget du mois correspondant à la date donnée."""
+
     if not date_objet:
         return None
     return BUDGET_MENSUEL.query.filter_by(
@@ -295,7 +276,7 @@ def recuperer_budget_mensuel(date_objet):
 
 
 def estimer_cout_campagne(plateforme, duree_jours):
-    """Calcule le coût estimé en fonction du coût journalier."""
+
     if not plateforme or not plateforme.cout_journalier:
         return None
     jours = max(1, int(duree_jours))
