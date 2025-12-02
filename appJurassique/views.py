@@ -313,7 +313,58 @@ def maintenance():
     )
 
 
-@app.route("/login/", methods=("GET", "POST"))
+@app.route("/lieux/")
+@login_required
+def liste_lieux():
+    lieux = LIEU_FOUILLE.query.all()
+    error = request.args.get('error')
+    success = request.args.get('success')
+    return render_template("liste_lieux.html",
+                           title="Liste des lieux",
+                           current_page="lieux",
+                           lieux=lieux,
+                           error=error,
+                           success=success)
+
+@app.route('/lieux/<int:idLieu>/supprimer/')
+@login_required
+def supprimer_lieu(idLieu):
+    lieu = db.session.get(LIEU_FOUILLE, idLieu)
+    if lieu is None:
+        return render_template('404.html', message="Lieu non trouvé"), 404
+    if lieu.campagnes:
+        return redirect(url_for('liste_lieux', error='Suppression impossible : campagnes associées'))
+    db.session.delete(lieu)
+    db.session.commit()
+    return redirect(url_for('liste_lieux'))
+
+@app.route('/lieux/ajouter/', methods=['GET', 'POST'])
+@login_required
+def ajouter_lieu():
+    unForm = LieuForm()
+
+    if unForm.validate_on_submit():
+        unLieu = unForm.build_lieu()
+        db.session.add(unLieu)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unForm.nom.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
+
+    return render_template('add_lieu.html',
+                           title='Ajouter un lieu',
+                           current_page='lieux',
+                           form=unForm)
+
+
+@app.route("/login/", methods=(
+    "GET",
+    "POST",
+))
 def login():
     unForm = LoginForm()
     unUser = None

@@ -151,6 +151,16 @@ class CampagneForm(FlaskForm):
         choices=[],
         coerce=str,
     )
+    
+
+class LieuForm(FlaskForm):
+    
+    nomLieu = StringField("Nom du lieu", validators=[DataRequired()])
+    next = HiddenField()
+    
+    def build_lieu(self):
+        return LIEU_FOUILLE(
+            nomLieu=self.nomLieu.data
 
 
 class MaintenanceForm(FlaskForm):
