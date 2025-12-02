@@ -139,5 +139,3 @@ class MaintenanceForm(FlaskForm):
             idPlateforme=int(self.idPlateforme.data),
             statut=statut.PLANIFIEE,
         )
-
-

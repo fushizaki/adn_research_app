@@ -1,19 +1,21 @@
-from flask import (render_template, request, url_for, redirect, current_app)
-from appJurassique.utils import creer_campagne, obtenir_membres_compatibles
-from .app import app, db
+from pathlib import Path
+from flask import current_app, render_template, request, url_for, redirect
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
+from .app import app, db
 from appJurassique.forms import (CampagneForm, LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm)
-from appJurassique.models import (CAMPAGNE, LIEU_FOUILLE, PERSONNE, PLATEFORME, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER)
-from pathlib import Path
+                                 AssociateFilesForm, MaintenanceForm)
+from appJurassique.models import (CAMPAGNE, LIEU_FOUILLE, PERSONNE, PLATEFORME, 
+                                  role_labo_enum, ECHANTILLON, RAPPORTER)
+from appJurassique.utils import (creer_campagne, obtenir_membres_compatibles,
+                                verifier_chevauchement_campagne)
 
 
 @app.route('/')
 @app.route('/index/')
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
+
 
 @app.route('/add_campagne/', methods=['GET', 'POST'])
 def add_campagne():
@@ -257,10 +259,62 @@ def ajouter_personnel():
     # TODO
     return "Ajouter un personnel - Fonctionnalité à implémenter"
 
-@app.route("/login/", methods=(
-    "GET",
-    "POST",
-))
+
+@app.route('/maintenance/', methods=['GET', 'POST'])
+def maintenance():
+    plateformes = PLATEFORME.query.all()
+    form = MaintenanceForm()
+    form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+        (p.idPlateforme, p.nom) for p in plateformes]
+    
+    message = None
+    message_type = None
+    
+    if request.method == 'POST':
+        form.process(formdata=request.form)
+        if form.validate():
+            try:
+                erreur_chevauchement = verifier_chevauchement_campagne(
+                    int(form.idPlateforme.data),
+                    form.dateDebut.data,
+                    form.duree.data
+                )
+                if erreur_chevauchement:
+                    message = erreur_chevauchement
+                    message_type = 'error'
+                else:
+                    new_maintenance = form.build_maintenance()
+                    db.session.add(new_maintenance)
+                    db.session.commit()
+                    message = 'Maintenance créée avec succès !'
+                    message_type = 'success'
+            except ValueError as e:
+                message = f'Erreur de validation : {str(e)}'
+                message_type = 'error'
+            except Exception as e:
+                message = f'Erreur : {str(e)}'
+                message_type = 'error'
+        else:
+            first_error = next(iter(form.errors.values()))[0]
+            message = first_error
+            message_type = 'error'
+    else:
+        message = request.args.get('error') or request.args.get('success')
+        message_type = 'error' if request.args.get('error') else (
+            'success' if request.args.get('success') else None
+        )
+    
+    return render_template(
+        'maintenance.html',
+        title='Prévoir une maintenance',
+        plateformes=plateformes,
+        form=form,
+        message=message,
+        message_type=message_type
+    )
+
+
+@app.route("/login/", methods=("GET", "POST"))
 def login():
     unForm = LoginForm()
     unUser = None
@@ -277,10 +331,7 @@ def login():
     return render_template("login.html", form=unForm)
 
 
-@app.route("/register/", methods=(
-    "GET",
-    "POST",
-))
+@app.route("/register/", methods=("GET","POST"))
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
