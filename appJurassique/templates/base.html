@@ -104,7 +104,7 @@
         </div>
         <div class="flex-1 flex flex-col {% if current_user.is_authenticated %}ml-64{% endif %}">
     {% endif %}
-            <main role="main" class="{% if current_user.is_authenticated %}flex-1{% else %}pt-20{% endif %}">
+            <main role="main" class="{% if current_user.is_authenticated %}flex-1{% else %}pt-10{% endif %}">
                 {% block main %}{% endblock %}
             </main>
     {% if current_user.is_authenticated %}

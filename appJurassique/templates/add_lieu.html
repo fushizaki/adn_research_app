@@ -2,7 +2,7 @@
 {% block main %}
 <div
     class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center min-h-screen drop-shadow-button">
-    <div class="rounded-[40px] bg-gray-div shadow-md p-10 mt-2 border border-green-button w-full max-w-3xl mx-4">
+    <div class="rounded-[40px] bg-gray-div shadow-md p-10 mt-2 border border-green-button w-full max-w-2xl mx-4">
         <div class="flex gap-3 mb-8">
             <div class="bg-green-button rounded-lg p-2">
                 <div class=" rounded-lg p-2 h-8 w-8 flex items-center justify-center">
@@ -22,9 +22,9 @@
             {{ form.hidden_tag() }}
             <div class="mb-6">
                 <label for="nomLieu" class="block text-sm font-semibold text-green-text mb-2">Nom du lieu</label>
-                {{ form.nomLieu(class_="w-full rounded-full border border-green-button/30 bg-gray-div px-4 py-3 text-sm
-                text-white placeholder:text-gray-300 focus:border-green-button focus:outline-none focus:ring-2
-                focus:ring-green-button/50", placeholder="Entrez le nom du lieu") }}
+                {{ form.nomLieu(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
+                focus:ring-green-button-menu", placeholder="Entrez le nom du lieu") }}
                 {% if form.nomLieu.errors %}
                 <p class="text-red-500 text-sm mt-2">{{ form.nomLieu.errors[0] }}</p>
                 {% endif %}
