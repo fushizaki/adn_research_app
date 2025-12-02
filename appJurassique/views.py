@@ -7,7 +7,7 @@ from algo.main import *
 from pathlib import Path
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
 from appJurassique.utils import *
@@ -149,9 +149,9 @@ def set_budget():
         db.session.add(unBudget)
         try:
             db.session.commit()
-        except IntegrityError:
+        except (IntegrityError, DataError):
             db.session.rollback()
-            unForm.date.errors.append(
+            unForm.budget_mensuel.errors.append(
                 "Une erreur est survenue, merci de réessayer.")
         else:
             return redirect(unForm.next.data or url_for('index'))
@@ -173,6 +173,14 @@ def view_campagnes(idCampagne):
                            campagne=campagne,
                            upload_form=upload_form)
 
+@app.route("/campagnes/")
+@login_required
+def liste_campagnes():
+    campagnes = CAMPAGNE.query.all()
+    return render_template("liste_campagnes.html",
+                           title="Liste des campagnes",
+                           current_page="campagne",
+                           campagnes=campagnes)
 
 @app.route('/campagnes/<int:idCampagne>/supprimer/')
 @login_required

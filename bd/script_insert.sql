@@ -293,7 +293,7 @@ VALUES
     (14, 15);
 
 INSERT into
-    RAPPORTER (idEchant, idCampagne)
+    RAPPORTER (idEchantillon, idCampagne)
 VALUES
     (1, 1),
     (2, 1),

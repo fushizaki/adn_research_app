@@ -59,8 +59,8 @@ class BudgetForm(FlaskForm):
                      format='%Y-%m',
                      validators=[DataRequired()],
                      render_kw={'type': 'month'})
-    budget_mensuel = StringField('Montant du budget',
-                                 validators=[DataRequired()])
+    budget_mensuel = DecimalField('Montant du budget',
+                                  validators=[DataRequired(), NumberRange(min=0, max=99999.99)])
     next = HiddenField()
 
     def build_budget(self):
@@ -161,6 +161,7 @@ class LieuForm(FlaskForm):
     def build_lieu(self):
         return LIEU_FOUILLE(
             nomLieu=self.nomLieu.data
+        )
 
 
 class MaintenanceForm(FlaskForm):
@@ -177,6 +178,13 @@ class MaintenanceForm(FlaskForm):
             DataRequired(message="La durée est obligatoire."),
             NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
         ],
+    )
+
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
     )
 
     next = HiddenField()
