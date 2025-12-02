@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError
-from .models import *
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, MultipleFileField, SubmitField, IntegerField, SelectMultipleField
+from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError, Optional
+from .models import MAINTENANCE, PERSONNE, role_labo_enum, BUDGET_MENSUEL, statut
 from hashlib import sha256
 from datetime import date
 
@@ -75,13 +75,42 @@ class AssociateFilesForm(FlaskForm):
     submit = SubmitField('Associer les fichiers')
 
 
-class MaintenanceForm(FlaskForm):
+class CampagneForm(FlaskForm):
+
+    titre = StringField("Titre", validators=[Optional()])
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+    duree = IntegerField(
+        "Durée en heures",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+        ],
+    )
+    idLieu = SelectField(
+        "Lieu de fouille",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+    )
     idPlateforme = SelectField(
         "Plateforme",
         choices=[],
         coerce=str,
         validators=[DataRequired(message="La plateforme est obligatoire.")],
     )
+    membres = SelectMultipleField(
+        "Membres",
+        choices=[],
+        coerce=str,
+    )
+
+
+
+class MaintenanceForm(FlaskForm):
 
     dateDebut = DateField(
         "Date de début",
@@ -110,4 +139,5 @@ class MaintenanceForm(FlaskForm):
             idPlateforme=int(self.idPlateforme.data),
             statut=statut.PLANIFIEE,
         )
+
 
