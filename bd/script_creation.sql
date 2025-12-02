@@ -7,7 +7,8 @@ CREATE TABLE
         PRIMARY KEY (idCampagne),
         idCampagne int NOT NULL AUTO_INCREMENT,
         dateDebut date NOT NULL,
-        duree int NOT NULL
+        duree int NOT NULL,
+        idLieu int
     );
 
 CREATE TABLE
@@ -32,7 +33,8 @@ CREATE TABLE
         PRIMARY KEY (idHabilitation),
         idHabilitation int NOT NULL AUTO_INCREMENT,
         nom_habilitation varchar(100) NOT NULL,
-        description varchar(500)
+        description varchar(500),
+        idMateriel int
     );
 
 CREATE TABLE
@@ -42,7 +44,8 @@ CREATE TABLE
         nom varchar(100) NOT NULL,
         min_nb_personne int CHECK (min_nb_personne > 0),
         cout_journalier decimal(10, 2),
-        intervalle_maintenance int CHECK (intervalle_maintenance > 0)
+        intervalle_maintenance int CHECK (intervalle_maintenance > 0),
+        idMateriel int
     );
 
 CREATE TABLE
@@ -114,6 +117,21 @@ CREATE TABLE
 
 
 CREATE TABLE
+    HISTORIQUE (
+        PRIMARY KEY (idHistorique),
+        idHistorique int NOT NULL AUTO_INCREMENT,
+        nom_fichier_base varchar(255),
+        proba float,
+        nb_remplacement int,
+        nb_insertion int,
+        nb_deletion int,
+        note varchar(255),
+        date_enregistrement datetime DEFAULT CURRENT_TIMESTAMP
+    );
+
+
+
+CREATE TABLE
     MATERIEL (
         PRIMARY KEY (idMateriel),
         idMateriel int NOT NULL AUTO_INCREMENT,
@@ -172,8 +190,12 @@ ALTER TABLE PARTICIPER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampa
 
 ALTER TABLE PARTICIPER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username);
 
+ALTER TABLE CAMPAGNE ADD FOREIGN KEY (idLieu) REFERENCES LIEU_FOUILLE (idLieu);
+
 ALTER TABLE HABILITER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username);
 
 ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
 
 ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
+
+ALTER TABLE PLATEFORME ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
