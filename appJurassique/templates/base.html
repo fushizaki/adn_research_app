@@ -48,8 +48,8 @@
                 <p class="text-white font-exo text-4xl font-bold">DINOTRACK</p>
             </div>
             <nav class="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
-                <a href="#"
-                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'dashboard' else 'text-green-button' }}">
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'index' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-house w-6 text-center"></i>
                     <span class="font-medium">Tableau de bord</span>
                 </a>
@@ -63,7 +63,7 @@
                     <i class="text-2xl fas fa-suitcase w-6 text-center"></i>
                     <span class="font-medium">Plateforme</span>
                 </a>
-                <a href="#"
+                <a href="{{ url_for('liste_personnels') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'personnels' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-user-group w-6 text-center"></i>
                     <span class="font-medium">Personnels</span>
@@ -78,12 +78,12 @@
                     <i class="text-2xl fas fa-sack-dollar w-6 text-center"></i>
                     <span class="font-medium">Budget</span>
                 </a>
-                <a href="#"
+                <a href="{{ url_for('maintenance') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'maintenances' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-wrench w-6 text-center"></i>
                     <span class="font-medium">Maintenances</span>
                 </a>
-                <a href="#"
+                <a href="{{ url_for('gerer_adn') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'echantillon-adn' else 'text-green-button' }}">
                     <i class="text-2xl fas fa-flask w-6 text-center"></i>
                     <span class="font-medium">Echantillon ADN</span>

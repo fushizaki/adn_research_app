@@ -71,10 +71,10 @@ CREATE TABLE
 
 CREATE TABLE
     ECHANTILLON (
-        PRIMARY KEY (idEchant),
-        idEchant int NOT NULL AUTO_INCREMENT,
-        seqNucleotides varchar(1000) NOT NULL,
-        commentairesEchantillon varchar(500)
+        PRIMARY KEY (idEchantillon),
+        idEchantillon int NOT NULL AUTO_INCREMENT,
+        fichierAdn varchar(100),
+        commentairesEchantillion varchar(500)
     );
 
 CREATE TABLE
@@ -87,9 +87,9 @@ CREATE TABLE
 
 CREATE TABLE
     APPARTENIR (
-        PRIMARY KEY (idEspece, idEchant),
-        idEspece int NOT NULL,
-        idEchant int NOT NULL
+        PRIMARY KEY (idEchantillon, idEspece),
+        idEchantillon int NOT NULL,
+        idEspece int NOT NULL
     );
 
 CREATE TABLE
@@ -101,8 +101,8 @@ CREATE TABLE
 
 CREATE TABLE
     RAPPORTER (
-        PRIMARY KEY (idEchant, idCampagne),
-        idEchant int NOT NULL,
+        PRIMARY KEY (idEchantillon, idCampagne),
+        idEchantillon int NOT NULL,
         idCampagne int NOT NULL
     );
 
@@ -172,9 +172,11 @@ ALTER TABLE UTILISER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMaterie
 
 ALTER TABLE UTILISER ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
 
+ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchantillon) REFERENCES ECHANTILLON (idEchantillon);
+
 ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEspece) REFERENCES ESPECE (idEspece);
 
-ALTER TABLE RAPPORTER ADD FOREIGN KEY (idEchant) REFERENCES ECHANTILLON (idEchant);
+ALTER TABLE RAPPORTER ADD FOREIGN KEY (idEchantillon) REFERENCES ECHANTILLON (idEchantillon);
 
 ALTER TABLE RAPPORTER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampagne);
 
