@@ -14,6 +14,24 @@ def periodes_se_chevauchent(debut_a, fin_a, debut_b, fin_b):
 
     return not (fin_a < debut_b or fin_b < debut_a)
 
+def verifier_chevauchement_campagne(id_plateforme, date_debut, duree_jours):
+    """
+    Vérifie si une maintenance chevauche une campagne existante sur la même plateforme.
+    Retourne un message d'erreur si chevauchement, None sinon.
+    """
+    date_fin_maintenance = date_debut + timedelta(days=duree_jours - 1)
+    
+    campagnes_plateforme = db.session.query(CAMPAGNE).join(
+        PLANIFIER, CAMPAGNE.idCampagne == PLANIFIER.idCampagne).filter(
+        PLANIFIER.idPlateforme == id_plateforme).all()
+    
+    for campagne in campagnes_plateforme:
+        date_fin_campagne = campagne.dateDebut + timedelta(days=campagne.duree - 1)
+        if date_debut <= date_fin_campagne and date_fin_maintenance >= campagne.dateDebut:
+            return f"Conflit avec une campagne existante (du {campagne.dateDebut} au {date_fin_campagne}) pour cette plateforme."
+    
+    return None
+
 
 def verifier_nombre_membres(plateforme, membres):
     """Vérifie que le nombre de membres est suffisant pour la plateforme."""
@@ -93,71 +111,6 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
         db.session.rollback()
         raise e
 
-def obtenir_membres_compatibles(id_plateforme, date_debut=None, date_fin=None):
-    """
-    Filtre les membres habilités ET disponibles pour les dates données.
-    Args:
-        id_plateforme: ID 
-        date_debut: Date de début 
-        date_fin: Date de fin 
-    Returns:
-        list: liste de tuples (PERSONNE, bool)
-    """
-    
-    try:
-        plateforme = PLATEFORME.query.get(id_plateforme)
-        if not plateforme:
-            return []
-        
-        tous_membres = PERSONNE.query.all()
-        utilisations = UTILISER.query.filter_by(idPlateforme=id_plateforme).all()
-        
-        if not utilisations:
-            materiels_ids = []
-        else:
-            materiels_ids = [u.idMateriel for u in utilisations]
-        
-        if materiels_ids:
-            habilitations_requises = db.session.query(HABILITATION).join(
-                NECESSITER, HABILITATION.idHabilitation == NECESSITER.idHabilitation
-            ).filter(NECESSITER.idMateriel.in_(materiels_ids)).all()
-        else:
-            habilitations_requises = []
-        
-        habilitations_requises_ids = set([h.idHabilitation for h in habilitations_requises])
-        
-        membres_compatibles = []
-        for membre in tous_membres:
-            if hasattr(membre, 'habiliter') and membre.habiliter:
-                habilitations_membre_ids = set([h.idHabilitation for h in membre.habiliter])
-            else:
-                habilitations_membre_ids = set()
-            
-            habilite = habilitations_requises_ids.issubset(habilitations_membre_ids)
-            
-            disponible = True
-            if date_debut and date_fin:
-                campagnes = (CAMPAGNE.query
-                            .join(PARTICIPER, PARTICIPER.idCampagne == CAMPAGNE.idCampagne)
-                            .filter(PARTICIPER.username == membre.username)
-                            .all())
-                for campagne in campagnes:
-                    fin_existante = calculer_date_fin(campagne.dateDebut, campagne.duree)
-                    if periodes_se_chevauchent(date_debut, date_fin, campagne.dateDebut, fin_existante):
-                        disponible = False
-                        break
-            
-            compatible = habilite and disponible
-            membres_compatibles.append((membre, compatible))
-        
-        return membres_compatibles
-    
-    except Exception as e:
-        print(f"erreur dans la fonction obtenir_membres_compatibles: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return []
-    
 
 
 #====== fonctions qui verifient. elles sont commentées car pas assez d'insert  ======
@@ -231,6 +184,74 @@ def verifier_maintenance_plateforme(plateforme, date_debut, date_fin):
 
 
 #==== getters
+
+
+def obtenir_membres_compatibles(id_plateforme, date_debut=None, date_fin=None):
+    """
+    Filtre les membres habilités ET disponibles pour les dates données.
+    Args:
+        id_plateforme: ID 
+        date_debut: Date de début 
+        date_fin: Date de fin 
+    Returns:
+        list: liste de tuples (PERSONNE, bool)
+    """
+    
+    try:
+        plateforme = PLATEFORME.query.get(id_plateforme)
+        if not plateforme:
+            return []
+        
+        tous_membres = PERSONNE.query.all()
+        utilisations = UTILISER.query.filter_by(idPlateforme=id_plateforme).all()
+        
+        if not utilisations:
+            materiels_ids = []
+        else:
+            materiels_ids = [u.idMateriel for u in utilisations]
+        
+        if materiels_ids:
+            habilitations_requises = db.session.query(HABILITATION).join(
+                NECESSITER, HABILITATION.idHabilitation == NECESSITER.idHabilitation
+            ).filter(NECESSITER.idMateriel.in_(materiels_ids)).all()
+        else:
+            habilitations_requises = []
+        
+        habilitations_requises_ids = set([h.idHabilitation for h in habilitations_requises])
+        
+        membres_compatibles = []
+        for membre in tous_membres:
+            if hasattr(membre, 'habiliter') and membre.habiliter:
+                habilitations_membre_ids = set([h.idHabilitation for h in membre.habiliter])
+            else:
+                habilitations_membre_ids = set()
+            
+            habilite = habilitations_requises_ids.issubset(habilitations_membre_ids)
+            
+            disponible = True
+            if date_debut and date_fin:
+                campagnes = (CAMPAGNE.query
+                            .join(PARTICIPER, PARTICIPER.idCampagne == CAMPAGNE.idCampagne)
+                            .filter(PARTICIPER.username == membre.username)
+                            .all())
+                for campagne in campagnes:
+                    fin_existante = calculer_date_fin(campagne.dateDebut, campagne.duree)
+                    if periodes_se_chevauchent(date_debut, date_fin, campagne.dateDebut, fin_existante):
+                        disponible = False
+                        break
+            
+            compatible = habilite and disponible
+            membres_compatibles.append((membre, compatible))
+        
+        return membres_compatibles
+    
+    except Exception as e:
+        print(f"erreur dans la fonction obtenir_membres_compatibles: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return []
+    
+
 
 
 def obtenir_plateformes_disponibles(date_debut, duree_jours):

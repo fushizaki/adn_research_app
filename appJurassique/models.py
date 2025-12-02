@@ -31,7 +31,6 @@ class PLATEFORME(db.Model):
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
     utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
 
-    #manque des trucs jsp
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
