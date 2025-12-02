@@ -1,10 +1,8 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from wtforms import (BooleanField, DateField, FloatField, HiddenField,
-                     IntegerField, PasswordField, SelectField,
-                     SelectMultipleField, StringField, SubmitField)
-from wtforms.validators import DataRequired, EqualTo, NumberRange, Optional
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from wtforms import *
+from wtforms.validators import *
+from .models import *
 from hashlib import sha256
 
 
@@ -112,3 +110,42 @@ class ResultatTraitemement(FlaskForm):
 
 class ReinitialiserResultatForm(FlaskForm):
     submit_reinitialiser = SubmitField('Reinitialiser les resultats')
+
+class AssociateFilesForm(FlaskForm):
+    file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
+    submit = SubmitField('Associer les fichiers')
+
+
+class CampagneForm(FlaskForm):
+    """Formulaire WTForms pour la création d'une campagne."""
+
+    titre = StringField("Titre", validators=[Optional()])
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+    duree = IntegerField(
+        "Durée en heures",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 heure."),
+        ],
+    )
+    idLieu = SelectField(
+        "Lieu de fouille",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+    )
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+    membres = SelectMultipleField(
+        "Membres",
+        choices=[],
+        coerce=str,
+    )

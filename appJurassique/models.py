@@ -11,6 +11,8 @@ class MATERIEL(db.Model):
     description = db.Column(db.String(500))
     plateforme = db.relationship('PLATEFORME', back_populates='materiel')
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
+    utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
@@ -27,6 +29,7 @@ class PLATEFORME(db.Model):
     materiel = db.relationship('MATERIEL', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
+    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
@@ -40,6 +43,7 @@ class HABILITATION(db.Model):
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='habilitations')
     habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='habilitation', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -66,10 +70,10 @@ class LIEU_FOUILLE(db.Model):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
 class role_labo_enum(enum.Enum):
-    RECHERCHE = "DIRECTION"
+    DIRECTION = "DIRECTION"
     TECHNICIEN = "TECHNICIEN"
     ADMINISTRATION = "ADMINISTRATION"
-    CHERCHEURSE = "CHERCHEUR(SE)"
+    CHERCHEUR = "CHERCHEUR"
     
     def get_roles():
         return [role.value for role in role_labo_enum]
@@ -159,8 +163,8 @@ class SEJOURNER(db.Model):
 class ECHANTILLON(db.Model):
     __tablename__ = 'ECHANTILLON'
     idEchantillon = db.Column(db.Integer, primary_key=True)
-    seqNucleotides = db.Column(db.String(1000), nullable=False)
-    commentairesEnchatillion = db.Column(db.String(500))
+    fichierAdn = db.Column(db.String(100))
+    commentairesEchantillion = db.Column(db.String(500))
     appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
     rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
 
@@ -233,8 +237,8 @@ class UTILISER(db.Model):
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
     quantite = db.Column(db.Integer)
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
+    materiel = db.relationship('MATERIEL', back_populates='utilisations')
+    plateforme = db.relationship('PLATEFORME', back_populates='utilisations')
 
     def __repr__(self):
         return f"<UTILISER Materiel {self.idMateriel} sur Plateforme {self.idPlateforme}>"
@@ -248,8 +252,8 @@ class NECESSITER(db.Model):
     idMateriel = db.Column(db.Integer,
                            db.ForeignKey('MATERIEL.idMateriel'),
                            primary_key=True)
-    materiel = db.relationship('MATERIEL', back_populates='habilitations')
-    habilitation = db.relationship('HABILITATION', back_populates='materiel')
+    materiel = db.relationship('MATERIEL', back_populates='necessites')
+    habilitation = db.relationship('HABILITATION', back_populates='necessites')
 
     def __repr__(self):
         return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
