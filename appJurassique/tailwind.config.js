@@ -6,6 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        'green-button': 'rgba(0, 255, 77, 1)',
         'gray-div': 'rgba(26, 31, 26, 1)',
         'green-l': 'rgba(0, 255, 77, 1)',
         'green-line': 'rgba(49, 190, 75, 1)',

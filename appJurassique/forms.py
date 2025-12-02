@@ -11,8 +11,8 @@ class MultiCheckboxField(SelectMultipleField):
 class Form_plateforme(FlaskForm):
     id_plateforme = HiddenField('id_plateforme')
     nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
-    cout_journalier = IntegerField('cout_journalier', validators = [DataRequired()])
-    minimum_personnes = IntegerField('minimum_personnes', validators = [DataRequired()])
-    intervalle_maintenance = IntegerField('intervalle_maintenance', validators = [DataRequired()])
+    cout_journalier = IntegerField('cout_journalier', validators = [DataRequired()], render_kw={"min": "1"})
+    minimum_personnes = IntegerField('minimum_personnes', validators = [DataRequired()], render_kw={"min": "1"})
+    intervalle_maintenance = IntegerField('intervalle_maintenance', validators = [DataRequired()], render_kw={"min": "1"})
 
     
