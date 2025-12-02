@@ -345,6 +345,23 @@ VALUES
 
 
 INSERT into
+    HISTORIQUE (
+        nom_fichier_base,
+        proba,
+        nb_remplacement,
+        nb_insertion,
+        nb_deletion,
+        note,
+        date_enregistrement
+    )
+VALUES
+    ('sample_theropode.adn', 0.15, 4, 2, 1, 'Test mutations multiples', NOW()),
+    ('specimen_brachio.adn', 0.05, 1, 0, 0, 'Verification faible proba', NOW()),
+    ('archive_veloci.adn', 0.25, 6, 3, 2, 'Scenario stress', NOW());
+
+
+
+INSERT into
     MATERIEL (nom, description)
 VALUES
     (
