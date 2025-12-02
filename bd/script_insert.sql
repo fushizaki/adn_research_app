@@ -62,12 +62,12 @@ VALUES
     ('Formation Cedar Mountain');
 
 INSERT into
-    HABILITATION (nom_habilitation, description)
+    HABILITATION (nom_habilitation, description, idMateriel)
 VALUES
-    ('électrique', 'Habilitation électrique'),
-    ('chimique', 'Habilitation chimique'),
-    ('biologique', 'Habilitation biologique'),
-    ('radiations', 'Habilitation radiations');
+    ('électrique', 'Habilitation électrique', 1),
+    ('chimique', 'Habilitation chimique', 2),
+    ('biologique', 'Habilitation biologique', 3),
+    ('radiations', 'Habilitation radiations', 4);
 
 INSERT into
     HABILITER (username, idHabilitation)
@@ -462,3 +462,37 @@ VALUES
     (14, 3),
     (15, 1),
     (15, 4);
+
+INSERT IGNORE into
+    MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)
+VALUES
+    -- Maintenances pour Plateforme Alpha (intervalle 30 jours) - avant les campagnes
+    (1, '2024-01-01', 2, 'TERMINEE'),
+    (1, '2025-01-01', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Beta (intervalle 45 jours)
+    (2, '2023-12-20', 1, 'TERMINEE'),
+    (2, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Gamma (intervalle 21 jours)
+    (3, '2024-01-01', 3, 'TERMINEE'),
+    (3, '2024-12-01', 3, 'TERMINEE'),
+    -- Maintenances pour Plateforme Delta (intervalle 60 jours)
+    (4, '2023-11-20', 2, 'TERMINEE'),
+    (4, '2024-11-20', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Epsilon (intervalle 28 jours)
+    (5, '2024-01-01', 1, 'TERMINEE'),
+    (5, '2024-12-01', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Zeta (intervalle 35 jours)
+    (6, '2023-12-25', 2, 'TERMINEE'),
+    (6, '2024-12-25', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Eta (intervalle 90 jours)
+    (7, '2023-10-01', 4, 'TERMINEE'),
+    (7, '2024-10-01', 4, 'TERMINEE'),
+    -- Maintenances pour Plateforme Theta (intervalle 14 jours)
+    (8, '2024-01-01', 1, 'TERMINEE'),
+    (8, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Iota (intervalle 42 jours)
+    (9, '2024-01-01', 2, 'TERMINEE'),
+    (9, '2024-12-10', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Kappa (intervalle 56 jours)
+    (10, '2023-12-01', 2, 'TERMINEE'),
+    (10, '2024-12-01', 2, 'TERMINEE');
