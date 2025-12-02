@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import (StringField, HiddenField, PasswordField, SelectField,
-                     DateField, MultipleFileField, SubmitField, IntegerField, SelectMultipleField)
-from wtforms.validators import DataRequired, EqualTo, NumberRange,Optional
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DateField, MultipleFileField, SubmitField, IntegerField, SelectMultipleField
+from wtforms.validators import DataRequired, EqualTo, NumberRange, ValidationError, Optional
+from .models import MAINTENANCE, PERSONNE, role_labo_enum, BUDGET_MENSUEL, statut
 from hashlib import sha256
+from datetime import date
 
 
 class LoginForm(FlaskForm):
@@ -68,8 +68,7 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
-
-
+    
 class AssociateFilesForm(FlaskForm):
     file = MultipleFileField("Fichiers d'échantillon",
                              validators=[DataRequired()])
@@ -77,7 +76,6 @@ class AssociateFilesForm(FlaskForm):
 
 
 class CampagneForm(FlaskForm):
-    """Formulaire WTForms pour la création d'une campagne."""
 
     titre = StringField("Titre", validators=[Optional()])
     dateDebut = DateField(
@@ -109,3 +107,35 @@ class CampagneForm(FlaskForm):
         choices=[],
         coerce=str,
     )
+
+
+
+class MaintenanceForm(FlaskForm):
+
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+
+    duree = IntegerField(
+        "Durée (en jours)",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+        ],
+    )
+
+    next = HiddenField()
+
+    def validate_dateDebut(self, field):
+        if field.data and field.data < date.today():
+            raise ValidationError("La date ne peut pas être dans le passé.")
+
+    def build_maintenance(self):
+        return MAINTENANCE(
+            dateMaintenance=self.dateDebut.data,
+            duree_maintenance=self.duree.data,
+            idPlateforme=int(self.idPlateforme.data),
+            statut=statut.PLANIFIEE,
+        )
