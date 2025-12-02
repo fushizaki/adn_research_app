@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import (StringField, HiddenField, PasswordField, SelectField,
-                     DateField, MultipleFileField, SubmitField, SelectMultipleField, widgets)
-from wtforms.validators import DataRequired, EqualTo, ValidationError
+from flask_wtf.file import FileField
+from wtforms import (BooleanField, DateField, FloatField, HiddenField,
+                     IntegerField, PasswordField, SelectField,
+                     SelectMultipleField, StringField, SubmitField, MultipleFileField, widgets)
+from wtforms.validators import DataRequired, EqualTo, NumberRange, Optional
 from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
 from hashlib import sha256
 
@@ -101,3 +103,44 @@ class FormPersonne(FlaskForm):
         if not field.data:
             raise ValidationError("Sélectionnez au moins une habilitation")
     
+class GenererSequenceForm(FlaskForm):
+    longueur = IntegerField('Longueur', validators=[DataRequired(), NumberRange(min=1, max=5000)])
+    nom_fichier = StringField('Nom du fichier', validators=[DataRequired()])
+    submit_generer = SubmitField('Generer et sauvegarder')
+
+
+class ChargerSequenceForm(FlaskForm):
+    fichier_adn = FileField('Fichier ADN', validators=[DataRequired()])
+    nom_souhaite = StringField('Nom souhaite', validators=[Optional()])
+    submit_charger = SubmitField('Charger le fichier')
+
+
+class ChoisirSequenceForm(FlaskForm):
+    sequences = SelectMultipleField('Fichiers ADN', choices=[], validators=[DataRequired()])
+    submit_traitements = SubmitField('Acceder aux traitements')
+
+
+class TraitementAdnForm(FlaskForm):
+    sequence_base = SelectField('Sequence de base', choices=[], validators=[DataRequired()])
+    proba = FloatField('Probabilite p', validators=[DataRequired(), NumberRange(min=0, max=1)])
+    mutation_remplacement = BooleanField('Mutation remplacement')
+    mutation_insertion = BooleanField('Mutation insertion')
+    mutation_deletion = BooleanField('Mutation deletion')
+    calcul_levenshtein = BooleanField('Calculer distance Levenshtein')
+    sequence_lev_a = SelectField('Sequence A', choices=[], validators=[Optional()])
+    sequence_lev_b = SelectField('Sequence B', choices=[], validators=[Optional()])
+    submit_traiter = SubmitField('Appliquer les traitements')
+
+
+class SauvegarderSequenceForm(FlaskForm):
+    nom_sequence = StringField('Nom du fichier', validators=[DataRequired()])
+    submit_sauvegarder = SubmitField('Sauvegarder la sequence')
+
+class ResultatTraitemement(FlaskForm):
+    telecharger_resultat =BooleanField('Télécharger les résultats')
+    telecharger_sequences_mutees = BooleanField('Sauvegarder les séquences mutées')
+    note = StringField('Note', validators=[Optional()])
+    submit_historique = SubmitField('Ajouter a l\'historique')
+
+class ReinitialiserResultatForm(FlaskForm):
+    submit_reinitialiser = SubmitField('Reinitialiser les resultats')

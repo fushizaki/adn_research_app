@@ -114,6 +114,21 @@ CREATE TABLE
 
 
 CREATE TABLE
+    HISTORIQUE (
+        PRIMARY KEY (idHistorique),
+        idHistorique int NOT NULL AUTO_INCREMENT,
+        nom_fichier_base varchar(255),
+        proba float,
+        nb_remplacement int,
+        nb_insertion int,
+        nb_deletion int,
+        note varchar(255),
+        date_enregistrement datetime DEFAULT CURRENT_TIMESTAMP
+    );
+
+
+
+CREATE TABLE
     MATERIEL (
         PRIMARY KEY (idMateriel),
         idMateriel int NOT NULL AUTO_INCREMENT,
