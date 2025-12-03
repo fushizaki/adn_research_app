@@ -50,7 +50,7 @@
                                 <td class="px-6 py-5 font-medium">{{ campagne.idCampagne }}</td>
                                 <td class="px-6 py-5">{{ campagne.dateDebut }}</td>
                                 <td class="px-6 py-5 text-green-button font-semibold">{{ campagne.duree }}</td>
-                                <td class="px-6 py-5 text-white/70">{{ campagne.lieu }}</td>
+                                <td class="px-6 py-5 text-white/70">{{ campagne.sejourner[0].lieu.nomLieu }}</td>
                                 <td class="px-6 py-5">{{ campagne.rapporter|length }}</td>
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4 text-base">

@@ -98,7 +98,7 @@ class CAMPAGNE(db.Model):
     idCampagne = db.Column(db.Integer, primary_key=True)
     dateDebut = db.Column(db.Date, nullable=False)
     duree = db.Column(db.Integer, nullable=False)
-    idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'))
+    idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'), nullable=False)
     lieu = db.relationship('LIEU_FOUILLE', back_populates='campagnes')
     participer = db.relationship('PARTICIPER', back_populates='campagne', cascade='all, delete-orphan')
     planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
