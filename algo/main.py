@@ -37,6 +37,8 @@ def simuler_mutations_remplacements(sequence: str, p: float) -> str:
     if p < 0 or p > 1:
         raise ValueError("Valeur de p pas comprise entre 0 et 1")
     for base in sequence:
+        if base not in constants.bases:
+            continue
         if random.random() < p:
             restes_bases = constants.bases.copy()
             restes_bases.remove(base)
@@ -153,10 +155,14 @@ def estimation_distance_mutation(echantillon1: str, echantillion2: str) -> int:
     """
     
     distance = 0
+    longueur_min = min(len(echantillon1), len(echantillion2))
     
-    for base in range(len(echantillon1)):
+    for base in range(longueur_min):
         if echantillon1[base] != echantillion2[base]:
             distance += 1
+    
+    # Ajouter la différence de longueur à la distance
+    distance += abs(len(echantillon1) - len(echantillion2))
     
     return distance
 

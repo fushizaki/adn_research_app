@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block main %}
+<section
+    class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center drop-shadow-button">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-md border-green-button border relative">
+        <h2 class="text-2xl font-bold mb-4 text-center text-white">Prévoir une maintenance</h2>
+        {% if message %}
+        <aside class="mb-6 px-4 py-3 rounded-lg text-sm {% if message_type == 'error' %}bg-red-900/40 border border-red-500 text-red-200{% else %}bg-green-900/40 border border-green-500 text-green-200{% endif %}" role="status">
+            {{ message }}
+        </aside>
+        {% endif %}
+        <form method="POST" action="{{ url_for('maintenance') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                <label for="idPlateforme" class="block text-green-text font-medium mb-2">Plateforme *</label>
+                {{ form.idPlateforme(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
+                focus:ring-green-button-menu", required=True) }}
+            </div>
+            <div class="mb-6">
+                <label for="dateDebut" class="block text-green-text font-medium mb-2">Date *</label>
+                {% set today = now().strftime('%Y-%m-%d') %}
+                {{ form.dateDebut(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4 py-3
+                text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2 focus:ring-green-button-menu",
+                required=True, min=today) }}
+            </div>
+            <div class="mb-6">
+                <label for="duree" class="block text-green-text font-medium mb-2">Durée (jours) *</label>
+                {{ form.duree(class_="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                py-3 text-gray-900 focus:border-green-button-menu focus:outline-none focus:ring-2
+                focus:ring-green-button-menu", required=True, min=1, type="number") }}
+            </div>
+            <div class="flex justify-center">
+                <button type="submit"
+                    class="w-full bg-green-button-menu text-white font-medium py-2 px-4 rounded-md hover:bg-green-button-menu-hover transition-colors duration-300">
+                    + Ajouter
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,15 +1,21 @@
+import algo
 from zipfile import Path
-from flask import flash, render_template, request, session, url_for, redirect, jsonify
+from flask import flash, render_template, request, session, url_for, redirect, jsonify, current_app
 from werkzeug.utils import secure_filename
 from algo import constants
 from algo.main import *
+from pathlib import Path
 from .app import app, db
 import algo
 from flask_login import login_user, logout_user, login_required, current_user
-from sqlalchemy.exc import IntegrityError
+from .utils import creer_campagne, obtenir_membres_compatibles
+from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
+from appJurassique.utils import *
 
+
+# ==================== ACCUEIL ====================
 
 @app.route('/')
 @app.route('/index/')
@@ -17,30 +23,194 @@ def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
 
-@app.route('/dashboard/set_budget/', methods=(
-    'GET',
-    'POST',
+# ==================== AUTHENTIFICATION ====================
+
+@app.route("/login/", methods=(
+    "GET",
+    "POST",
 ))
-@login_required
-def set_budget():
-    unForm = BudgetForm()
+def login():
+    unForm = LoginForm()
+    unUser = None
+
     if not unForm.is_submitted():
         unForm.next.data = request.args.get('next')
     elif unForm.validate_on_submit():
-        unBudget = unForm.build_budget()
-        db.session.add(unBudget)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            unForm.date.errors.append(
-                "Une erreur est survenue, merci de réessayer.")
+        unUser = unForm.get_authenticated_user()
+
+    if unUser:
+        login_user(unUser)
+        next = unForm.next.data or url_for("index", name=unUser.username)
+        return redirect(next)
+    return render_template("login.html", form=unForm)
+
+
+@app.route("/register/", methods=("GET","POST"))
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    form = RegisterForm()
+    role_choices = [('', 'Sélectionner un rôle')
+                    ] + [(role.value, role.value) for role in role_labo_enum]
+    form.role_labo.choices = role_choices
+
+    if not form.is_submitted():
+        form.next.data = request.args.get('next')
+
+    if form.validate_on_submit():
+        if PERSONNE.query.get(form.username.data):
+            form.username.errors.append("Cet identifiant est déjà utilisé.")
         else:
-            return redirect(unForm.next.data or url_for('index'))
-    return render_template('set_budget.html',
-                           title='Définir le budget',
-                           current_page='dashboard',
-                           form=unForm)
+            user = form.build_user()
+            db.session.add(user)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                form.username.errors.append(
+                    "Une erreur est survenue, merci de réessayer.")
+            else:
+                login_user(user)
+                next_url = form.next.data or url_for("index",
+                                                     name=user.username)
+                return redirect(next_url)
+
+    return render_template("register.html", form=form)
+
+@app.route("/logout/")
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+# ==================== CAMPAGNES ====================
+
+@app.route('/add_campagne/', methods=['GET', 'POST'])
+def add_campagne():
+    """Crée une nouvelle campagne."""
+    lieux = LIEU_FOUILLE.query.all()
+    plateformes = PLATEFORME.query.all()
+
+    form = CampagneForm()
+    form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
+        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux]
+    form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+        (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes]
+
+    formdata = request.form if request.method == 'POST' else request.args
+    if formdata:
+        form.process(formdata=formdata)
+
+    message = request.args.get('error') or request.args.get('success')
+    message_type = 'error' if request.args.get('error') else (
+        'success' if request.args.get('success') else None)
+
+    plateforme_selectionnee = None
+    membres_compatibles = []
+    membres_selectionnes = []
+    budget_mensuel = recuperer_budget_mensuel(form.dateDebut.data)
+    budget_estime = None
+
+    id_plateforme = form.idPlateforme.data or request.values.get('idPlateforme')
+    if id_plateforme is not None and id_plateforme != form.idPlateforme.data:
+        form.idPlateforme.data = id_plateforme
+    if id_plateforme:
+        try:
+            id_plateforme_int = int(id_plateforme)
+            plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
+            if plateforme_selectionnee:
+                membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
+                form.membres.choices = [
+                    (membre.username, f"{membre.nom} {membre.prenom}")
+                    for membre, compatible in membres_compatibles]
+                if form.duree.data:
+                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, form.duree.data)
+                if form.membres.data:
+                    membres_selectionnes = form.membres.data
+        except ValueError:
+            message = "Plateforme sélectionnée invalide."
+            message_type = 'error'
+
+    if request.method == 'POST':
+        if request.form.get('action') == 'load_members':
+            return render_template(
+                'add_campagne.html',
+                title='Ajouter une campagne',
+                current_page='campagnes',
+                form=form,
+                lieux=lieux,
+                plateformes=plateformes,
+                plateforme_selectionnee=plateforme_selectionnee,
+                membres_compatibles=membres_compatibles,
+                membres_selectionnes=membres_selectionnes,
+                budget_mensuel=budget_mensuel,
+                budget_estime=budget_estime,
+                message=message,
+                message_type=message_type,)
+        
+        if not form.validate():
+            first_error = next(iter(form.errors.values()))[0]
+            message = first_error
+            message_type = 'error'
+        else:
+            try:
+                titre = (form.titre.data or '').strip() or None
+                date_debut = form.dateDebut.data
+                duree_jours = form.duree.data
+                id_lieu = int(form.idLieu.data)
+                id_plateforme_int = int(form.idPlateforme.data)
+                membres_usernames = form.membres.data
+            except ValueError as exc:
+                message = f'Erreur de validation : {exc}'
+                message_type = 'error'
+            else:
+                if not membres_usernames:
+                    message = 'Vous devez sélectionner au moins un membre habilité'
+                    message_type = 'error'
+                else:
+                    if not plateforme_selectionnee or plateforme_selectionnee.idPlateforme != id_plateforme_int:
+                        plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
+                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_jours)
+                    campagne, error = creer_campagne(
+                        date_debut=date_debut,
+                        duree_jours=duree_jours,
+                        id_lieu=id_lieu,
+                        id_plateforme=id_plateforme_int,
+                        noms_utilisateurs_membres=membres_usernames,
+                        titre=titre)
+                    if error:
+                        message = error
+                        message_type = 'error'
+                    else:
+                        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
+
+    return render_template(
+        'add_campagne.html',
+        title='Ajouter une campagne',
+        current_page='campagnes',
+        form=form,
+        lieux=lieux,
+        plateformes=plateformes,
+        plateforme_selectionnee=plateforme_selectionnee,
+        membres_compatibles=membres_compatibles,
+        membres_selectionnes=membres_selectionnes,
+        budget_mensuel=budget_mensuel,
+        budget_estime=budget_estime,
+        message=message,
+        message_type=message_type)
+
+
+@app.route("/campagnes/")
+@login_required
+def liste_campagnes():
+    campagnes = CAMPAGNE.query.all()
+    return render_template("liste_campagnes.html",
+                           title="Liste des campagnes",
+                           current_page="campagne",
+                           campagnes=campagnes)
+
+
 
 @app.route('/campagnes/<int:idCampagne>/view/')
 @login_required
@@ -54,6 +224,19 @@ def view_campagnes(idCampagne):
                            current_page='campagne',
                            campagne=campagne,
                            upload_form=upload_form)
+
+
+@app.route('/campagnes/<int:idCampagne>/supprimer/')
+@login_required
+def supprimer_campagne(idCampagne):
+    campagne = db.session.get(CAMPAGNE, idCampagne)
+    if campagne is None:
+        return render_template('404.html', message="Campagne non trouvée"), 404
+    if campagne:
+        db.session.delete(campagne)
+        db.session.commit()
+    return redirect(url_for('liste_campagnes'))
+
 
 @app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
     'POST',))
@@ -102,6 +285,60 @@ def associer_fichier(idCampagne):
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
 
 
+# ==================== LIEUX ====================
+
+@app.route("/lieux/")
+@login_required
+def liste_lieux():
+    lieux = LIEU_FOUILLE.query.all()
+    error = request.args.get('error')
+    success = request.args.get('success')
+    return render_template("liste_lieux.html",
+                           title="Liste des lieux",
+                           current_page="lieux",
+                           lieux=lieux,
+                           error=error,
+                           success=success)
+
+
+@app.route('/lieux/ajouter/', methods=['GET', 'POST'])
+@login_required
+def ajouter_lieu():
+    unForm = LieuForm()
+
+    if unForm.validate_on_submit():
+        unLieu = unForm.build_lieu()
+        db.session.add(unLieu)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unForm.nom.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
+
+    return render_template('add_lieu.html',
+                           title='Ajouter un lieu',
+                           current_page='lieux',
+                           form=unForm)
+
+
+@app.route('/lieux/<int:idLieu>/supprimer/')
+@login_required
+def supprimer_lieu(idLieu):
+    lieu = db.session.get(LIEU_FOUILLE, idLieu)
+    if lieu is None:
+        return render_template('404.html', message="Lieu non trouvé"), 404
+    if lieu.campagnes:
+        return redirect(url_for('liste_lieux', error='Suppression impossible : campagnes associées'))
+    db.session.delete(lieu)
+    db.session.commit()
+    return redirect(url_for('liste_lieux'))
+
+
+# ==================== PERSONNELS ====================
+
 @app.route("/personnels/")
 @login_required
 def liste_personnels():
@@ -110,6 +347,13 @@ def liste_personnels():
                            title="Liste des personnels",
                            current_page="personnels",
                            personnels=personnels)
+
+
+@app.route("/personnels/ajouter/")
+@login_required
+def ajouter_personnel():
+    # TODO
+    return "Ajouter un personnel - Fonctionnalité à implémenter"
 
 
 @app.route("/personnels/<string:username>/supprimer/")
@@ -121,75 +365,102 @@ def supprimer_personnel(username):
         db.session.commit()
     return redirect(url_for('liste_personnels'))
 
-@app.route("/personnels/ajouter/")
-@login_required
-def ajouter_personnel():
-    # TODO
-    return "Ajouter un personnel - Fonctionnalité à implémenter"
 
-@app.route("/login/", methods=(
-    "GET",
-    "POST",
+# ==================== BUDGET ====================
+
+@app.route('/dashboard/set_budget/', methods=(
+    'GET',
+    'POST',
 ))
-def login():
-    unForm = LoginForm()
-    unUser = None
-
+@login_required
+def set_budget():
+    unForm = BudgetForm()
     if not unForm.is_submitted():
         unForm.next.data = request.args.get('next')
     elif unForm.validate_on_submit():
-        unUser = unForm.get_authenticated_user()
-
-    if unUser:
-        login_user(unUser)
-        next = unForm.next.data or url_for("index", name=unUser.username)
-        return redirect(next)
-    return render_template("login.html", form=unForm)
-
-
-@app.route("/register/", methods=(
-    "GET",
-    "POST",
-))
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    form = RegisterForm()
-    role_choices = [('', 'Sélectionner un rôle')
-                    ] + [(role.value, role.value) for role in role_labo_enum]
-    form.role_labo.choices = role_choices
-
-    if not form.is_submitted():
-        form.next.data = request.args.get('next')
-
-    if form.validate_on_submit():
-        if PERSONNE.query.get(form.username.data):
-            form.username.errors.append("Cet identifiant est déjà utilisé.")
+        unBudget = unForm.build_budget()
+        db.session.add(unBudget)
+        try:
+            db.session.commit()
+        except (IntegrityError, DataError):
+            db.session.rollback()
+            unForm.budget_mensuel.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
         else:
-            user = form.build_user()
-            db.session.add(user)
+            return redirect(unForm.next.data or url_for('index'))
+    return render_template('set_budget.html',
+                           title='Définir le budget',
+                           current_page='budget',
+                           form=unForm)
+
+
+# ==================== MAINTENANCE ====================
+
+@app.route('/maintenance/', methods=['GET', 'POST'])
+def maintenance():
+    plateformes = PLATEFORME.query.all()
+    form = MaintenanceForm()
+    form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
+        (p.idPlateforme, p.nom) for p in plateformes]
+    
+    message = None
+    message_type = None
+    
+    if request.method == 'POST':
+        form.process(formdata=request.form)
+        if form.validate():
             try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-                form.username.errors.append(
-                    "Une erreur est survenue, merci de réessayer.")
-            else:
-                login_user(user)
-                next_url = form.next.data or url_for("index",
-                                                     name=user.username)
-                return redirect(next_url)
+                id_plateforme = int(form.idPlateforme.data)
+                erreur_chevauchement = verifier_chevauchement_campagne(
+                    id_plateforme,
+                    form.dateDebut.data,
+                    form.duree.data
+                )
+                if erreur_chevauchement:
+                    message = erreur_chevauchement
+                    message_type = 'error'
+                else:
+                    erreur_maintenance = verifier_chevauchement_maintenance(
+                        id_plateforme,
+                        form.dateDebut.data,
+                        form.duree.data
+                    )
+                    if erreur_maintenance:
+                        message = erreur_maintenance
+                        message_type = 'error'
+                    else:
+                        new_maintenance = form.build_maintenance()
+                        db.session.add(new_maintenance)
+                        db.session.commit()
+                        message = 'Maintenance créée avec succès !'
+                        message_type = 'success'
+            except ValueError as e:
+                message = f'Erreur de validation : {str(e)}'
+                message_type = 'error'
+            except Exception as e:
+                message = f'Erreur : {str(e)}'
+                message_type = 'error'
+        else:
+            first_error = next(iter(form.errors.values()))[0]
+            message = first_error
+            message_type = 'error'
+    else:
+        message = request.args.get('error') or request.args.get('success')
+        message_type = 'error' if request.args.get('error') else (
+            'success' if request.args.get('success') else None
+        )
+    
+    return render_template(
+        'maintenance.html',
+        title='Prévoir une maintenance',
+        plateformes=plateformes,
+        form=form,
+        message=message,
+        message_type=message_type
+    )
 
-    return render_template("register.html", form=form)
 
-@app.route("/logout/")
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-#===================== PARTIE ADN  ====================
+# ==================== ADN - UTILITAIRES ====================
 
 DOSSIER_BASE = Path(__file__).resolve().parents[1]
 DOSSIER_ADN = DOSSIER_BASE / "algo" / "data"
@@ -234,9 +505,7 @@ def charger_sequence_fichier(nom_fichier: str) -> str:
     return chemin.read_text().strip().upper()
 
 
-
-
-#============== GERER ADN ==============
+# ==================== ADN - GESTION FICHIERS ====================
 
 
 @app.route('/gerer_adn/', methods=['GET', 'POST'])
@@ -307,7 +576,7 @@ def gerer_adn():
 
 
 
-#============== TRAITEMEMENTS  ADN ==============
+# ==================== ADN - TRAITEMENTS ====================
 
 
 @app.route('/traitements_adn/', methods=['GET', 'POST'])
@@ -433,7 +702,6 @@ def traitements_adn():
                            fichiers=fichiers_adn,
                            preselection=preselection,
                            form_traitement=form_traitement)
-from datetime import datetime  # si ce n'est pas déjà importé
 
 @app.route("/view_resultats/", methods=["GET"])
 @login_required
@@ -460,4 +728,36 @@ def resultat():
         )
     else:
         return redirect(url_for('register'))
+    
+@app.route('/add_plateforme/', methods=['GET', 'POST'])
+def add_plateforme():   
+    
+    if current_user.is_authenticated:
+        form = Form_plateforme()
 
+        if form.validate_on_submit():
+            plateforme_existe = PLATEFORME.query.filter(PLATEFORME.nom == form.nom_plateforme.data).first()
+            print(plateforme_existe)
+
+            if not plateforme_existe:
+                nouvelle_plateforme = PLATEFORME(
+                    nom=form.nom_plateforme.data,
+                    cout_journalier=form.cout_journalier.data,
+                    min_nb_personne=form.minimum_personnes.data,
+                    intervalle_maintenance=form.intervalle_maintenance.data
+                )
+
+                db.session.add(nouvelle_plateforme)
+                db.session.commit()
+
+                return redirect(url_for('index'))
+            else:
+                return render_template("add_plateforme.html", form_plateforme=form, message="Une plateforme avec le même nom existe déjà", message_type='error') 
+
+        return render_template("add_plateforme.html", form_plateforme=form)
+    else:
+        return redirect(url_for('register'))
+    
+
+if __name__ == "__main__":
+    app.run()
