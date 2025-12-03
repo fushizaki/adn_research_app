@@ -9,8 +9,6 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    plateformes = db.relationship('PLATEFORME', secondary='UTILISER', back_populates='materiels')
-    habilitations = db.relationship('HABILITATION', back_populates='materiel')
     utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
     necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
     
@@ -26,7 +24,6 @@ class PLATEFORME(db.Model):
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
     utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
-    materiels = db.relationship('MATERIEL', secondary='UTILISER', back_populates='plateformes')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
 
@@ -41,8 +38,6 @@ class HABILITATION(db.Model):
     idHabilitation = db.Column(db.Integer, primary_key=True)
     nom_habilitation = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='habilitations')
     habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
     necessites = db.relationship('NECESSITER', back_populates='habilitation', cascade='all, delete-orphan')
 

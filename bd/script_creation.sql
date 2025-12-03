@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS Jurassique;
+CREATE DATABASE IF NOT EXISTS jurassique_db;
 
-use Jurassique;
+use jurassique_db;
 
 CREATE TABLE
     CAMPAGNE (
