@@ -7,6 +7,7 @@ from algo.main import *
 from pathlib import Path
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
+from .utils import creer_campagne, obtenir_membres_compatibles
 from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
@@ -160,6 +161,7 @@ def set_budget():
                            current_page='budget',
                            form=unForm)
 
+
 @app.route('/campagnes/<int:idCampagne>/view/')
 @login_required
 def view_campagnes(idCampagne):
@@ -241,6 +243,26 @@ def associer_fichier(idCampagne):
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
 
 
+@app.route("/plateformes/")
+@login_required
+def liste_plateformes():
+    plateformes = PLATEFORME.query.all()
+    return render_template("liste_plateformes.html",
+                           title="Liste des plateformes",
+                           current_page="plateformes",
+                           plateformes=plateformes)
+
+
+@app.route("/plateformes/<int:idPlateforme>/supprimer/")
+@login_required
+def supprimer_plateforme(idPlateforme):
+    plateforme = PLATEFORME.query.filter_by(idPlateforme=idPlateforme).first()
+    if plateforme:
+        db.session.delete(plateforme)
+        db.session.commit()
+    return redirect(url_for('liste_plateformes'))
+
+
 @app.route("/personnels/")
 @login_required
 def liste_personnels():
@@ -259,6 +281,7 @@ def supprimer_personnel(username):
         db.session.delete(personnel)
         db.session.commit()
     return redirect(url_for('liste_personnels'))
+
 
 @app.route("/personnels/ajouter/")
 @login_required
