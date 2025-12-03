@@ -5,6 +5,9 @@ from werkzeug.utils import secure_filename
 from algo import constants
 from algo.main import *
 from pathlib import Path
+from datetime import date, timedelta
+from calendar import monthrange
+from sqlalchemy.orm import joinedload
 from .app import app, db
 import algo
 from flask_login import login_user, logout_user, login_required, current_user
@@ -17,11 +20,29 @@ from appJurassique.utils import *
 # ==================== ACCUEIL ====================
 
 
+MONTH_NAMES_FR = [
+    None,
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
+]
+
+
 @app.route('/')
 @app.route('/index/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     return render_template('index.html', title='Accueil', current_page='index')
-
 
 # ==================== AUTHENTIFICATION ====================
 
@@ -322,6 +343,43 @@ def supprimer_plateforme(idPlateforme):
     return redirect(url_for('liste_plateformes'))
 
 
+@app.route('/add_plateforme/', methods=['GET', 'POST'])
+@login_required
+def add_plateforme():
+
+    if current_user.is_authenticated:
+        form = Form_plateforme()
+
+        if form.validate_on_submit():
+            plateforme_existe = PLATEFORME.query.filter(
+                PLATEFORME.nom == form.nom_plateforme.data).first()
+            print(plateforme_existe)
+
+            if not plateforme_existe:
+                nouvelle_plateforme = PLATEFORME(
+                    nom=form.nom_plateforme.data,
+                    cout_journalier=form.cout_journalier.data,
+                    min_nb_personne=form.minimum_personnes.data,
+                    intervalle_maintenance=form.intervalle_maintenance.data)
+
+                db.session.add(nouvelle_plateforme)
+                db.session.commit()
+
+                return redirect(
+                    url_for('add_materiel',
+                            idPlateforme=nouvelle_plateforme.idPlateforme))
+            else:
+                return render_template(
+                    "add_plateforme.html",
+                    form_plateforme=form,
+                    message="Une plateforme avec le même nom existe déjà",
+                    message_type='error')
+
+        return render_template("add_plateforme.html", form_plateforme=form)
+    else:
+        return redirect(url_for('login'))
+
+
 # ==================== MATERIELS ====================
 @app.route("/materiels/")
 @login_required
@@ -591,7 +649,7 @@ def add_personne():
                             db.session.add(habiliter)
                             db.session.commit()
 
-                return redirect(url_for('index'))
+                return redirect(url_for('liste_personnels'))
             else:
                 return render_template("add_personne.html",
                                        form_personne=form_pers,
@@ -1001,42 +1059,158 @@ def resultat():
     else:
         return redirect(url_for('register'))
 
-
-@app.route('/add_plateforme/', methods=['GET', 'POST'])
+@app.route('/dashboard/', methods=['GET', 'POST'])
 @login_required
-def add_plateforme():
+def dashboard():
+    form = DashboardPeriodForm()
+    display_form = form
+    today = date.today()
 
-    if current_user.is_authenticated:
-        form = Form_plateforme()
+    selected_month = today.month
+    selected_year = today.year
 
+    if request.method == 'POST':
         if form.validate_on_submit():
-            plateforme_existe = PLATEFORME.query.filter(
-                PLATEFORME.nom == form.nom_plateforme.data).first()
-            print(plateforme_existe)
-
-            if not plateforme_existe:
-                nouvelle_plateforme = PLATEFORME(
-                    nom=form.nom_plateforme.data,
-                    cout_journalier=form.cout_journalier.data,
-                    min_nb_personne=form.minimum_personnes.data,
-                    intervalle_maintenance=form.intervalle_maintenance.data)
-
-                db.session.add(nouvelle_plateforme)
-                db.session.commit()
-
-                return redirect(
-                    url_for('add_materiel',
-                            idPlateforme=nouvelle_plateforme.idPlateforme))
-            else:
-                return render_template(
-                    "add_plateforme.html",
-                    form_plateforme=form,
-                    message="Une plateforme avec le même nom existe déjà",
-                    message_type='error')
-
-        return render_template("add_plateforme.html", form_plateforme=form)
+            selected_month = form.month.data
+            selected_year = form.year.data
+        else:
+            flash('La période sélectionnée est invalide.', 'error')
+        display_form = DashboardPeriodForm()
     else:
-        return redirect(url_for('login'))
+        arg_month = request.args.get('month', type=int)
+        arg_year = request.args.get('year', type=int)
+        if arg_month:
+            selected_month = arg_month
+        if arg_year:
+            selected_year = arg_year
+
+    if selected_month < 1 or selected_month > 12:
+        selected_month = today.month
+    if selected_year < 1900 or selected_year > 2100:
+        selected_year = today.year
+
+    display_form.month.data = selected_month
+    display_form.year.data = selected_year
+
+    # date début et fin du mois sélectionné
+    month_start = date(selected_year, selected_month, 1)
+    last_day = monthrange(selected_year, selected_month)[1]
+    month_end = date(selected_year, selected_month, last_day)
+
+    previous_date = month_start - timedelta(days=1)
+    next_date = month_end + timedelta(days=1)
+    previous_period = {'month': previous_date.month, 'year': previous_date.year}
+    next_period = {'month': next_date.month, 'year': next_date.year}
+
+    def format_currency(value):
+        if value is None:
+            return None
+        return f"{value:,.2f}".replace(',', ' ').replace('.', ',')
+
+    campagnes = CAMPAGNE.query.all()
+
+    active_campagnes = []
+    active_personnel = set()
+    for campagne in campagnes:
+        duree = campagne.duree or 0
+        fin_campagne = campagne.dateDebut + timedelta(days=max(duree - 1, 0))
+        if fin_campagne < month_start or campagne.dateDebut > month_end:
+            continue
+        active_campagnes.append(campagne)
+        for participation in campagne.participer:
+            active_personnel.add(participation.username)
+
+    # calcul des personne dispo
+    total_personnel = PERSONNE.query.count()
+    total_personnel_occupe = len(active_personnel)
+    total_personnel_disponible = max(0, total_personnel - total_personnel_occupe)
+
+    budget_record = BUDGET_MENSUEL.query.filter_by(
+        annee=selected_year, mois=selected_month).first()
+    budget_initial = float(budget_record.budget) if budget_record else None
+
+    budget_depense = 0.0
+    # calcul du budget dépensé
+    for campagne in active_campagnes:
+        duree = campagne.duree or 0
+        fin_campagne = campagne.dateDebut + timedelta(days=max(duree - 1, 0))
+        chevauchement_debut = max(campagne.dateDebut, month_start)
+        chevauchement_fin = min(fin_campagne, month_end)
+        overlap = (chevauchement_fin - chevauchement_debut).days + 1
+        if overlap <= 0:
+            continue
+        for liaison in campagne.planifier:
+            plateforme = liaison.plateforme
+            if plateforme and plateforme.cout_journalier:
+                budget_depense += float(plateforme.cout_journalier) * overlap
+
+    budget_restant = (budget_initial - budget_depense
+                      if budget_initial is not None else None)
+    budget_restant = round(budget_restant, 2) if budget_restant is not None else None
+    budget_depense = round(budget_depense, 2)
+
+    budget_status = 'ok'
+    if budget_restant is not None and budget_restant < 0:
+        budget_status = 'alert'
+    elif budget_restant is None:
+        budget_status = 'undefined'
+
+    # récupération des maintenances planifiées pour le mois
+    maintenances = (MAINTENANCE.query
+                    .filter(MAINTENANCE.dateMaintenance >= month_start)
+                    .filter(MAINTENANCE.dateMaintenance <= month_end)
+                    .filter(MAINTENANCE.statut == statut.PLANIFIEE)
+                    .order_by(MAINTENANCE.dateMaintenance.asc())
+                    .all())
+
+    # préparation des items de maintenance
+    maintenance_items = []
+    for maintenance in maintenances:
+        jours_restant = (maintenance.dateMaintenance - today).days
+        if jours_restant > 0:
+            relative = f"d'ici {jours_restant} jours"
+        elif jours_restant == 0:
+            relative = "aujourd'hui"
+        else:
+            relative = f"il y a {abs(jours_restant)} jours"
+        maintenance_items.append({
+            'id': maintenance.idMaintenance,
+            'plateforme': maintenance.plateforme.nom if maintenance.plateforme else 'Plateforme inconnue',
+            'date': maintenance.dateMaintenance,
+            'date_label': maintenance.dateMaintenance.strftime('%d/%m/%Y'),
+            'relative': relative,
+        })
+     selected_period_label = f"{MONTH_NAMES_FR[selected_month]} {selected_year}"
+
+    return render_template(
+        'dashboard.html',
+        title='Tableau de bord',
+        current_page='dashboard',
+        form=display_form,
+        month_start=month_start,
+        month_end=month_end,
+        selected_month=selected_month,
+        selected_year=selected_year,
+        selected_period_label=selected_period_label,
+        previous_period=previous_period,
+        next_period=next_period,
+        personnel_metrics={
+            'available': total_personnel_disponible,
+            'total': total_personnel,
+            'engaged': total_personnel_occupe,
+        },
+        active_campaigns_count=len(active_campagnes),
+        budget_summary={
+            'initial': budget_initial,
+            'spent': budget_depense,
+            'remaining': budget_restant,
+            'remaining_label': format_currency(budget_restant) if budget_restant is not None else None,
+            'initial_label': format_currency(budget_initial) if budget_initial is not None else None,
+            'spent_label': format_currency(budget_depense),
+            'status': budget_status,
+        },
+        maintenance_items=maintenance_items,
+    )
     
 @app.route("/gerer_materiel/<idPlateforme>/", methods=("GET", "POST"))
 def gerer_materiel(idPlateforme):
@@ -1164,6 +1338,8 @@ def gerer_materiel(idPlateforme):
                            form_materiel=form_mat,
                            materiel_dispo=mat_dispo,
                            materiel_plateforme=mat_plat)
+    
+      
 
 
 if __name__ == "__main__":

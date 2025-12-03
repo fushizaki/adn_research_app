@@ -11,7 +11,7 @@
                         {{ plateformes|length }} plateformes enregistrées
                     </p>
                 </div>
-                <a href="#"
+                <a href="{{ url_for('add_plateforme') }}"
                     class="inline-flex items-center justify-center gap-3 rounded bg-green-button-menu px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white transition-colors duration-300 hover:bg-green-button-menu-hover">
                     <i class="fas fa-plus text-base"></i>
                     Ajouter une plateforme
@@ -36,7 +36,7 @@
                                 <th scope="col" class="unselectable px-6 py-4">Personnel min.</th>
                                 <th scope="col" class="unselectable px-6 py-4">Coût journalier</th>
                                 <th scope="col" class="unselectable px-6 py-4">Maintenance (jours)</th>
-                                <th scope="col" class="unselectable px-6 py-4">Matériel</th>
+                                <th scope="col" class="unselectable px-6 py-4">Matériels Différents</th>
                                 <th scope="col" class="unselectable sorttable_nosort px-6 py-4">Actions</th>
                             </tr>
                         </thead>
@@ -48,11 +48,7 @@
                                 <td class="px-6 py-5 text-green-button font-semibold">{{ '%.2f €'|format(plateforme.cout_journalier) if plateforme.cout_journalier else '-' }}</td>
                                 <td class="px-6 py-5 text-white/70">{{ plateforme.intervalle_maintenance if plateforme.intervalle_maintenance else '-' }}</td>
                                 <td class="px-6 py-5">
-                                    {% if plateforme.materiels %}
-                                        {{ plateforme.materiels | map(attribute='nom') | join(', ') }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
+                                    {{ plateforme.utilisations|length }}
                                 </td>
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4 text-base">

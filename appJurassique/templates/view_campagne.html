@@ -70,7 +70,7 @@
                             <i class="fas fa-arrow-up-from-bracket mb-3 text-4xl"></i>
                             <p class="font-semibold text-green-button">Déposez vos fichiers d'échantillon ici</p>
                             <p class="text-sm text-white/70">ou cliquez pour parcourir</p>
-                            {{ upload_form.file(class_='hidden', id='fileInput') }}
+                            {{ upload_form.file(class_='hidden', id='fileInput', accept=".adn,.txt") }}
                         </label>
                         {% if upload_form.file.errors %}
                         <ul class="space-y-1 text-left text-sm text-red-400">

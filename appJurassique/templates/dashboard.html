@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block main %}
+<div
+    class="min-h-screen w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center px-6 py-12 drop-shadow-button">
+    <section
+        class="w-full max-w-5xl bg-gray-div/90 border border-green-button rounded-[40px] shadow-lg backdrop-blur-sm">
+        <div class="flex flex-col gap-8 px-10 py-10">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="space-y-3">
+                {% for category, message in messages %}
+                <div
+                    class="rounded-xl border px-4 py-3 text-sm {% if category == 'error' %}border-red-500 bg-red-900/60 text-red-100{% elif category == 'success' %}border-green-button bg-green-button/10 text-green-button{% else %}border-green-line/60 bg-black/40 text-white{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <header
+                class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-green-button/40 pb-6 text-white">
+                <div class="flex flex-col gap-2">
+                    <h1 class="text-3xl font-bold font-exo">Tableau de bord</h1>
+                    <p class="text-green-text font-medium flex items-center gap-2">
+                        <i class="fas fa-chart-line text-xs"></i>
+                        {{ active_campaigns_count }} campagne(s) active(s) pour cette période
+                    </p>
+                </div>
+                <div class="flex items-center justify-center gap-6">
+                    <form method="post" action="{{ url_for('dashboard') }}" class="flex items-center">
+                        <input type="hidden" name="month" value="{{ previous_period.month }}">
+                        <input type="hidden" name="year" value="{{ previous_period.year }}">
+                        <button type="submit"
+                            class="text-xl text-green-button transition-colors hover:text-green-button-hover">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </form>
+                    <span class="text-lg font-semibold">{{ selected_period_label }}</span>
+                    <form method="post" action="{{ url_for('dashboard') }}" class="flex items-center">
+                        <input type="hidden" name="month" value="{{ next_period.month }}">
+                        <input type="hidden" name="year" value="{{ next_period.year }}">
+                        <button type="submit"
+                            class="text-xl text-green-button transition-colors hover:text-green-button-hover">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <div class="grid gap-6 md:grid-cols-3 text-white">
+                <div class="rounded-3xl border border-green-line/40 bg-gray-div/80 p-6 drop-shadow-button">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm uppercase tracking-wide text-green-text">Personnel disponible</p>
+                            <p class="mt-2 text-3xl font-semibold">{{ personnel_metrics.available }}/{{
+                                personnel_metrics.total }}</p>
+                            <p class="mt-1 text-sm text-gray-300">{{ personnel_metrics.engaged }} mobilisé(s) ce mois
+                            </p>
+                        </div>
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-button/15 text-green-button">
+                            <i class="fas fa-user-check text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl border border-green-line/40 bg-gray-div/80 p-6 drop-shadow-button">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm uppercase tracking-wide text-green-text">Budget restant</p>
+                            <p
+                                class="mt-2 text-3xl font-semibold {% if budget_summary.status == 'alert' %}text-red-400{% else %}text-white{% endif %}">
+                                {% if budget_summary.remaining_label %}
+                                {{ budget_summary.remaining_label }} €
+                                {% else %}
+                                --
+                                {% endif %}
+                            </p>
+                            {% if budget_summary.initial_label is none %}
+                            <p class="mt-1 text-sm text-gray-300">Aucun budget défini pour cette période.</p>
+                            {% else %}
+                            <p class="mt-1 text-sm text-gray-300">Budget : {{ budget_summary.initial_label }} € ·
+                                Dépensé : {{ budget_summary.spent_label }} €</p>
+                            {% endif %}
+                        </div>
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-button/15 text-green-button">
+                            <i class="fas fa-wallet text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-3xl border border-green-line/40 bg-gray-div/80 p-6 drop-shadow-button">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm uppercase tracking-wide text-green-text">Campagnes actives</p>
+                            <p class="mt-2 text-3xl font-semibold">{{ active_campaigns_count }}</p>
+                            <p class="mt-1 text-sm text-gray-300">Campagnes couvrant cette période sélectionnée.</p>
+                        </div>
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-button/15 text-green-button">
+                            <i class="fas fa-calendar text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-[2fr_1fr] text-white">
+                <div class="rounded-3xl border border-green-line/40 bg-gray-div/80 p-6 drop-shadow-button">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-lg font-semibold">Maintenance à prévoir</p>
+                            <p class="text-sm text-gray-300">Programmé entre le {{ month_start.strftime('%d/%m/%Y') }}
+                                et le {{ month_end.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <span class="rounded-full bg-green-button/15 px-4 py-1 text-sm text-green-button">{{
+                            maintenance_items|length }} tâche(s)</span>
+                    </div>
+                    <div class="mt-6 h-72 overflow-y-auto rounded-2xl border border-green-line/40 bg-black/30">
+                        {% if maintenance_items %}
+                        <ul class="divide-y divide-green-line/20">
+                            {% for item in maintenance_items %}
+                            <li class="p-4">
+                                <p class="text-lg font-semibold text-white">{{ item.plateforme }}</p>
+                                <p class="text-sm text-green-text">{{ item.date_label }}</p>
+                                <p class="text-sm text-gray-300">{{ item.relative }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="flex h-full items-center justify-center px-6 text-center text-sm text-gray-300">
+                            Aucune maintenance planifiée pour cette période.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div
+                    class="rounded-3xl border border-green-line/40 bg-gray-div/80 p-6 drop-shadow-button flex flex-col justify-between gap-6">
+                    <div>
+                        <p class="text-lg font-semibold">Résumé rapide</p>
+                        <ul class="mt-4 space-y-3 text-sm text-gray-200">
+                            <li>Personnel mobilisé : {{ personnel_metrics.engaged }} personne(s)</li>
+                            <li>Budget dépensé ce mois : {{ budget_summary.spent_label }} €</li>
+                            <li>Période analysée : {{ selected_period_label }}</li>
+                        </ul>
+                    </div>
+                    <a href="{{ url_for('liste_campagnes') }}"
+                        class="inline-flex items-center justify-center rounded-full border border-green-button px-4 py-2 text-sm font-semibold text-green-button transition-colors hover:bg-green-button hover:text-black">
+                        Voir toutes les campagnes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -69,6 +69,15 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+
+
+class DashboardPeriodForm(FlaskForm):
+    class Meta:
+        csrf = False
+    
+    month = IntegerField('Mois', validators=[DataRequired(), NumberRange(min=1, max=12)])
+    year = IntegerField('Année', validators=[DataRequired(), NumberRange(min=1900, max=2100)])
+    submit = SubmitField('Mettre à jour')
       
 
 class GenererSequenceForm(FlaskForm):
