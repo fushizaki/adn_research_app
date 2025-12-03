@@ -11,6 +11,8 @@ app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 app.config.from_object('config')
 
+login_manager = LoginManager(app)
+
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 db_name = os.getenv("DB_NAME")
