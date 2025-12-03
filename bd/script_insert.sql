@@ -21,7 +21,9 @@ VALUES
     ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'DIRECTION'),
     ('zmuller', 'Muller', 'Zoé', 'secure123', 'TECHNICIEN'),
     ('efaure', 'Faure', 'Enzo', 'mypass456', 'CHERCHEUR'),
-    ('clopez', 'Lopez', 'Camille', 'password789', 'ADMINISTRATION');
+    ('clopez', 'Lopez', 'Camille', 'password789', 'ADMINISTRATION'),
+    ('cmarchand', 'Marchand', 'Claire', 'vault135', 'ADMINISTRATION'),
+    ('odupont', 'Dupont', 'Oscar', 'jurassic777', 'CHERCHEUR');
 
 INSERT into
     PLATEFORME (
@@ -113,64 +115,72 @@ VALUES
     ('efaure', 1),
     ('efaure', 2),
     ('clopez', 3),
-    ('clopez', 4);
+    ('clopez', 4),
+    ('cmarchand', 2),
+    ('cmarchand', 3),
+    ('odupont', 1),
+    ('odupont', 4);
 
 INSERT into
-    CAMPAGNE (dateDebut, duree)
+    CAMPAGNE (dateDebut, duree, idLieu)
 VALUES
-    ('2024-01-15', 30),
-    ('2024-03-10', 45),
-    ('2024-05-20', 21),
-    ('2024-07-05', 60),
-    ('2024-09-12', 28),
-    ('2024-11-01', 35),
-    ('2025-01-18', 42),
-    ('2025-04-15', 25),
-    ('2025-06-22', 38),
-    ('2025-08-30', 50);
+    ('2024-01-15', 30, 1),
+    ('2024-03-10', 45, 3),
+    ('2024-05-20', 21, 5),
+    ('2024-07-05', 60, 8),
+    ('2024-09-12', 28, 9),
+    ('2024-11-01', 35, 11),
+    ('2025-01-18', 42, 13),
+    ('2025-04-15', 25, 1),
+    ('2025-06-22', 38, 2),
+    ('2025-08-30', 50, 3);
 
 INSERT into
-    PARTICIPER (idCampagne, username)
+    PARTICIPER (username, idCampagne)
 VALUES
-    (1, 'adurand'),
-    (1, 'lmartin'),
-    (1, 'ebernard'),
-    (1, 'npetit'),
-    (2, 'lrobert'),
-    (2, 'lrichard'),
-    (2, 'cdubois'),
-    (3, 'gmoreau'),
-    (3, 'jlaurent'),
-    (3, 'msimon'),
-    (3, 'tmichel'),
-    (3, 'slefebvre'),
-    (4, 'rleroy'),
-    (4, 'lroux'),
-    (4, 'ndavid'),
-    (5, 'eblanc'),
-    (5, 'hgarcia'),
-    (5, 'zmuller'),
-    (5, 'efaure'),
-    (6, 'clopez'),
-    (6, 'adurand'),
-    (6, 'lrobert'),
-    (7, 'lmartin'),
-    (7, 'lrichard'),
-    (7, 'msimon'),
-    (7, 'lroux'),
-    (8, 'ebernard'),
-    (8, 'cdubois'),
-    (8, 'tmichel'),
-    (9, 'npetit'),
-    (9, 'gmoreau'),
-    (9, 'slefebvre'),
-    (9, 'eblanc'),
-    (9, 'clopez'),
-    (10, 'jlaurent'),
-    (10, 'rleroy'),
-    (10, 'hgarcia'),
-    (10, 'zmuller'),
-    (10, 'efaure');
+    ('adurand', 1),
+    ('lmartin', 1),
+    ('ebernard', 1),
+    ('npetit', 1),
+    ('lrobert', 2),
+    ('lrichard', 2),
+    ('cdubois', 2),
+    ('gmoreau', 3),
+    ('jlaurent', 3),
+    ('msimon', 3),
+    ('tmichel', 3),
+    ('slefebvre', 3),
+    ('rleroy', 4),
+    ('lroux', 4),
+    ('ndavid', 4),
+    ('eblanc', 5),
+    ('hgarcia', 5),
+    ('zmuller', 5),
+    ('efaure', 5),
+    ('clopez', 6),
+    ('adurand', 6),
+    ('lrobert', 6),
+    ('lmartin', 7),
+    ('lrichard', 7),
+    ('msimon', 7),
+    ('lroux', 7),
+    ('ebernard', 8),
+    ('cdubois', 8),
+    ('tmichel', 8),
+    ('npetit', 9),
+    ('gmoreau', 9),
+    ('slefebvre', 9),
+    ('eblanc', 9),
+    ('clopez', 9),
+    ('jlaurent', 10),
+    ('rleroy', 10),
+    ('hgarcia', 10),
+    ('zmuller', 10),
+    ('efaure', 10),
+    ('cmarchand', 4),
+    ('cmarchand', 8),
+    ('odupont', 5),
+    ('odupont', 9);
 
 INSERT into
     PLANIFIER (idPlateforme, idCampagne)
@@ -274,23 +284,23 @@ VALUES
     ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
 INSERT into
-    APPARTENIR (idEspece, idEchantillon)
+    APPARTENIR (idEchantillon, idEspece)
 VALUES
-    (9, 1),
-    (2, 2),
-    (8, 3),
-    (3, 4),
-    (4, 5),
-    (5, 6),
-    (6, 7),
-    (7, 8),
     (1, 9),
-    (11, 10),
-    (9, 11),
-    (10, 12),
-    (12, 13),
-    (13, 14),
-    (14, 15);
+    (2, 2),
+    (3, 8),
+    (4, 3),
+    (5, 4),
+    (6, 5),
+    (7, 6),
+    (8, 7),
+    (9, 1),
+    (10, 11),
+    (11, 9),
+    (12, 10),
+    (13, 12),
+    (14, 13),
+    (15, 14);
 
 INSERT into
     RAPPORTER (idEchantillon, idCampagne)
@@ -340,7 +350,9 @@ VALUES
     (2025, 7, 21800.75),
     (2025, 8, 20500.00),
     (2025, 9, 17900.25),
-    (2025, 10, 23000.50);
+    (2025, 10, 23000.50),
+    (2025, 11, 21050.00),
+    (2025, 12, 23850.75);
 
 
 
@@ -357,7 +369,8 @@ INSERT into
 VALUES
     ('sample_theropode.adn', 0.15, 4, 2, 1, 'Test mutations multiples', NOW()),
     ('specimen_brachio.adn', 0.05, 1, 0, 0, 'Verification faible proba', NOW()),
-    ('archive_veloci.adn', 0.25, 6, 3, 2, 'Scenario stress', NOW());
+    ('archive_veloci.adn', 0.25, 6, 3, 2, 'Scenario stress', NOW()),
+    ('restauration_ankyl.adn', 0.18, 3, 1, 1, 'Post-traitement plateau Zeta', NOW());
 
 
 
@@ -512,4 +525,6 @@ VALUES
     (9, '2024-12-10', 2, 'TERMINEE'),
     -- Maintenances pour Plateforme Kappa (intervalle 56 jours)
     (10, '2023-12-01', 2, 'TERMINEE'),
-    (10, '2024-12-01', 2, 'TERMINEE');
+    (10, '2024-12-01', 2, 'TERMINEE'),
+    (4, '2025-06-15', 3, 'PLANIFIEE'),
+    (7, '2025-07-20', 5, 'PLANIFIEE');

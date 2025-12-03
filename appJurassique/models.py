@@ -147,8 +147,8 @@ class PARTICIPER(db.Model):
                          db.ForeignKey('PERSONNE.username'),
                          primary_key=True)
     idCampagne = db.Column(db.Integer,
-                           db.ForeignKey('CAMPAGNE.idCampagne'),
-                           primary_key=True)
+                           db.ForeignKey('CAMPAGNE.idCampagne')
+                           , primary_key=True)
     personne = db.relationship('PERSONNE', back_populates='participer')
     campagne = db.relationship('CAMPAGNE', back_populates='participer')
 
