@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from wtforms import (BooleanField, DateField, FloatField, HiddenField,
-                     IntegerField, PasswordField, SelectField,
-                     SelectMultipleField, StringField, SubmitField, MultipleFileField, widgets)
-from wtforms.validators import DataRequired, EqualTo, NumberRange, Optional
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from wtforms import *
+from wtforms.validators import *
+from .models import *
 from hashlib import sha256
+from datetime import date
 
 
 class LoginForm(FlaskForm):
@@ -60,8 +59,8 @@ class BudgetForm(FlaskForm):
                      format='%Y-%m',
                      validators=[DataRequired()],
                      render_kw={'type': 'month'})
-    budget_mensuel = StringField('Montant du budget',
-                                 validators=[DataRequired()])
+    budget_mensuel = DecimalField('Montant du budget',
+                                  validators=[DataRequired(), NumberRange(min=0, max=99999.99)])
     next = HiddenField()
 
     def build_budget(self):
@@ -70,39 +69,8 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+      
 
-
-class AssociateFilesForm(FlaskForm):
-    file = MultipleFileField("Fichiers d'échantillon",
-                             validators=[DataRequired()])
-    submit = SubmitField('Associer les fichiers')
-
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
-
-class FormPersonne(FlaskForm):
-    idPersonne = HiddenField()
-    nom = StringField('nom', validators=[DataRequired()])
-    prenom = StringField('prenom', validators=[DataRequired()])
-    username = StringField('username', validators=[DataRequired()])
-    password = PasswordField('password', validators=[DataRequired()])
-    role_labo = SelectField(
-        'Rôle dans le labo',
-        choices=[],
-        validators=[DataRequired()],
-    )
-    habilitations = MultiCheckboxField('Habilitations', choices=[
-        ('electrique', 'Electrique'),
-        ('chimique', 'Chimique'),
-        ('biologique', 'Biologique'),
-        ('radiation', 'Radiation')
-    ])
-        
-    def validate_habilitations(self, field):
-        if not field.data:
-            raise ValidationError("Sélectionnez au moins une habilitation")
-    
 class GenererSequenceForm(FlaskForm):
     longueur = IntegerField('Longueur', validators=[DataRequired(), NumberRange(min=1, max=5000)])
     nom_fichier = StringField('Nom du fichier', validators=[DataRequired()])
@@ -144,3 +112,126 @@ class ResultatTraitemement(FlaskForm):
 
 class ReinitialiserResultatForm(FlaskForm):
     submit_reinitialiser = SubmitField('Reinitialiser les resultats')
+
+    
+class AssociateFilesForm(FlaskForm):
+    file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
+    submit = SubmitField('Associer les fichiers')
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+    
+class Form_plateforme(FlaskForm):
+    id_plateforme = HiddenField('id_plateforme')
+    nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
+    cout_journalier = IntegerField('cout_journalier', validators = [DataRequired()], render_kw={"min": "1"})
+    minimum_personnes = IntegerField('minimum_personnes', validators = [DataRequired()], render_kw={"min": "1"})
+    intervalle_maintenance = IntegerField('intervalle_maintenance', validators = [DataRequired()], render_kw={"min": "1"})
+
+    
+
+class FormPersonne(FlaskForm):
+    idPersonne = HiddenField()
+    nom = StringField('nom', validators=[DataRequired()])
+    prenom = StringField('prenom', validators=[DataRequired()])
+    username = StringField('username', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
+    role_labo = SelectField(
+        'Rôle dans le labo',
+        choices=[],
+        validators=[DataRequired()],
+    )
+    habilitations = MultiCheckboxField('Habilitations', choices=[
+        ('electrique', 'Electrique'),
+        ('chimique', 'Chimique'),
+        ('biologique', 'Biologique'),
+        ('radiation', 'Radiation')
+    ])
+        
+    def validate_habilitations(self, field):
+        if not field.data:
+            raise ValidationError("Sélectionnez au moins une habilitation")
+    
+
+class CampagneForm(FlaskForm):
+
+    titre = StringField("Titre", validators=[Optional()])
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+    duree = IntegerField(
+        "Durée en jours",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+        ],
+    )
+    idLieu = SelectField(
+        "Lieu de fouille",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+    )
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+    membres = SelectMultipleField(
+        "Membres",
+        choices=[],
+        coerce=str,
+    )
+    
+
+class LieuForm(FlaskForm):
+    
+    nomLieu = StringField("Nom du lieu", validators=[DataRequired()])
+    next = HiddenField()
+    
+    def build_lieu(self):
+        return LIEU_FOUILLE(
+            nomLieu=self.nomLieu.data
+        )
+
+
+class MaintenanceForm(FlaskForm):
+
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+
+    duree = IntegerField(
+        "Durée (en jours)",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+        ],
+    )
+
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+
+    next = HiddenField()
+
+    def validate_dateDebut(self, field):
+        if field.data and field.data < date.today():
+            raise ValidationError("La date ne peut pas être dans le passé.")
+
+    def build_maintenance(self):
+        return MAINTENANCE(
+            dateMaintenance=self.dateDebut.data,
+            duree_maintenance=self.duree.data,
+            idPlateforme=int(self.idPlateforme.data),
+            statut=statut.PLANIFIEE,
+        )

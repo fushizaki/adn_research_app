@@ -25,11 +25,9 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    materiel = db.relationship('UTILISER', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
-    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
@@ -73,7 +71,7 @@ class role_labo_enum(enum.Enum):
     DIRECTION = "DIRECTION"
     TECHNICIEN = "TECHNICIEN"
     ADMINISTRATION = "ADMINISTRATION"
-    CHERCHEURSE = "CHERCHEUR(SE)"
+    CHERCHEUR = "CHERCHEUR"
     
     def get_roles():
         return [role.value for role in role_labo_enum]
@@ -281,8 +279,6 @@ class MAINTENANCE(db.Model):
 class HISTORIQUE(db.Model):
     __tablename__ = 'HISTORIQUE'
     idHistorique = db.Column(db.Integer, primary_key=True)
-    idPlateforme = db.Column(db.Integer)
-    idEchant = db.Column(db.Integer)
     nom_fichier_base = db.Column(db.String(255))
     proba = db.Column(db.Float)
     nb_remplacement = db.Column(db.Integer)
