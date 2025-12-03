@@ -6,6 +6,7 @@ from algo import constants
 from algo.main import *
 from pathlib import Path
 from .app import app, db
+import algo
 from flask_login import login_user, logout_user, login_required, current_user
 from .utils import creer_campagne, obtenir_membres_compatibles
 from sqlalchemy.exc import IntegrityError, DataError
@@ -695,6 +696,39 @@ def traitements_adn():
         notifier('Traitements appliqués.', 'succes')
         return redirect(url_for('resultat'))
 
+    return render_template('traitements_adn.html',
+                           title='Traitements ADN',
+                           current_page='traitements_adn',
+                           fichiers=fichiers_adn,
+                           preselection=preselection,
+                           form_traitement=form_traitement)
+
+@app.route("/view_resultats/", methods=["GET"])
+@login_required
+def resultat():
+    if current_user.is_authenticated:
+    
+        resultat = session.get("resultat_adn")
+        if not resultat:
+            notifier("Aucun résultat disponible. Lancez d’abord un traitement.", "erreur")
+            return redirect(url_for("traitements_adn"))
+
+        fichiersadn = lister_fichiers_adn()
+        index_fichiers = {f["nom"]: f for f in fichiersadn}
+        fichier_base_info = index_fichiers.get(resultat["fichier_base"])
+        distance_info = resultat.get("distance")
+
+        return render_template(
+            "view_resultats.html",
+            title="Résultats ADN",
+            currentpage="resultatsadn",
+            resultat=resultat,
+            fichier_base_info=fichier_base_info,
+            distance_info=distance_info,
+        )
+    else:
+        return redirect(url_for('register'))
+    
 @app.route('/add_plateforme/', methods=['GET', 'POST'])
 def add_plateforme():   
     

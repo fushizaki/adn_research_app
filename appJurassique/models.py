@@ -29,8 +29,6 @@ class PLATEFORME(db.Model):
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
 
-    #manque des trucs jsp
-
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
 
