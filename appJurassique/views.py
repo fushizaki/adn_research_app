@@ -14,8 +14,8 @@ from appJurassique.forms import *
 from appJurassique.models import *
 from appJurassique.utils import *
 
-
 # ==================== ACCUEIL ====================
+
 
 @app.route('/')
 @app.route('/index/')
@@ -24,6 +24,7 @@ def index():
 
 
 # ==================== AUTHENTIFICATION ====================
+
 
 @app.route("/login/", methods=(
     "GET",
@@ -45,7 +46,7 @@ def login():
     return render_template("login.html", form=unForm)
 
 
-@app.route("/register/", methods=("GET","POST"))
+@app.route("/register/", methods=("GET", "POST"))
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -78,6 +79,7 @@ def register():
 
     return render_template("register.html", form=form)
 
+
 @app.route("/logout/")
 def logout():
     logout_user()
@@ -85,6 +87,7 @@ def logout():
 
 
 # ==================== CAMPAGNES ====================
+
 
 @app.route('/add_campagne/', methods=['GET', 'POST'])
 @login_required
@@ -95,9 +98,12 @@ def add_campagne():
 
     form = CampagneForm()
     form.idLieu.choices = [('', 'Sélectionner un lieu')] + [
-        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux]
+        (str(lieu.idLieu), lieu.nomLieu) for lieu in lieux
+    ]
     form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
-        (str(plateforme.idPlateforme), plateforme.nom) for plateforme in plateformes]
+        (str(plateforme.idPlateforme), plateforme.nom)
+        for plateforme in plateformes
+    ]
 
     formdata = request.form if request.method == 'POST' else request.args
     if formdata:
@@ -113,7 +119,8 @@ def add_campagne():
     budget_mensuel = recuperer_budget_mensuel(form.dateDebut.data)
     budget_estime = None
 
-    id_plateforme = form.idPlateforme.data or request.values.get('idPlateforme')
+    id_plateforme = form.idPlateforme.data or request.values.get(
+        'idPlateforme')
     if id_plateforme is not None and id_plateforme != form.idPlateforme.data:
         form.idPlateforme.data = id_plateforme
     if id_plateforme:
@@ -121,12 +128,15 @@ def add_campagne():
             id_plateforme_int = int(id_plateforme)
             plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
             if plateforme_selectionnee:
-                membres_compatibles = obtenir_membres_compatibles(id_plateforme_int)
+                membres_compatibles = obtenir_membres_compatibles(
+                    id_plateforme_int)
                 form.membres.choices = [
                     (membre.username, f"{membre.nom} {membre.prenom}")
-                    for membre, compatible in membres_compatibles]
+                    for membre, compatible in membres_compatibles
+                ]
                 if form.duree.data:
-                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, form.duree.data)
+                    budget_estime = estimer_cout_campagne(
+                        plateforme_selectionnee, form.duree.data)
                 if form.membres.data:
                     membres_selectionnes = form.membres.data
         except ValueError:
@@ -148,8 +158,9 @@ def add_campagne():
                 budget_mensuel=budget_mensuel,
                 budget_estime=budget_estime,
                 message=message,
-                message_type=message_type,)
-        
+                message_type=message_type,
+            )
+
         if not form.validate():
             first_error = next(iter(form.errors.values()))[0]
             message = first_error
@@ -171,8 +182,10 @@ def add_campagne():
                     message_type = 'error'
                 else:
                     if not plateforme_selectionnee or plateforme_selectionnee.idPlateforme != id_plateforme_int:
-                        plateforme_selectionnee = PLATEFORME.query.get(id_plateforme_int)
-                    budget_estime = estimer_cout_campagne(plateforme_selectionnee, duree_jours)
+                        plateforme_selectionnee = PLATEFORME.query.get(
+                            id_plateforme_int)
+                    budget_estime = estimer_cout_campagne(
+                        plateforme_selectionnee, duree_jours)
                     campagne, error = creer_campagne(
                         date_debut=date_debut,
                         duree_jours=duree_jours,
@@ -184,22 +197,23 @@ def add_campagne():
                         message = error
                         message_type = 'error'
                     else:
-                        return redirect(url_for('liste_campagnes', success='Campagne créée avec succès !'))
+                        return redirect(
+                            url_for('liste_campagnes',
+                                    success='Campagne créée avec succès !'))
 
-    return render_template(
-        'add_campagne.html',
-        title='Ajouter une campagne',
-        current_page='campagnes',
-        form=form,
-        lieux=lieux,
-        plateformes=plateformes,
-        plateforme_selectionnee=plateforme_selectionnee,
-        membres_compatibles=membres_compatibles,
-        membres_selectionnes=membres_selectionnes,
-        budget_mensuel=budget_mensuel,
-        budget_estime=budget_estime,
-        message=message,
-        message_type=message_type)
+    return render_template('add_campagne.html',
+                           title='Ajouter une campagne',
+                           current_page='campagnes',
+                           form=form,
+                           lieux=lieux,
+                           plateformes=plateformes,
+                           plateforme_selectionnee=plateforme_selectionnee,
+                           membres_compatibles=membres_compatibles,
+                           membres_selectionnes=membres_selectionnes,
+                           budget_mensuel=budget_mensuel,
+                           budget_estime=budget_estime,
+                           message=message,
+                           message_type=message_type)
 
 
 @app.route("/campagnes/")
@@ -210,7 +224,6 @@ def liste_campagnes():
                            title="Liste des campagnes",
                            current_page="campagne",
                            campagnes=campagnes)
-
 
 
 @app.route('/campagnes/<int:idCampagne>/view/')
@@ -239,8 +252,8 @@ def supprimer_campagne(idCampagne):
     return redirect(url_for('liste_campagnes'))
 
 
-@app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
-    'POST',))
+@app.route('/campagnes/<int:idCampagne>/view/associer-fichier',
+           methods=('POST', ))
 @login_required
 def associer_fichier(idCampagne):
     campagne = db.session.get(CAMPAGNE, idCampagne)
@@ -284,6 +297,31 @@ def associer_fichier(idCampagne):
         db.session.rollback()
 
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
+
+
+# ==================== PLATEFORMES ====================
+
+
+@app.route("/plateformes/")
+@login_required
+def liste_plateformes():
+    plateformes = PLATEFORME.query.all()
+    return render_template("liste_plateformes.html",
+                           title="Liste des plateformes",
+                           current_page="plateformes",
+                           plateformes=plateformes)
+
+
+@app.route("/plateformes/<int:idPlateforme>/supprimer/")
+@login_required
+def supprimer_plateforme(idPlateforme):
+    plateforme = PLATEFORME.query.filter_by(idPlateforme=idPlateforme).first()
+    if plateforme:
+        db.session.delete(plateforme)
+        db.session.commit()
+    return redirect(url_for('liste_plateformes'))
+
+
 # ==================== MATERIELS ====================
 @app.route("/materiels/")
 @login_required
@@ -293,7 +331,8 @@ def liste_materiels():
                            title="Liste des matériels",
                            current_page="materiels",
                            materiels=materiels)
-    
+
+
 @app.route('/materiels/<int:idMateriel>/supprimer/')
 @login_required
 def supprimer_materiel(idMateriel):
@@ -304,35 +343,40 @@ def supprimer_materiel(idMateriel):
     db.session.commit()
     return redirect(url_for('liste_materiels'))
 
+
 @app.route("/add_materiel/<idPlateforme>/", methods=("GET", "POST"))
 def add_materiel(idPlateforme):
-    
+
     mat_dispo = db.session.query(MATERIEL).all()
-    
+
     la_plateforme = PLATEFORME.query.get(idPlateforme)
-    
+
     if la_plateforme is None:
         return render_template(
             "add_materiel.html",
             form_materiel=form_mat,
             message_type='error',
-            message='Erreur lors du chargement de la plateforme veuillez réessayer',
+            message=
+            'Erreur lors du chargement de la plateforme veuillez réessayer',
             plateforme=la_plateforme,
-            materiel_dispo= mat_dispo,
+            materiel_dispo=mat_dispo,
             materiel_plateforme=mat_plat)
-    
-    mat_plat = mat_plat = db.session.query(UTILISER).filter(UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
-    
+
+    mat_plat = mat_plat = db.session.query(UTILISER).filter(
+        UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+
     form_mat = Form_materiel()
-    
+
     if request.form.get("mat_id"):
-            print("here")
-            id_mat = request.form.get("mat_id", type=int)
-            quantite_add = request.form.get("mat_qte", type=int)
-            if quantite_add and id_mat and quantite_add > 0:
-                update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
-                db.session.commit()
-                return redirect(url_for('add_materiel', idPlateforme=la_plateforme.idPlateforme))
+        print("here")
+        id_mat = request.form.get("mat_id", type=int)
+        quantite_add = request.form.get("mat_qte", type=int)
+        if quantite_add and id_mat and quantite_add > 0:
+            update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
+            db.session.commit()
+            return redirect(
+                url_for('add_materiel',
+                        idPlateforme=la_plateforme.idPlateforme))
 
     elif form_mat.validate_on_submit():
         nouveau_mat = MATERIEL(
@@ -341,50 +385,63 @@ def add_materiel(idPlateforme):
         )
         db.session.add(nouveau_mat)
         db.session.commit()
-        
+
         hab = db.session.query(HABILITATION).all()
-        print(hab)    
-        
+        print(hab)
+
         necessite = None
         for item in form_mat.habilitations.data:
             match item:
                 case "electrique":
-                    necessite = NECESSITER(idHabilitation=1, idMateriel=nouveau_mat.idMateriel)
+                    necessite = NECESSITER(idHabilitation=1,
+                                           idMateriel=nouveau_mat.idMateriel)
                     db.session.add(necessite)
                     db.session.commit()
                 case "chimique":
-                    necessite = NECESSITER(idHabilitation=2, idMateriel=nouveau_mat.idMateriel)
+                    necessite = NECESSITER(idHabilitation=2,
+                                           idMateriel=nouveau_mat.idMateriel)
                     db.session.add(necessite)
                     db.session.commit()
                 case "biologique":
-                    necessite = NECESSITER(idHabilitation=3, idMateriel=nouveau_mat.idMateriel)
+                    necessite = NECESSITER(idHabilitation=3,
+                                           idMateriel=nouveau_mat.idMateriel)
                     db.session.add(necessite)
                     db.session.commit()
                 case "radiations":
-                    necessite = NECESSITER(idHabilitation=4, idMateriel=nouveau_mat.idMateriel)
+                    necessite = NECESSITER(idHabilitation=4,
+                                           idMateriel=nouveau_mat.idMateriel)
                     db.session.add(necessite)
                     db.session.commit()
-                
-                
-        utilise = UTILISER(idMateriel=nouveau_mat.idMateriel, idPlateforme=idPlateforme, quantite=form_mat.quantite_mat.data)
+
+        utilise = UTILISER(idMateriel=nouveau_mat.idMateriel,
+                           idPlateforme=idPlateforme,
+                           quantite=form_mat.quantite_mat.data)
         db.session.add(utilise)
         db.session.commit()
 
         print("ble ble ble")
-        return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
+        return render_template("add_materiel.html",
+                               plateforme=la_plateforme,
+                               form_materiel=form_mat,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
     if not request.form.get("mat_id") and request.method == 'POST':
-        return render_template(
-            "add_materiel.html",
-            form_materiel=form_mat,
-            message_type='error',
-            plateforme=la_plateforme,
-            materiel_dispo= mat_dispo,
-            materiel_plateforme=mat_plat)
+        return render_template("add_materiel.html",
+                               form_materiel=form_mat,
+                               message_type='error',
+                               plateforme=la_plateforme,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
 
-    return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
+    return render_template("add_materiel.html",
+                           plateforme=la_plateforme,
+                           form_materiel=form_mat,
+                           materiel_dispo=mat_dispo,
+                           materiel_plateforme=mat_plat)
 
 
 # ==================== LIEUX ====================
+
 
 @app.route("/lieux/")
 @login_required
@@ -415,7 +472,8 @@ def ajouter_lieu():
             unForm.nom.errors.append(
                 "Une erreur est survenue, merci de réessayer.")
         else:
-            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
+            return redirect(
+                url_for('liste_lieux', success='Lieu ajouté avec succès !'))
 
     return render_template('add_lieu.html',
                            title='Ajouter un lieu',
@@ -430,13 +488,16 @@ def supprimer_lieu(idLieu):
     if lieu is None:
         return render_template('404.html', message="Lieu non trouvé"), 404
     if lieu.campagnes:
-        return redirect(url_for('liste_lieux', error='Suppression impossible : campagnes associées'))
+        return redirect(
+            url_for('liste_lieux',
+                    error='Suppression impossible : campagnes associées'))
     db.session.delete(lieu)
     db.session.commit()
     return redirect(url_for('liste_lieux'))
 
 
 # ==================== PERSONNELS ====================
+
 
 @app.route("/personnels/")
 @login_required
@@ -464,12 +525,13 @@ def supprimer_personnel(username):
         db.session.commit()
     return redirect(url_for('liste_personnels'))
 
+
 @app.route("/add_personne/", methods=("GET", "POST"))
 @login_required
 def add_personne():
-    
+
     if current_user.is_authenticated:
-    
+
         form_pers = FormPersonne()
 
         role_choices = [('', 'Sélectionner un rôle')] + [
@@ -482,45 +544,54 @@ def add_personne():
             username = form_pers.username.data
             personne_existe = PERSONNE.query.get(username)
 
-
-
-            if not personne_existe:        
+            if not personne_existe:
                 habiliter = None
-                nouvelle_personne = PERSONNE(nom= form_pers.nom.data,
-                                             prenom= form_pers.prenom.data,
-                                             username= form_pers.username.data,
-                                             password= form_pers.password.data,
-                                             role_labo= form_pers.role_labo.data)
+                nouvelle_personne = PERSONNE(
+                    nom=form_pers.nom.data,
+                    prenom=form_pers.prenom.data,
+                    username=form_pers.username.data,
+                    password=form_pers.password.data,
+                    role_labo=form_pers.role_labo.data)
                 db.session.add(nouvelle_personne)
                 db.session.commit()
                 for item in form_pers.habilitations.data:
                     match item:
                         case "electrique":
-                            habiliter = HABILITER(idHabilitation=1, username=form_pers.username.data)
+                            habiliter = HABILITER(
+                                idHabilitation=1,
+                                username=form_pers.username.data)
                             db.session.add(habiliter)
                             db.session.commit()
                         case "chimique":
-                            habiliter = HABILITER(idHabilitation=2, username=form_pers.username.data)
+                            habiliter = HABILITER(
+                                idHabilitation=2,
+                                username=form_pers.username.data)
                             db.session.add(habiliter)
                             db.session.commit()
                         case "biologique":
-                            habiliter = HABILITER(idHabilitation=3, username=form_pers.username.data)
+                            habiliter = HABILITER(
+                                idHabilitation=3,
+                                username=form_pers.username.data)
                             db.session.add(habiliter)
                             db.session.commit()
                         case "radiations":
-                            habiliter = HABILITER(idHabilitation=4, username=form_pers.username.data)
+                            habiliter = HABILITER(
+                                idHabilitation=4,
+                                username=form_pers.username.data)
                             db.session.add(habiliter)
                             db.session.commit()
 
                 return redirect(url_for('index'))
             else:
-                return render_template("add_personne.html", form_personne=form_pers, message_type='error', message="Le pseudo est déjà utilisé")
+                return render_template("add_personne.html",
+                                       form_personne=form_pers,
+                                       message_type='error',
+                                       message="Le pseudo est déjà utilisé")
 
         if request.method == 'POST':
-            return render_template(
-                "add_personne.html",
-                form_personne=form_pers,
-                message_type='error')
+            return render_template("add_personne.html",
+                                   form_personne=form_pers,
+                                   message_type='error')
 
         return render_template("add_personne.html", form_personne=form_pers)
     else:
@@ -528,6 +599,7 @@ def add_personne():
 
 
 # ==================== BUDGET ====================
+
 
 @app.route('/dashboard/set_budget/', methods=(
     'GET',
@@ -557,36 +629,32 @@ def set_budget():
 
 # ==================== MAINTENANCE ====================
 
+
 @app.route('/maintenance/', methods=['GET', 'POST'])
 @login_required
 def maintenance():
     plateformes = PLATEFORME.query.all()
     form = MaintenanceForm()
     form.idPlateforme.choices = [('', 'Sélectionner une plateforme')] + [
-        (p.idPlateforme, p.nom) for p in plateformes]
-    
+        (p.idPlateforme, p.nom) for p in plateformes
+    ]
+
     message = None
     message_type = None
-    
+
     if request.method == 'POST':
         form.process(formdata=request.form)
         if form.validate():
             try:
                 id_plateforme = int(form.idPlateforme.data)
                 erreur_chevauchement = verifier_chevauchement_campagne(
-                    id_plateforme,
-                    form.dateDebut.data,
-                    form.duree.data
-                )
+                    id_plateforme, form.dateDebut.data, form.duree.data)
                 if erreur_chevauchement:
                     message = erreur_chevauchement
                     message_type = 'error'
                 else:
                     erreur_maintenance = verifier_chevauchement_maintenance(
-                        id_plateforme,
-                        form.dateDebut.data,
-                        form.duree.data
-                    )
+                        id_plateforme, form.dateDebut.data, form.duree.data)
                     if erreur_maintenance:
                         message = erreur_maintenance
                         message_type = 'error'
@@ -609,17 +677,14 @@ def maintenance():
     else:
         message = request.args.get('error') or request.args.get('success')
         message_type = 'error' if request.args.get('error') else (
-            'success' if request.args.get('success') else None
-        )
-    
-    return render_template(
-        'maintenance.html',
-        title='Prévoir une maintenance',
-        plateformes=plateformes,
-        form=form,
-        message=message,
-        message_type=message_type
-    )
+            'success' if request.args.get('success') else None)
+
+    return render_template('maintenance.html',
+                           title='Prévoir une maintenance',
+                           plateformes=plateformes,
+                           form=form,
+                           message=message,
+                           message_type=message_type)
 
 
 # ==================== ADN - UTILITAIRES ====================
@@ -627,8 +692,10 @@ def maintenance():
 DOSSIER_BASE = Path(__file__).resolve().parents[1]
 DOSSIER_ADN = DOSSIER_BASE / "algo" / "data"
 
+
 def assurer_dossier_adn() -> None:
     DOSSIER_ADN.mkdir(parents=True, exist_ok=True)
+
 
 def notifier(message: str, categorie: str = 'info') -> None:
     flash(message, categorie)
@@ -641,7 +708,7 @@ def valider_sequence(chaine: str) -> bool:
 
 def lister_fichiers_adn() -> list[dict]:
     """Liste les fichiers ADN disponibles dans le dossier des données."""
-    
+
     assurer_dossier_adn()
     fichiers = []
     for chemin in sorted(DOSSIER_ADN.glob("*.adn")):
@@ -656,6 +723,7 @@ def lister_fichiers_adn() -> list[dict]:
             "apercu": apercu,
         })
     return fichiers
+
 
 def charger_sequence_fichier(nom_fichier: str) -> str:
     """Charge une séquence ADN depuis un fichier .adn"""
@@ -674,7 +742,8 @@ def charger_sequence_fichier(nom_fichier: str) -> str:
 @login_required
 def gerer_adn():
     fichiers_adn = lister_fichiers_adn()
-    choix_fichiers = [(f['nom'], f"{f['nom']} ({f['taille']} bases)") for f in fichiers_adn]
+    choix_fichiers = [(f['nom'], f"{f['nom']} ({f['taille']} bases)")
+                      for f in fichiers_adn]
 
     form_generer = GenererSequenceForm()
     form_charger = ChargerSequenceForm()
@@ -686,29 +755,40 @@ def gerer_adn():
     if form_generer.submit_generer.data and form_generer.validate_on_submit():
         try:
             longueur = form_generer.longueur.data
-            nom_fichier = secure_filename(form_generer.nom_fichier.data.strip())
+            nom_fichier = secure_filename(
+                form_generer.nom_fichier.data.strip())
             if not nom_fichier:
                 raise ValueError
-            nouvelle_sequence = generer_sequence_adn_aleatoirement(constants.bases, longueur)
+            nouvelle_sequence = generer_sequence_adn_aleatoirement(
+                constants.bases, longueur)
             try:
-                sauvegarder_sequence(nouvelle_sequence, nom_fichier, DOSSIER_ADN)
+                sauvegarder_sequence(nouvelle_sequence, nom_fichier,
+                                     DOSSIER_ADN)
             except TypeError:
                 sauvegarder_sequence(nouvelle_sequence, nom_fichier)
-            sequence_creee = {'nom': f"{nom_fichier}.adn", 'contenu': nouvelle_sequence}
+            sequence_creee = {
+                'nom': f"{nom_fichier}.adn",
+                'contenu': nouvelle_sequence
+            }
             notifier('Séquence générée et sauvegardée.', 'succes')
         except (ValueError, OSError):
             notifier('Impossible de générer la séquence.', 'erreur')
         fichiers_adn = lister_fichiers_adn()
-        form_choisir.sequences.choices = [(f['nom'], f"{f['nom']} ({f['taille']} bases)") for f in fichiers_adn]
+        form_choisir.sequences.choices = [(f['nom'],
+                                           f"{f['nom']} ({f['taille']} bases)")
+                                          for f in fichiers_adn]
 
-    elif form_charger.submit_charger.data and form_charger.validate_on_submit():
+    elif form_charger.submit_charger.data and form_charger.validate_on_submit(
+    ):
         try:
             fichier = form_charger.fichier_adn.data
             contenu = fichier.read().decode('utf-8').strip().upper()
             if not valider_sequence(contenu):
                 raise ValueError
-            nom_souhaite = form_charger.nom_souhaite.data.strip() if form_charger.nom_souhaite.data else ''
-            nom_final = secure_filename(nom_souhaite) or secure_filename(Path(fichier.filename).stem)
+            nom_souhaite = form_charger.nom_souhaite.data.strip(
+            ) if form_charger.nom_souhaite.data else ''
+            nom_final = secure_filename(nom_souhaite) or secure_filename(
+                Path(fichier.filename).stem)
             if not nom_final:
                 raise ValueError
             assurer_dossier_adn()
@@ -719,13 +799,18 @@ def gerer_adn():
         except (ValueError, OSError, UnicodeDecodeError):
             notifier('Le fichier ne peut pas être enregistré.', 'erreur')
         fichiers_adn = lister_fichiers_adn()
-        form_choisir.sequences.choices = [(f['nom'], f"{f['nom']} ({f['taille']} bases)") for f in fichiers_adn]
+        form_choisir.sequences.choices = [(f['nom'],
+                                           f"{f['nom']} ({f['taille']} bases)")
+                                          for f in fichiers_adn]
 
-    elif form_choisir.submit_traitements.data and form_choisir.validate_on_submit():
+    elif form_choisir.submit_traitements.data and form_choisir.validate_on_submit(
+    ):
         if not form_choisir.sequences.data:
             notifier('Choisissez au moins un fichier.', 'erreur')
         else:
-            return redirect(url_for('traitements_adn', fichiers=','.join(form_choisir.sequences.data)))
+            return redirect(
+                url_for('traitements_adn',
+                        fichiers=','.join(form_choisir.sequences.data)))
 
     return render_template('gerer_adn.html',
                            title='Gerer les fichiers ADN',
@@ -738,7 +823,6 @@ def gerer_adn():
                            fichier_charge=fichier_charge)
 
 
-
 # ==================== ADN - TRAITEMENTS ====================
 
 
@@ -747,12 +831,16 @@ def gerer_adn():
 def traitements_adn():
     fichiers_adn = lister_fichiers_adn()
     choix_fichiers = [(f['nom'], f['nom']) for f in fichiers_adn]
-    preselection = [nom for nom in request.args.get('fichiers', '').split(',') if nom]
+    preselection = [
+        nom for nom in request.args.get('fichiers', '').split(',') if nom
+    ]
 
     form_traitement = TraitementAdnForm()
     form_traitement.sequence_base.choices = choix_fichiers
-    form_traitement.sequence_lev_a.choices = [('', 'Choisir un fichier')] + choix_fichiers
-    form_traitement.sequence_lev_b.choices = [('', 'Choisir un fichier')] + choix_fichiers
+    form_traitement.sequence_lev_a.choices = [('', 'Choisir un fichier')
+                                              ] + choix_fichiers
+    form_traitement.sequence_lev_b.choices = [('', 'Choisir un fichier')
+                                              ] + choix_fichiers
 
     if not form_traitement.sequence_base.data and preselection:
         form_traitement.sequence_base.data = preselection[0]
@@ -767,7 +855,8 @@ def traitements_adn():
             return redirect(url_for('gerer_adn'))
 
         try:
-            sequence_depart = charger_sequence_fichier(form_traitement.sequence_base.data)
+            sequence_depart = charger_sequence_fichier(
+                form_traitement.sequence_base.data)
         except FileNotFoundError:
             notifier('Impossible de lire la séquence de base.', 'erreur')
             return redirect(url_for('traitements_adn'))
@@ -780,7 +869,8 @@ def traitements_adn():
             form_traitement.calcul_levenshtein.data,
         ]
         if not any(mutations_cochees):
-            notifier('Choisissez au moins une mutation ou un calcul.', 'erreur')
+            notifier('Choisissez au moins une mutation ou un calcul.',
+                     'erreur')
             return redirect(url_for('traitements_adn'))
 
         sequence_en_cours = sequence_depart
@@ -789,8 +879,10 @@ def traitements_adn():
 
         if form_traitement.mutation_remplacement.data:
             sequence_avant = sequence_en_cours
-            sequence_en_cours = simuler_mutations_remplacements(sequence_avant, proba)
-            delta = estimation_distance_mutation(sequence_avant, sequence_en_cours)
+            sequence_en_cours = simuler_mutations_remplacements(
+                sequence_avant, proba)
+            delta = estimation_distance_mutation(sequence_avant,
+                                                 sequence_en_cours)
             compte_mutations['remplacement'] = delta
             liste_mutations.append({
                 'nom': 'Mutation par remplacement',
@@ -831,7 +923,9 @@ def traitements_adn():
             fichier_a = form_traitement.sequence_lev_a.data
             fichier_b = form_traitement.sequence_lev_b.data
             if not fichier_a or not fichier_b:
-                notifier('Choisissez deux fichiers pour le calcul de distance.', 'erreur')
+                notifier(
+                    'Choisissez deux fichiers pour le calcul de distance.',
+                    'erreur')
                 return redirect(url_for('traitements_adn'))
             try:
                 seq_a = charger_sequence_fichier(fichier_a)
@@ -842,7 +936,8 @@ def traitements_adn():
                     'fichier_b': fichier_b,
                 }
             except FileNotFoundError:
-                notifier('Impossible de charger les fichiers pour le calcul.', 'erreur')
+                notifier('Impossible de charger les fichiers pour le calcul.',
+                         'erreur')
                 return redirect(url_for('traitements_adn'))
 
         resultat = {
@@ -867,14 +962,17 @@ def traitements_adn():
                            preselection=preselection,
                            form_traitement=form_traitement)
 
+
 @app.route("/view_resultats/", methods=["GET"])
 @login_required
 def resultat():
     if current_user.is_authenticated:
-    
+
         resultat = session.get("resultat_adn")
         if not resultat:
-            notifier("Aucun résultat disponible. Lancez d’abord un traitement.", "erreur")
+            notifier(
+                "Aucun résultat disponible. Lancez d’abord un traitement.",
+                "erreur")
             return redirect(url_for("traitements_adn"))
 
         fichiersadn = lister_fichiers_adn()
@@ -892,16 +990,18 @@ def resultat():
         )
     else:
         return redirect(url_for('register'))
-    
+
+
 @app.route('/add_plateforme/', methods=['GET', 'POST'])
 @login_required
-def add_plateforme():   
-    
+def add_plateforme():
+
     if current_user.is_authenticated:
         form = Form_plateforme()
 
         if form.validate_on_submit():
-            plateforme_existe = PLATEFORME.query.filter(PLATEFORME.nom == form.nom_plateforme.data).first()
+            plateforme_existe = PLATEFORME.query.filter(
+                PLATEFORME.nom == form.nom_plateforme.data).first()
             print(plateforme_existe)
 
             if not plateforme_existe:
@@ -909,19 +1009,25 @@ def add_plateforme():
                     nom=form.nom_plateforme.data,
                     cout_journalier=form.cout_journalier.data,
                     min_nb_personne=form.minimum_personnes.data,
-                    intervalle_maintenance=form.intervalle_maintenance.data
-                )
+                    intervalle_maintenance=form.intervalle_maintenance.data)
 
                 db.session.add(nouvelle_plateforme)
                 db.session.commit()
 
-                return redirect(url_for('add_materiel', idPlateforme=nouvelle_plateforme.idPlateforme))
+                return redirect(
+                    url_for('add_materiel',
+                            idPlateforme=nouvelle_plateforme.idPlateforme))
             else:
-                return render_template("add_plateforme.html", form_plateforme=form, message="Une plateforme avec le même nom existe déjà", message_type='error') 
+                return render_template(
+                    "add_plateforme.html",
+                    form_plateforme=form,
+                    message="Une plateforme avec le même nom existe déjà",
+                    message_type='error')
 
         return render_template("add_plateforme.html", form_plateforme=form)
     else:
         return redirect(url_for('login'))
+
 
 if __name__ == "__main__":
     app.run()
