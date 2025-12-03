@@ -62,12 +62,12 @@ VALUES
     ('Formation Cedar Mountain');
 
 INSERT into
-    HABILITATION (nom_habilitation, description, idMateriel)
+    HABILITATION (idHabilitation, nom_habilitation, description)
 VALUES
-    ('électrique', 'Habilitation électrique', 1),
-    ('chimique', 'Habilitation chimique', 2),
-    ('biologique', 'Habilitation biologique', 3),
-    ('radiations', 'Habilitation radiations', 4);
+    (1,'électrique', 'Habilitation électrique'),
+    (2,'chimique', 'Habilitation chimique'),
+    (3,'biologique', 'Habilitation biologique'),
+    (4,'radiations', 'Habilitation radiations');
 
 INSERT into
     HABILITER (username, idHabilitation)
@@ -227,7 +227,7 @@ VALUES
     (10, 11);
 
 INSERT into
-    ECHANTILLON (seqNucleotides, commentairesEchantillon)
+    ECHANTILLON (fichierAdn, commentairesEchantillion)
 VALUES
     (
         'ATCGATCGATCGATCG',
@@ -454,31 +454,31 @@ VALUES
     (15, 10, 1);
 
 INSERT into
-    NECESSITER (idMateriel, idHabilitation)
+    NECESSITER (idHabilitation, idMateriel)
 VALUES
     (1, 1),
-    (2, 1),
-    (3, 1),
+    (1, 2),
+    (1, 3),
     (3, 3),
-    (4, 1),
-    (4, 2),
-    (5, 1),
-    (5, 3),
-    (6, 1),
-    (6, 2),
-    (7, 1),
-    (8, 2),
-    (9, 1),
-    (10, 2),
-    (11, 1),
-    (11, 3),
-    (12, 1),
-    (12, 2),
-    (13, 3),
-    (14, 1),
-    (14, 3),
-    (15, 1),
-    (15, 4);
+    (1, 4),
+    (2, 4),
+    (1, 5),
+    (3, 5),
+    (1, 6),
+    (2, 6),
+    (1, 7),
+    (2, 8),
+    (1, 9),
+    (2, 10),
+    (1, 11),
+    (3, 11),
+    (1, 12),
+    (2, 12),
+    (3, 13),
+    (1, 14),
+    (3, 14),
+    (1, 15),
+    (4, 15);
 
 INSERT IGNORE into
     MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)

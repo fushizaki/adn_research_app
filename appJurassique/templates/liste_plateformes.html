@@ -1,56 +1,64 @@
 {% extends "base.html" %}
 {% block main %}
 <div class="min-h-screen w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center px-6 py-12 drop-shadow-button">
-    <section class="w-full max-w-5xl bg-gray-div/90 border border-green-button rounded-[40px] shadow-lg backdrop-blur-sm">
+    <section class="w-full max-w-6xl bg-gray-div/90 border border-green-button rounded-[40px] shadow-lg backdrop-blur-sm">
         <div class="flex flex-col gap-6 px-10 py-10">
             <header class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between border-b border-green-button/40 pb-6">
                 <div class="flex flex-col gap-2">
-                    <h2 class="text-3xl font-bold text-white font-exo">Gestion du personnel</h2>
+                    <h2 class="text-3xl font-bold text-white font-exo">Gestion des plateformes</h2>
                     <p class="text-green-text font-medium flex items-center gap-2">
-                        <i class="fas fa-user-group text-xs"></i>
-                        {{ personnels|length }} personnels enregistrés
+                        <i class="fas fa-server text-xs"></i>
+                        {{ plateformes|length }} plateformes enregistrées
                     </p>
                 </div>
-                <a href="{{ url_for('add_personne') }}"
+                <a href="{{ url_for('add_plateforme') }}"
                     class="inline-flex items-center justify-center gap-3 rounded bg-green-button-menu px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white transition-colors duration-300 hover:bg-green-button-menu-hover">
                     <i class="fas fa-plus text-base"></i>
-                    Ajouter un membre
+                    Ajouter une plateforme
                 </a>
             </header>
 
             <div class="flex flex-col gap-3">
-                <label for="searchBarPersonnel" class="text-sm font-semibold uppercase tracking-widest text-green-text">Rechercher</label>
+                <label for="searchBarPlateforme" class="text-sm font-semibold uppercase tracking-widest text-green-text">Rechercher</label>
                 <div class="relative">
                     <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-sm text-green-button"></i>
-                    <input id="searchBarPersonnel" type="text" onkeyup="searchByName()" placeholder="Chercher par nom..."
+                    <input id="searchBarPlateforme" type="text" onkeyup="searchByName()" placeholder="Chercher par nom..."
                         class="w-full rounded-full border border-green-button/30 bg-gray-div px-12 py-3 text-sm text-white placeholder:text-gray-300 focus:border-green-button focus:outline-none focus:ring-2 focus:ring-green-button/50">
                 </div>
             </div>
 
             <div class="overflow-hidden rounded-3xl border border-green-button/40 bg-black/40">
                 <div class="overflow-x-auto overflow-y-auto max-h-96">
-                    <table id="tablePersonnels" class="sortable min-w-full divide-y divide-white/5 font-nunito">
+                    <table id="tablePlateformes" class="sortable min-w-full divide-y divide-white/5 font-nunito">
                         <thead class="bg-black/30 text-left uppercase text-green-text">
                             <tr>
                                 <th scope="col" class="unselectable px-6 py-4">Nom</th>
-                                <th scope="col" class="unselectable px-6 py-4">Prénom</th>
-                                <th scope="col" class="unselectable px-6 py-4">Rôle</th>
-                                <th scope="col" class="unselectable px-6 py-4">Identifiant</th>
+                                <th scope="col" class="unselectable px-6 py-4">Personnel min.</th>
+                                <th scope="col" class="unselectable px-6 py-4">Coût journalier</th>
+                                <th scope="col" class="unselectable px-6 py-4">Maintenance (jours)</th>
+                                <th scope="col" class="unselectable px-6 py-4">Matériels Différents</th>
                                 <th scope="col" class="unselectable sorttable_nosort px-6 py-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody class=" text-sm text-white">
-                            {% for personnel in personnels %}
+                            {% for plateforme in plateformes %}
                             <tr class="transition-colors duration-200 hover:bg-white/5">
-                                <td class="px-6 py-5 font-medium">{{ personnel.nom }}</td>
-                                <td class="px-6 py-5">{{ personnel.prenom }}</td>
-                                <td class="px-6 py-5 text-green-button font-semibold">{{ personnel.role_labo.value }}</td>
-                                <td class="px-6 py-5 text-white/70">{{ personnel.username }}</td>
+                                <td class="px-6 py-5 font-medium">{{ plateforme.nom }}</td>
+                                <td class="px-6 py-5">{{ plateforme.min_nb_personne if plateforme.min_nb_personne else '-' }}</td>
+                                <td class="px-6 py-5 text-green-button font-semibold">{{ '%.2f €'|format(plateforme.cout_journalier) if plateforme.cout_journalier else '-' }}</td>
+                                <td class="px-6 py-5 text-white/70">{{ plateforme.intervalle_maintenance if plateforme.intervalle_maintenance else '-' }}</td>
+                                <td class="px-6 py-5">
+                                    {{ plateforme.utilisations|length }}
+                                </td>
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4 text-base">
-                                        <a href="{{ url_for('supprimer_personnel', username=personnel.username) }}"
+                                        <a href="{{ url_for('supprimer_plateforme', idPlateforme=plateforme.idPlateforme) }}"
                                             class="text-red-400 transition-colors hover:text-red-500" title="Supprimer">
                                             <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                        <a href="#"
+                                            class="text-white transition-colors hover:text-white/80" title="Ajouter du matériel">
+                                            <i class="fas fa-plus"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -67,7 +75,7 @@
 <script src="{{ url_for('static', filename='js/search-bar-function.js') }}"></script>
 <script>
 function searchByName() {
-        searchBarFunctionPersonnels(0);
+        searchBarFunctionPlateformes(0);
     }
 </script>
 {% endblock %}
