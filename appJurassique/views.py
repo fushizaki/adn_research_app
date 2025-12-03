@@ -407,8 +407,9 @@ def maintenance():
         form.process(formdata=request.form)
         if form.validate():
             try:
+                id_plateforme = int(form.idPlateforme.data)
                 erreur_chevauchement = verifier_chevauchement_campagne(
-                    int(form.idPlateforme.data),
+                    id_plateforme,
                     form.dateDebut.data,
                     form.duree.data
                 )
@@ -416,11 +417,20 @@ def maintenance():
                     message = erreur_chevauchement
                     message_type = 'error'
                 else:
-                    new_maintenance = form.build_maintenance()
-                    db.session.add(new_maintenance)
-                    db.session.commit()
-                    message = 'Maintenance créée avec succès !'
-                    message_type = 'success'
+                    erreur_maintenance = verifier_chevauchement_maintenance(
+                        id_plateforme,
+                        form.dateDebut.data,
+                        form.duree.data
+                    )
+                    if erreur_maintenance:
+                        message = erreur_maintenance
+                        message_type = 'error'
+                    else:
+                        new_maintenance = form.build_maintenance()
+                        db.session.add(new_maintenance)
+                        db.session.commit()
+                        message = 'Maintenance créée avec succès !'
+                        message_type = 'success'
             except ValueError as e:
                 message = f'Erreur de validation : {str(e)}'
                 message_type = 'error'
