@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block main %}
 
-    <div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center min-h-screen drop-shadow-button">
+    <div class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center min-h-screen drop-shadow-button overflow-y-auto">
         <div class="rounded-[40px] bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full max-w-3xl mx-4">                
-            <form method="POST" action="{{ url_for('creer_nouvelle_campagne') }}">
+            <form method="POST" action="{{ url_for('add_campagne') }}">
                 {{ form.hidden_tag() }}
                 <div class="flex gap-3 mb-8">
                     <div class="bg-green-button rounded-lg p-2">
@@ -39,28 +39,36 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <p class="block text-green-button text-sm font-semibold mb-2">Titre</p>
-                            <input type="text" name="titre" placeholder="Campagne Dinosaurus AX1" 
-                                class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600" 
+                            <input type="text" name="titre" placeholder="ex : Campagne Dinosaurus AX1" 
+                                class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu" 
                                 value="{{ form.titre.data or '' }}">
                         </div>
                         
                         <div>
                             <p class="block text-green-button text-sm font-semibold mb-2">Date de début *</p>
                             <input type="date" name="dateDebut" required
-                                class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600" 
+                                class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu" 
                                 value="{{ form.dateDebut.data.strftime('%Y-%m-%d') if form.dateDebut.data else '' }}">
                         </div>
                         
                         <div>
-                            <p class="block text-green-button text-sm font-semibold mb-2">Durée en heures *</p>
-                            <input type="number" name="duree" placeholder="72" required min="1"
-                                class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600"
+                            <p class="block text-green-button text-sm font-semibold mb-2">Durée en jours *</p>
+                            <input type="number" name="duree" placeholder="ex : 30" required min="1"
+                                class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu"
                                 value="{{ form.duree.data or '' }}">
                         </div>
                         
                         <div>
                             <p class="block text-green-button text-sm font-semibold mb-2">Lieu de fouille *</p>
-                            <select name="idLieu" required class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600">
+                            <select name="idLieu" class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu">
                                 <option value="">Sélectionner un lieu</option>
                                 {% for lieu in lieux %}
                                 <option value="{{ lieu.idLieu }}" {% if form.idLieu.data and form.idLieu.data|string == lieu.idLieu|string %}selected{% endif %}>
@@ -75,7 +83,9 @@
                                 <div class="flex-1">
                                     <p class="block text-green-button text-sm font-semibold mb-2">Plateforme *</p>
                                     <select name="idPlateforme" id="plateforme-select" required 
-                                            class="w-full bg-gray-700 text-white rounded p-3 border border-gray-600">
+                                            class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu">
                                         <option value="">Sélectionner une plateforme</option>
                                         {% for plateforme in plateformes %}
                                         <option value="{{ plateforme.idPlateforme }}" 
@@ -89,15 +99,14 @@
                                     </select>
                                 </div>
                                 <div class="pt-7">
-                                    <button type="submit" formaction="{{ url_for('add_campagne') }}" formmethod="get"
-                                            class="bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded transition">
+                                    <button type="submit" name="action" value="load_members"
+                                            class="w-full text-white rounded-lg border border-transparent bg-green-button px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu hover:bg-green-600 transition">
                                         <i class="fas fa-sync-alt"></i> Charger les membres
                                     </button>
                                 </div>
                             </div>
-                            {% if plateforme_selectionnee %}
-                        
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -110,10 +119,22 @@
                             <i class="fas fa-users text-green-button text-xl"></i>
                             <h2 class="text-xl font-bold text-white">Membres de la campagne</h2>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <p class="text-sm text-green-button uppercase tracking-wide">Budget estimé</p>
+                                {% if budget_estime is not none %}
+                                <p class="text-white text-lg font-semibold">{{ '%.2f' % budget_estime }} €</p>
+                                {% else %}
+                                <p class="text-gray-400 text-sm">—</p>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
 
                     {% if plateforme_selectionnee %}
-                    <div class="mb-4 p-3 bg-gray-800 rounded border border-gray-700">
+                    <div class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu">
                         <p class="text-sm text-gray-300">
                             Sélectionnez au moins <strong>{{ plateforme_selectionnee.min_nb_personne or 1 }}</strong> 
                             membre(s) habilité(s) pour cette plateforme.
@@ -122,39 +143,41 @@
 
                     <div style="max-height: 200px; overflow-y: scroll;" class="border border-gray-700 rounded-lg p-2">
                         <div class="space-y-2">
-                            {% for membre, compatible in membres_compatibles %}
-                            <label class="block">
-                                <div class="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-gray-750 transition cursor-pointer
-                                            {% if not compatible %}opacity-50{% endif %}">
-                                    <div class="flex items-center gap-3tit flex-1">
-                                        <input type="checkbox" name="membres" value="{{ membre.username }}" 
-                                            class="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
-                                            {% if not compatible %}disabled{% endif %}
-                                            {% if membre.username in membres_selectionnes %}checked{% endif %}>
-                                        <div class="bg-green-500 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-user text-black"></i>
+                            {% if membres_compatibles %}
+                                {% for membre, compatible in membres_compatibles %}
+                                    {% if compatible %}
+                                    <label class="block">
+                                        <div class="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-gray-750 transition cursor-pointer">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <input type="checkbox" name="membres" value="{{ membre.username }}" 
+                                                    class="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                                                    {% if membre.username in membres_selectionnes %}checked{% endif %}>
+                                                <div class="bg-green-500 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-user text-black"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="text-white font-semibold">{{ membre.nom }} {{ membre.prenom }}</p>
+                                                    <p class="text-gray-400 text-xs">{{ membre.role_labo }}</p>
+                                                </div>
+                                                <div class="text-green-button text-xs">
+                                                    <i class="fas fa-check-circle"></i> Habilité
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex-1">
-                                            <p class="text-white font-semibold">{{ membre.nom }} {{ membre.prenom }}</p>
-                                            <p class="text-gray-400 text-xs">{{ membre.role_labo }}</p>
-                                        </div>
-                                        {% if not compatible %}
-                                        <div class="text-red-400 text-xs">
-                                            <i class="fas fa-exclamation-triangle"></i> Habilitations manquantes
-                                        </div>
-                                        {% else %}
-                                        <div class="text-green-button text-xs">
-                                            <i class="fas fa-check-circle"></i> Habilité
-                                        </div>
-                                        {% endif %}
-                                    </div>
+                                    </label>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-gray-400 text-center py-4">
+                                    Aucun membre trouvé
                                 </div>
-                            </label>
-                            {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                     {% else %}
-                    <div class="p-4 bg-gray-800 rounded border border-gray-700 text-center">
+                    <div class="w-full text-white rounded-lg border border-transparent bg-gray-textfield px-4
+                                py-3 focus:border-green-button-menu focus:outline-none focus:ring-2
+                                 focus:ring-green-button-menu">
                         <p class="text-gray-400">
                             Veuillez d'abord sélectionner une plateforme pour afficher les membres compatibles.
                         </p>

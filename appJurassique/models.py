@@ -25,11 +25,9 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    materiel = db.relationship('UTILISER', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
-    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
 
     #manque des trucs jsp
 
@@ -279,3 +277,17 @@ class MAINTENANCE(db.Model):
 
     def __repr__(self):
         return f"<MAINTENANCE {self.idMaintenance} on {self.dateMaintenance}>"
+
+class HISTORIQUE(db.Model):
+    __tablename__ = 'HISTORIQUE'
+    idHistorique = db.Column(db.Integer, primary_key=True)
+    nom_fichier_base = db.Column(db.String(255))
+    proba = db.Column(db.Float)
+    nb_remplacement = db.Column(db.Integer)
+    nb_insertion = db.Column(db.Integer)
+    nb_deletion = db.Column(db.Integer)
+    note = db.Column(db.String(255))
+    date_enregistrement = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"<HISTORIQUE {self.idHistorique} {self.nom_fichier_base}>"
