@@ -61,73 +61,104 @@ VALUES
     ('Site de Ghost Ranch'),
     ('Formation Cedar Mountain');
 
-INSERT into
-    HABILITATION (idHabilitation, nom_habilitation, description)
-VALUES
-    (1,'électrique', 'Habilitation électrique'),
-    (2,'chimique', 'Habilitation chimique'),
-    (3,'biologique', 'Habilitation biologique'),
-    (4,'radiations', 'Habilitation radiations');
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'adurand', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'adurand', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lmartin', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lmartin', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'ebernard', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'ebernard', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'npetit', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'npetit', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lrobert', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lrobert', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lrichard', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lrichard', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'cdubois', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'cdubois', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'cdubois', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'gmoreau', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'jlaurent', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'jlaurent', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'msimon', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'msimon', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'tmichel', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'tmichel', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'slefebvre', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'slefebvre', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'rleroy', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'rleroy', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lroux', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'lroux', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'ndavid', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'ndavid', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'eblanc', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'eblanc', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'hgarcia', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'hgarcia', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'hgarcia', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'hgarcia', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'zmuller', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'zmuller', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'efaure', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'efaure', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'clopez', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into HABILITER (username, idHabilitation)
+SELECT 'clopez', idHabilitation FROM HABILITATION WHERE nom_habilitation = 'Radiations';
 
 INSERT into
-    HABILITER (username, idHabilitation)
+    CAMPAGNE (dateDebut, duree, idLieu)
 VALUES
-    ('adurand', 1),
-    ('adurand', 2),
-    ('lmartin', 3),
-    ('lmartin', 4),
-    ('ebernard', 1),
-    ('ebernard', 3),
-    ('npetit', 2),
-    ('npetit', 4),
-    ('lrobert', 1),
-    ('lrobert', 4),
-    ('lrichard', 2),
-    ('lrichard', 3),
-    ('cdubois', 1),
-    ('cdubois', 2),
-    ('cdubois', 3),
-    ('gmoreau', 4),
-    ('jlaurent', 1),
-    ('jlaurent', 3),
-    ('msimon', 2),
-    ('msimon', 4),
-    ('tmichel', 1),
-    ('tmichel', 2),
-    ('slefebvre', 3),
-    ('slefebvre', 4),
-    ('rleroy', 1),
-    ('rleroy', 3),
-    ('lroux', 2),
-    ('lroux', 4),
-    ('ndavid', 1),
-    ('ndavid', 4),
-    ('eblanc', 2),
-    ('eblanc', 3),
-    ('hgarcia', 1),
-    ('hgarcia', 2),
-    ('hgarcia', 3),
-    ('hgarcia', 4),
-    ('zmuller', 3),
-    ('zmuller', 4),
-    ('efaure', 1),
-    ('efaure', 2),
-    ('clopez', 3),
-    ('clopez', 4);
-
-INSERT into
-    CAMPAGNE (dateDebut, duree)
-VALUES
-    ('2024-01-15', 30),
-    ('2024-03-10', 45),
-    ('2024-05-20', 21),
-    ('2024-07-05', 60),
-    ('2024-09-12', 28),
-    ('2024-11-01', 35),
-    ('2025-01-18', 42),
-    ('2025-04-15', 25),
-    ('2025-06-22', 38),
-    ('2025-08-30', 50);
+    ('2024-01-15', 30, 1),
+    ('2024-03-10', 45, 3),
+    ('2024-05-20', 21, 5),
+    ('2024-07-05', 60, 8),
+    ('2024-09-12', 28, 9),
+    ('2024-11-01', 35, 11),
+    ('2025-01-18', 42, 13),
+    ('2025-04-15', 25, 1),
+    ('2025-06-22', 38, 2),
+    ('2025-08-30', 50, 3);
 
 INSERT into
     PARTICIPER (idCampagne, username)
@@ -176,55 +207,29 @@ INSERT into
     PLANIFIER (idPlateforme, idCampagne)
 VALUES
     (1, 1),
-    (2, 1),
-    (3, 2),
-    (4, 2),
-    (5, 3),
-    (6, 3),
-    (7, 3),
-    (8, 4),
-    (9, 5),
-    (10, 5),
-    (1, 6),
-    (3, 6),
-    (2, 7),
-    (4, 7),
-    (6, 7),
-    (5, 8),
-    (7, 8),
-    (8, 9),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
     (9, 9),
-    (10, 9),
-    (1, 10),
-    (2, 10),
-    (3, 10);
+    (10, 10);
 
 INSERT into
     SEJOURNER (idCampagne, idLieu)
 VALUES
     (1, 1),
-    (1, 2),
     (2, 3),
-    (2, 4),
     (3, 5),
-    (3, 6),
-    (3, 7),
     (4, 8),
     (5, 9),
-    (5, 10),
     (6, 11),
-    (6, 12),
     (7, 13),
-    (7, 14),
-    (7, 15),
     (8, 1),
-    (8, 5),
     (9, 2),
-    (9, 6),
-    (9, 10),
-    (10, 3),
-    (10, 7),
-    (10, 11);
+    (10, 3);
 
 INSERT into
     ECHANTILLON (fichierAdn, commentairesEchantillion)
@@ -453,32 +458,52 @@ VALUES
     (14, 10, 1),
     (15, 10, 1);
 
-INSERT into
-    NECESSITER (idHabilitation, idMateriel)
-VALUES
-    (1, 1),
-    (1, 2),
-    (1, 3),
-    (3, 3),
-    (1, 4),
-    (2, 4),
-    (1, 5),
-    (3, 5),
-    (1, 6),
-    (2, 6),
-    (1, 7),
-    (2, 8),
-    (1, 9),
-    (2, 10),
-    (1, 11),
-    (3, 11),
-    (1, 12),
-    (2, 12),
-    (3, 13),
-    (1, 14),
-    (3, 14),
-    (1, 15),
-    (4, 15);
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 1 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 2 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 3 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 3 FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 4 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 4 FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 5 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 5 FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 6 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 6 FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 7 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 8 FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 9 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 10 FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 11 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 11 FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 12 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 12 FROM HABILITATION WHERE nom_habilitation = 'Chimique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 13 FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 14 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 14 FROM HABILITATION WHERE nom_habilitation = 'Biologique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 15 FROM HABILITATION WHERE nom_habilitation = 'Électrique';
+INSERT into NECESSITER (idHabilitation, idMateriel)
+SELECT idHabilitation, 15 FROM HABILITATION WHERE nom_habilitation = 'Radiations';
 
 INSERT IGNORE into
     MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)

@@ -77,6 +77,12 @@
                         <h2 class="text-xl font-semibold text-white">3. Distance de Levenshtein</h2>
                         <p class="text-sm text-red-500">ATTENTION !! Ce calcul ne fonctionne qu'avec de très courtes séquences. Sélectionnez en deux.</p>
                     </div>
+                    <div>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            {{ form_traitement.calcul_levenshtein(class="w-5 h-5 accent-green-button") }}
+                            <span class="text-sm text-green-200">Activer Levenshtein</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
