@@ -368,7 +368,6 @@ def add_materiel(idPlateforme):
     form_mat = Form_materiel()
 
     if request.form.get("mat_id"):
-        print("here")
         id_mat = request.form.get("mat_id", type=int)
         quantite_add = request.form.get("mat_qte", type=int)
         if quantite_add and id_mat and quantite_add > 0:
@@ -419,16 +418,25 @@ def add_materiel(idPlateforme):
         db.session.add(utilise)
         db.session.commit()
 
-        print("ble ble ble")
+        # Recharger les données pour afficher immédiatement le nouveau matériel
+        mat_dispo = db.session.query(MATERIEL).all()
+        mat_plat = db.session.query(UTILISER).filter(
+            UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+        form_mat = Form_materiel()
         return render_template("add_materiel.html",
                                plateforme=la_plateforme,
                                form_materiel=form_mat,
                                materiel_dispo=mat_dispo,
-                               materiel_plateforme=mat_plat)
+                               materiel_plateforme=mat_plat,
+                               message=message,
+                               message_type=message_type)
     if not request.form.get("mat_id") and request.method == 'POST':
+        message = "Veuillez vérifier les champs du formulaire."
+        message_type = 'error'
         return render_template("add_materiel.html",
                                form_materiel=form_mat,
-                               message_type='error',
+                               message=message,
+                               message_type=message_type,
                                plateforme=la_plateforme,
                                materiel_dispo=mat_dispo,
                                materiel_plateforme=mat_plat)
@@ -437,7 +445,9 @@ def add_materiel(idPlateforme):
                            plateforme=la_plateforme,
                            form_materiel=form_mat,
                            materiel_dispo=mat_dispo,
-                           materiel_plateforme=mat_plat)
+                           materiel_plateforme=mat_plat,
+                           message=message,
+                           message_type=message_type)
 
 
 # ==================== LIEUX ====================
@@ -1027,6 +1037,133 @@ def add_plateforme():
         return render_template("add_plateforme.html", form_plateforme=form)
     else:
         return redirect(url_for('login'))
+    
+@app.route("/gerer_materiel/<idPlateforme>/", methods=("GET", "POST"))
+def gerer_materiel(idPlateforme):
+
+    mat_dispo = db.session.query(MATERIEL).all()
+
+    la_plateforme = PLATEFORME.query.get(idPlateforme)
+
+    form_mat = Form_materiel()
+
+
+    if la_plateforme is None:
+        return render_template(
+            "gerer_materiel.html",
+            form_materiel=form_mat,
+            message_type='error',
+            message=
+            'Erreur lors du chargement de la plateforme veuillez réessayer',
+            plateforme=la_plateforme,
+            materiel_dispo=mat_dispo,
+            materiel_plateforme=mat_plat)
+
+    mat_plat = db.session.query(UTILISER).filter(
+        UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+
+
+    if request.form.get("mat_id"):
+        id_mat = request.form.get("mat_id", type=int)
+        quantite_add = request.form.get("mat_qte", type=int)
+        if quantite_add and id_mat and quantite_add > 0:
+            update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
+            db.session.commit()
+            return render_template("gerer_materiel.html",
+                               plateforme=la_plateforme,
+                               form_materiel=form_mat,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
+
+    elif request.form.get("mat_delete_id"):
+        id_mat = request.form.get("mat_delete_id", type=int)
+        mat_delete = MATERIEL.query.get(id_mat) if id_mat else None
+        if mat_delete is None:
+            message = "Matériel introuvable ou déjà supprimé."
+            message_type = 'error'
+            return render_template("gerer_materiel.html",
+                               plateforme=la_plateforme,
+                               form_materiel=form_mat,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat,
+                               message=message,
+                               message_type=message_type)
+        else:
+            db.session.delete(mat_delete)
+            db.session.commit()
+            mat_dispo = db.session.query(MATERIEL).all()
+            mat_plat = db.session.query(UTILISER).filter(
+                UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+        return render_template("gerer_materiel.html",
+                               plateforme=la_plateforme,
+                               form_materiel=form_mat,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
+
+    elif form_mat.validate_on_submit():
+        nouveau_mat = MATERIEL(
+            nom=form_mat.nom_materiel.data,
+            description=form_mat.description_mat.data,
+        )
+        db.session.add(nouveau_mat)
+        db.session.commit()
+
+        hab = db.session.query(HABILITATION).all()
+        print(hab)
+
+        necessite = None
+        for item in form_mat.habilitations.data:
+            match item:
+                case "electrique":
+                    necessite = NECESSITER(idHabilitation=1,
+                                           idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "chimique":
+                    necessite = NECESSITER(idHabilitation=2,
+                                           idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "biologique":
+                    necessite = NECESSITER(idHabilitation=3,
+                                           idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "radiations":
+                    necessite = NECESSITER(idHabilitation=4,
+                                           idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+
+        utilise = UTILISER(idMateriel=nouveau_mat.idMateriel,
+                           idPlateforme=idPlateforme,
+                           quantite=form_mat.quantite_mat.data)
+        db.session.add(utilise)
+        db.session.commit()
+        
+        mat_dispo = db.session.query(MATERIEL).all()
+        mat_plat = db.session.query(UTILISER).filter(
+            UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+        form_mat = Form_materiel()
+
+        return render_template("gerer_materiel.html",
+                               plateforme=la_plateforme,
+                               form_materiel=form_mat,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
+    if not request.form.get("mat_id") and request.method == 'POST':
+        return render_template("gerer_materiel.html",
+                               form_materiel=form_mat,
+                               message_type='error',
+                               plateforme=la_plateforme,
+                               materiel_dispo=mat_dispo,
+                               materiel_plateforme=mat_plat)
+
+    return render_template("gerer_materiel.html",
+                           plateforme=la_plateforme,
+                           form_materiel=form_mat,
+                           materiel_dispo=mat_dispo,
+                           materiel_plateforme=mat_plat)
 
 
 if __name__ == "__main__":
