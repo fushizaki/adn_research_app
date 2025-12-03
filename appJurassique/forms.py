@@ -1,9 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import (StringField, HiddenField, PasswordField, SelectField,
-                     DateField, MultipleFileField, SubmitField, SelectMultipleField, widgets)
-from wtforms.validators import DataRequired, EqualTo, ValidationError
-from .models import PERSONNE, role_labo_enum, BUDGET_MENSUEL
+from flask_wtf.file import FileField
+from wtforms import *
+from wtforms.validators import *
+from .models import *
 from hashlib import sha256
+from datetime import date
 
 
 class LoginForm(FlaskForm):
@@ -58,8 +59,8 @@ class BudgetForm(FlaskForm):
                      format='%Y-%m',
                      validators=[DataRequired()],
                      render_kw={'type': 'month'})
-    budget_mensuel = StringField('Montant du budget',
-                                 validators=[DataRequired()])
+    budget_mensuel = DecimalField('Montant du budget',
+                                  validators=[DataRequired(), NumberRange(min=0, max=99999.99)])
     next = HiddenField()
 
     def build_budget(self):
@@ -68,11 +69,53 @@ class BudgetForm(FlaskForm):
             mois=self.date.data.month,
             budget=self.budget_mensuel.data,
         )
+      
+
+class GenererSequenceForm(FlaskForm):
+    longueur = IntegerField('Longueur', validators=[DataRequired(), NumberRange(min=1, max=5000)])
+    nom_fichier = StringField('Nom du fichier', validators=[DataRequired()])
+    submit_generer = SubmitField('Generer et sauvegarder')
 
 
+class ChargerSequenceForm(FlaskForm):
+    fichier_adn = FileField('Fichier ADN', validators=[DataRequired()])
+    nom_souhaite = StringField('Nom souhaite', validators=[Optional()])
+    submit_charger = SubmitField('Charger le fichier')
+
+
+class ChoisirSequenceForm(FlaskForm):
+    sequences = SelectMultipleField('Fichiers ADN', choices=[], validators=[DataRequired()])
+    submit_traitements = SubmitField('Acceder aux traitements')
+
+
+class TraitementAdnForm(FlaskForm):
+    sequence_base = SelectField('Sequence de base', choices=[], validators=[DataRequired()])
+    proba = FloatField('Probabilite p', validators=[DataRequired(), NumberRange(min=0, max=1)])
+    mutation_remplacement = BooleanField('Mutation remplacement')
+    mutation_insertion = BooleanField('Mutation insertion')
+    mutation_deletion = BooleanField('Mutation deletion')
+    calcul_levenshtein = BooleanField('Calculer distance Levenshtein')
+    sequence_lev_a = SelectField('Sequence A', choices=[], validators=[Optional()])
+    sequence_lev_b = SelectField('Sequence B', choices=[], validators=[Optional()])
+    submit_traiter = SubmitField('Appliquer les traitements')
+
+
+class SauvegarderSequenceForm(FlaskForm):
+    nom_sequence = StringField('Nom du fichier', validators=[DataRequired()])
+    submit_sauvegarder = SubmitField('Sauvegarder la sequence')
+
+class ResultatTraitemement(FlaskForm):
+    telecharger_resultat =BooleanField('Télécharger les résultats')
+    telecharger_sequences_mutees = BooleanField('Sauvegarder les séquences mutées')
+    note = StringField('Note', validators=[Optional()])
+    submit_historique = SubmitField('Ajouter a l\'historique')
+
+class ReinitialiserResultatForm(FlaskForm):
+    submit_reinitialiser = SubmitField('Reinitialiser les resultats')
+
+    
 class AssociateFilesForm(FlaskForm):
-    file = MultipleFileField("Fichiers d'échantillon",
-                             validators=[DataRequired()])
+    file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
     submit = SubmitField('Associer les fichiers')
 
 class MultiCheckboxField(SelectMultipleField):
@@ -101,3 +144,85 @@ class FormPersonne(FlaskForm):
         if not field.data:
             raise ValidationError("Sélectionnez au moins une habilitation")
     
+
+class CampagneForm(FlaskForm):
+
+    titre = StringField("Titre", validators=[Optional()])
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+    duree = IntegerField(
+        "Durée en jours",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+        ],
+    )
+    idLieu = SelectField(
+        "Lieu de fouille",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+    )
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+    membres = SelectMultipleField(
+        "Membres",
+        choices=[],
+        coerce=str,
+    )
+    
+
+class LieuForm(FlaskForm):
+    
+    nomLieu = StringField("Nom du lieu", validators=[DataRequired()])
+    next = HiddenField()
+    
+    def build_lieu(self):
+        return LIEU_FOUILLE(
+            nomLieu=self.nomLieu.data
+        )
+
+
+class MaintenanceForm(FlaskForm):
+
+    dateDebut = DateField(
+        "Date de début",
+        format="%Y-%m-%d",
+        validators=[DataRequired(message="La date de début est obligatoire.")],
+    )
+
+    duree = IntegerField(
+        "Durée (en jours)",
+        validators=[
+            DataRequired(message="La durée est obligatoire."),
+            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+        ],
+    )
+
+    idPlateforme = SelectField(
+        "Plateforme",
+        choices=[],
+        coerce=str,
+        validators=[DataRequired(message="La plateforme est obligatoire.")],
+    )
+
+    next = HiddenField()
+
+    def validate_dateDebut(self, field):
+        if field.data and field.data < date.today():
+            raise ValidationError("La date ne peut pas être dans le passé.")
+
+    def build_maintenance(self):
+        return MAINTENANCE(
+            dateMaintenance=self.dateDebut.data,
+            duree_maintenance=self.duree.data,
+            idPlateforme=int(self.idPlateforme.data),
+            statut=statut.PLANIFIEE,
+        )

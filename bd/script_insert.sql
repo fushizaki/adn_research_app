@@ -2,26 +2,26 @@
 INSERT into
     PERSONNE (username, nom, prenom, password, role_labo)
 VALUES
-    ('adurand', 'Durand', 'Alice', 'pass123', 'Directeur'),
-    ('lmartin', 'Martin', 'Lucas', 'secure456', 'Chercheur'),
-    ('ebernard', 'Bernard', 'Emma', 'mypass789', 'Technicien'),
-    ('npetit', 'Petit', 'Noah', 'password1', 'Administratif'),
-    ('lrobert', 'Robert', 'Léa', 'secret234', 'Chercheur'),
-    ('lrichard', 'Richard', 'Louis', 'login567', 'Technicien'),
-    ('cdubois', 'Dubois', 'Chloé', 'access890', 'Chercheur'),
-    ('gmoreau', 'Moreau', 'Gabriel', 'user123', 'Administratif'),
-    ('jlaurent', 'Laurent', 'Jules', 'pass456', 'Technicien'),
-    ('msimon', 'Simon', 'Manon', 'secure789', 'Chercheur'),
-    ('tmichel', 'Michel', 'Tom', 'mypass012', 'Directeur'),
-    ('slefebvre', 'Lefebvre', 'Sarah', 'password345', 'Technicien'),
-    ('rleroy', 'Leroy', 'Raphaël', 'secret678', 'Chercheur'),
-    ('lroux', 'Roux', 'Lina', 'login901', 'Administratif'),
-    ('ndavid', 'David', 'Nathan', 'access234', 'Technicien'),
-    ('eblanc', 'Blanc', 'Eva', 'user567', 'Chercheur'),
-    ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'Directeur'),
-    ('zmuller', 'Muller', 'Zoé', 'secure123', 'Technicien'),
-    ('efaure', 'Faure', 'Enzo', 'mypass456', 'Chercheur'),
-    ('clopez', 'Lopez', 'Camille', 'password789', 'Administratif');
+    ('adurand', 'Durand', 'Alice', 'pass123', 'DIRECTION'),
+    ('lmartin', 'Martin', 'Lucas', 'secure456', 'CHERCHEUR'),
+    ('ebernard', 'Bernard', 'Emma', 'mypass789', 'TECHNICIEN'),
+    ('npetit', 'Petit', 'Noah', 'password1', 'ADMINISTRATION'),
+    ('lrobert', 'Robert', 'Léa', 'secret234', 'CHERCHEUR'),
+    ('lrichard', 'Richard', 'Louis', 'login567', 'TECHNICIEN'),
+    ('cdubois', 'Dubois', 'Chloé', 'access890', 'CHERCHEUR'),
+    ('gmoreau', 'Moreau', 'Gabriel', 'user123', 'ADMINISTRATION'),
+    ('jlaurent', 'Laurent', 'Jules', 'pass456', 'TECHNICIEN'),
+    ('msimon', 'Simon', 'Manon', 'secure789', 'CHERCHEUR'),
+    ('tmichel', 'Michel', 'Tom', 'mypass012', 'DIRECTION'),
+    ('slefebvre', 'Lefebvre', 'Sarah', 'password345', 'TECHNICIEN'),
+    ('rleroy', 'Leroy', 'Raphaël', 'secret678', 'CHERCHEUR'),
+    ('lroux', 'Roux', 'Lina', 'login901', 'ADMINISTRATION'),
+    ('ndavid', 'David', 'Nathan', 'access234', 'TECHNICIEN'),
+    ('eblanc', 'Blanc', 'Eva', 'user567', 'CHERCHEUR'),
+    ('hgarcia', 'Garcia', 'Hugo', 'pass890', 'DIRECTION'),
+    ('zmuller', 'Muller', 'Zoé', 'secure123', 'TECHNICIEN'),
+    ('efaure', 'Faure', 'Enzo', 'mypass456', 'CHERCHEUR'),
+    ('clopez', 'Lopez', 'Camille', 'password789', 'ADMINISTRATION');
 
 INSERT into
     PLATEFORME (
@@ -62,12 +62,12 @@ VALUES
     ('Formation Cedar Mountain');
 
 INSERT into
-    HABILITATION (nom_habilitation, description)
+    HABILITATION (nom_habilitation, description, idMateriel)
 VALUES
-    ('électrique', 'Habilitation électrique'),
-    ('chimique', 'Habilitation chimique'),
-    ('biologique', 'Habilitation biologique'),
-    ('radiations', 'Habilitation radiations');
+    ('électrique', 'Habilitation électrique', 1),
+    ('chimique', 'Habilitation chimique', 2),
+    ('biologique', 'Habilitation biologique', 3),
+    ('radiations', 'Habilitation radiations', 4);
 
 INSERT into
     HABILITER (username, idHabilitation)
@@ -274,7 +274,7 @@ VALUES
     ('Archaeopteryx', 'Dinosaure-oiseau primitif');
 
 INSERT into
-    APPARTENIR (idEspece, idEchant)
+    APPARTENIR (idEspece, idEchantillon)
 VALUES
     (9, 1),
     (2, 2),
@@ -293,7 +293,7 @@ VALUES
     (14, 15);
 
 INSERT into
-    RAPPORTER (idEchant, idCampagne)
+    RAPPORTER (idEchantillon, idCampagne)
 VALUES
     (1, 1),
     (2, 1),
@@ -341,6 +341,23 @@ VALUES
     (2025, 8, 20500.00),
     (2025, 9, 17900.25),
     (2025, 10, 23000.50);
+
+
+
+INSERT into
+    HISTORIQUE (
+        nom_fichier_base,
+        proba,
+        nb_remplacement,
+        nb_insertion,
+        nb_deletion,
+        note,
+        date_enregistrement
+    )
+VALUES
+    ('sample_theropode.adn', 0.15, 4, 2, 1, 'Test mutations multiples', NOW()),
+    ('specimen_brachio.adn', 0.05, 1, 0, 0, 'Verification faible proba', NOW()),
+    ('archive_veloci.adn', 0.25, 6, 3, 2, 'Scenario stress', NOW());
 
 
 
@@ -462,3 +479,37 @@ VALUES
     (14, 3),
     (15, 1),
     (15, 4);
+
+INSERT IGNORE into
+    MAINTENANCE (idPlateforme, dateMaintenance, duree_maintenance, statut)
+VALUES
+    -- Maintenances pour Plateforme Alpha (intervalle 30 jours) - avant les campagnes
+    (1, '2024-01-01', 2, 'TERMINEE'),
+    (1, '2025-01-01', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Beta (intervalle 45 jours)
+    (2, '2023-12-20', 1, 'TERMINEE'),
+    (2, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Gamma (intervalle 21 jours)
+    (3, '2024-01-01', 3, 'TERMINEE'),
+    (3, '2024-12-01', 3, 'TERMINEE'),
+    -- Maintenances pour Plateforme Delta (intervalle 60 jours)
+    (4, '2023-11-20', 2, 'TERMINEE'),
+    (4, '2024-11-20', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Epsilon (intervalle 28 jours)
+    (5, '2024-01-01', 1, 'TERMINEE'),
+    (5, '2024-12-01', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Zeta (intervalle 35 jours)
+    (6, '2023-12-25', 2, 'TERMINEE'),
+    (6, '2024-12-25', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Eta (intervalle 90 jours)
+    (7, '2023-10-01', 4, 'TERMINEE'),
+    (7, '2024-10-01', 4, 'TERMINEE'),
+    -- Maintenances pour Plateforme Theta (intervalle 14 jours)
+    (8, '2024-01-01', 1, 'TERMINEE'),
+    (8, '2024-12-20', 1, 'TERMINEE'),
+    -- Maintenances pour Plateforme Iota (intervalle 42 jours)
+    (9, '2024-01-01', 2, 'TERMINEE'),
+    (9, '2024-12-10', 2, 'TERMINEE'),
+    -- Maintenances pour Plateforme Kappa (intervalle 56 jours)
+    (10, '2023-12-01', 2, 'TERMINEE'),
+    (10, '2024-12-01', 2, 'TERMINEE');
