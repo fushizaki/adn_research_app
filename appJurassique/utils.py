@@ -1,6 +1,8 @@
+
 from datetime import timedelta
 from .app import db
 from .models import *
+from appJurassique.models import UTILISER
 
 def calculer_date_fin(date_debut, duree_jours):
 
@@ -316,3 +318,24 @@ def estimer_cout_campagne(plateforme, duree_jours):
         return None
     jours = max(1, int(duree_jours))
     return round(plateforme.cout_journalier * jours, 2)
+
+
+def update_qte(qte, idMat, idPlat):
+    
+    materiel_deja_utilise = db.session.query(UTILISER).filter(UTILISER.idMateriel == idMat, UTILISER.idPlateforme == idPlat).first()
+    
+    print(materiel_deja_utilise)
+    
+    if materiel_deja_utilise != None:
+        new_qte = materiel_deja_utilise.quantite + qte
+        if new_qte >= 0:
+            db.session.query(UTILISER).filter(UTILISER.idMateriel == idMat, UTILISER.idPlateforme == idPlat).update({UTILISER.quantite: UTILISER.quantite + qte})
+            db.session.commit()
+            return True
+    else:
+            utilise = UTILISER(idMateriel= idMat, idPlateforme=idPlat, quantite= qte)
+            db.session.add(utilise)
+            db.session.commit()
+            return True
+    return False
+
