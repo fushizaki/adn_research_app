@@ -7,11 +7,21 @@ from algo.main import *
 from pathlib import Path
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
+<<<<<<< HEAD
 from .utils import creer_campagne, obtenir_membres_compatibles
 from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
 from appJurassique.utils import *
+=======
+from sqlalchemy.exc import IntegrityError
+from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
+                                 AssociateFilesForm, Form_materiel)
+from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
+                                  ECHANTILLON, RAPPORTER, MATERIEL, UTILISER, PLATEFORME, NECESSITER)
+from pathlib import Path
+from .utils import update_qte
+>>>>>>> feature/page-ajout-materiel
 
 
 # ==================== ACCUEIL ====================
@@ -734,5 +744,75 @@ def add_plateforme():
         return redirect(url_for('register'))
     
 
+
+@app.route("/add_materiel/<idPlateforme>/", methods=("GET", "POST"))
+def add_materiel(idPlateforme):
+    
+    mat_dispo = db.session.query(MATERIEL).all()
+    
+    la_plateforme = PLATEFORME.query.get(idPlateforme)
+    
+    mat_plat = mat_plat = db.session.query(UTILISER).filter(UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+    
+    print(mat_plat)
+    
+    form_mat = Form_materiel()
+    
+    if request.form.get("mat_id"):
+            print("here")
+            id_mat = request.form.get("mat_id", type=int)
+            quantite_add = request.form.get("mat_qte", type=int)
+            if quantite_add and id_mat and quantite_add > 0:
+                update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
+                db.session.commit()
+                return redirect(url_for('add_materiel', idPlateforme=la_plateforme.idPlateforme))
+
+    elif form_mat.validate_on_submit():
+        nouveau_mat = MATERIEL(
+            nom=form_mat.nom_materiel.data,
+            description=form_mat.description_mat.data,
+        )
+        db.session.add(nouveau_mat)
+        db.session.commit()
+        
+        necessite = None
+        for item in form_mat.habilitations.data:
+            match item:
+                case "electrique":
+                    necessite = NECESSITER(idHabilitation=1, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "chimique":
+                    necessite = NECESSITER(idHabilitation=2, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "biologique":
+                    necessite = NECESSITER(idHabilitation=3, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                case "radiations":
+                    necessite = NECESSITER(idHabilitation=4, idMateriel=nouveau_mat.idMateriel)
+                    db.session.add(necessite)
+                    db.session.commit()
+                
+                
+        utilise = UTILISER(idMateriel=nouveau_mat.idMateriel, idPlateforme=idPlateforme, quantite=form_mat.quantite_mat.data)
+        db.session.add(utilise)
+        db.session.commit()
+
+        
+        return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
+    if not request.form.get("mat_id") and request.method == 'POST':
+        return render_template(
+            "add_materiel.html",
+            form_materiel=form_mat,
+            message_type='error',
+            plateforme=la_plateforme,
+            materiel_dispo= mat_dispo,
+            materiel_plateforme=mat_plat)
+
+    return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
+    
+    
 if __name__ == "__main__":
-    app.run()
+    app.run()    

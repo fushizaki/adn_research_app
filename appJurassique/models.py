@@ -13,7 +13,7 @@ class MATERIEL(db.Model):
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
     utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
     necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
-
+    
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
 

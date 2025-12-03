@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+<div class="min-h-screen w-full flex items-center justify-center bg-black text-white">
+    <div class="w-full max-w-5xl mx-4 my-8 bg-gray-950 border border-green-button/40 rounded-xl p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-button/20 border border-green-button/60">
+                <span class="text-2xl font-bold text-green-button">+</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold">Ajouter du matériel à la plateforme : {{ plateforme.nom }}</h1>
+                <p class="text-sm text-green-button/80">Sélectionnez un matériel existant ou créez-en un nouveau</p>
+            </div>
+            <a href="{{ url_for('index') }}" class="ml-auto text-gray-400 hover:text-white text-2xl">
+                <i class="fas fa-times"></i>
+            </a>
+        </div>
+
+        <hr class="border-t border-green-button/40 my-6">
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            {# Formulaire création de matériel #}
+            <form method="POST"
+                  action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}"
+                  class="lg:w-2/3">
+                {{ form_materiel.hidden_tag() }}
+
+                <div class="mb-8">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-info-circle text-green-button text-lg"></i>
+                        <h2 class="text-xl font-semibold">Informations du matériel</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm font-semibold text-green-button mb-2">Nom du matériel</p>
+                            {{ form_materiel.nom_materiel(
+                                class_="w-full rounded-lg bg-gray-900 border border-green-button/40 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-button"
+                            ) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-green-button mb-2">Quantité disponible</p>
+                            {{ form_materiel.quantite_mat(
+                                class_="w-full rounded-lg bg-gray-900 border border-green-button/40 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-button"
+                            ) }}
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <p class="text-sm font-semibold text-green-button mb-2">
+                            Description du matériel (optionnel)
+                        </p>
+                        {{ form_materiel.description_mat(
+                            class_="w-full rounded-lg bg-gray-900 border border-green-button/40 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-button"
+                        ) }}
+                    </div>
+                </div>
+
+                <div class="rounded-lg bg-gray-900 border border-green-button/40 px-5 py-5">
+                    <h3 class="text-sm font-semibold text-green-button mb-4">
+                        <i class="fa-solid fa-shield mr-2"></i>Habilitations requises
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        {% for subfield in form_materiel.habilitations %}
+                            <div>
+                                {{ subfield(class_="peer hidden") }}
+                                <label for="{{ subfield.id }}"
+                                       class="block w-full cursor-pointer select-none rounded-md bg-gray-950 border border-green-button/30 py-2 px-3 text-center text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-800 peer-checked:bg-green-button peer-checked:text-black peer-checked:border-green-button">
+                                    {{ subfield.label.text }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-6">
+                        <button type="submit"
+                                class="w-full rounded-lg bg-green-button text-black font-semibold py-2.5 px-4 hover:bg-green-500 transition-colors">
+                            <i class="fa-solid fa-plus mr-2"></i>Créer le matériel et l'ajouter
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            {# Colonne droite : ajout existant + liste #}
+            <div class="lg:w-1/3 flex flex-col gap-6">
+                <form class="w-full mx-auto bg-gray-900 border border-green-button/40 rounded-lg px-5 py-5 flex flex-col gap-4"
+                      method="POST"
+                      action="{{ url_for('add_materiel', idPlateforme=plateforme.idPlateforme) }}">
+                    <p class="text-sm font-semibold text-green-button text-center">
+                        Ajouter un matériel existant
+                    </p>
+
+                    <select name="mat_id" id="mat_select"
+                            class="w-full rounded-lg bg-gray-950 border border-green-button/40 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-button"
+                            required>
+                        <option value="">-- Sélectionner le matériel --</option>
+                        {% for materiel in materiel_dispo %}
+                            <option value="{{ materiel.idMateriel }}">{{ materiel.nom }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input type="number" min="1" name="mat_qte"
+                           class="w-full rounded-lg bg-gray-950 border border-green-button/40 px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-button"
+                           placeholder="Quantité"
+                           required>
+
+                    <button type="submit"
+                            class="w-full rounded-lg bg-green-button text-black font-semibold py-2.5 px-4 hover:bg-green-500 transition-colors">
+                        Ajouter
+                    </button>
+                </form>
+
+                <div class="w-full mx-auto bg-gray-900 border border-green-button/40 rounded-lg px-5 py-5">
+                    <p class="text-sm font-semibold text-green-button mb-3 text-center">
+                        Matériel déjà associé
+                    </p>
+                    <div class="w-full overflow-x-auto">
+                        <table class="w-full text-left text-sm text-white">
+                            <thead>
+                                <tr class="border-b border-green-button/40 text-green-button text-xs">
+                                    <th class="pb-2 pr-2">Nom</th>
+                                    <th class="pb-2 pr-2">Description</th>
+                                    <th class="pb-2 text-right">Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for utilisation in materiel_plateforme %}
+                                    <tr class="border-b border-white/10 last:border-0">
+                                        <td class="py-2 pr-2 align-top">
+                                            {{ utilisation.materiel.nom }}
+                                        </td>
+                                        <td class="py-2 pr-2 align-top text-white/70 text-xs">
+                                            {{ utilisation.materiel.description }}
+                                        </td>
+                                        <td class="py-2 text-right align-top">
+                                            {{ utilisation.quantite }}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="py-4 text-center text-white/60 text-sm">
+                                            Aucun matériel associé pour le moment
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
