@@ -19,19 +19,33 @@ def verifier_chevauchement_campagne(id_plateforme, date_debut, duree_jours):
     Vérifie si une maintenance chevauche une campagne existante sur la même plateforme.
     Retourne un message d'erreur si chevauchement, None sinon.
     """
-    date_fin_maintenance = date_debut + timedelta(days=duree_jours - 1)
+    date_fin_maintenance = calculer_date_fin(date_debut, duree_jours)
     
     campagnes_plateforme = db.session.query(CAMPAGNE).join(
         PLANIFIER, CAMPAGNE.idCampagne == PLANIFIER.idCampagne).filter(
         PLANIFIER.idPlateforme == id_plateforme).all()
     
     for campagne in campagnes_plateforme:
-        date_fin_campagne = campagne.dateDebut + timedelta(days=campagne.duree - 1)
-        if date_debut <= date_fin_campagne and date_fin_maintenance >= campagne.dateDebut:
-            return f"Conflit avec une campagne existante (du {campagne.dateDebut} au {date_fin_campagne}) pour cette plateforme."
+        date_fin_campagne = calculer_date_fin(campagne.dateDebut, campagne.duree)
+        if periodes_se_chevauchent(date_debut, date_fin_maintenance, campagne.dateDebut, date_fin_campagne):
+            return f"Conflit avec une campagne existante"
     
     return None
 
+
+def verifier_chevauchement_maintenance(id_plateforme, date_debut, duree_jours):
+    """
+    Vérifie si une maintenance chevauche une autre maintenance existante sur la même plateforme.
+    """
+    date_fin_maintenance = calculer_date_fin(date_debut, duree_jours)
+    maintenances_plateforme = MAINTENANCE.query.filter_by(
+        idPlateforme=id_plateforme).all()
+    for maintenance in maintenances_plateforme:
+        date_fin_existante = calculer_date_fin(maintenance.dateMaintenance, maintenance.duree_maintenance)
+        if periodes_se_chevauchent(date_debut, date_fin_maintenance, maintenance.dateMaintenance, date_fin_existante):
+            return f"Conflit avec une maintenance existante"
+    
+    return None
 
 def verifier_nombre_membres(plateforme, membres):
     """Vérifie que le nombre de membres est suffisant pour la plateforme."""

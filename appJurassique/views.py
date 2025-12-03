@@ -14,11 +14,76 @@ from appJurassique.models import *
 from appJurassique.utils import *
 
 
+# ==================== ACCUEIL ====================
+
 @app.route('/')
 @app.route('/index/')
 def index():
     return render_template('index.html', title='Accueil', current_page='index')
 
+
+# ==================== AUTHENTIFICATION ====================
+
+@app.route("/login/", methods=(
+    "GET",
+    "POST",
+))
+def login():
+    unForm = LoginForm()
+    unUser = None
+
+    if not unForm.is_submitted():
+        unForm.next.data = request.args.get('next')
+    elif unForm.validate_on_submit():
+        unUser = unForm.get_authenticated_user()
+
+    if unUser:
+        login_user(unUser)
+        next = unForm.next.data or url_for("index", name=unUser.username)
+        return redirect(next)
+    return render_template("login.html", form=unForm)
+
+
+@app.route("/register/", methods=("GET","POST"))
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    form = RegisterForm()
+    role_choices = [('', 'Sélectionner un rôle')
+                    ] + [(role.value, role.value) for role in role_labo_enum]
+    form.role_labo.choices = role_choices
+
+    if not form.is_submitted():
+        form.next.data = request.args.get('next')
+
+    if form.validate_on_submit():
+        if PERSONNE.query.get(form.username.data):
+            form.username.errors.append("Cet identifiant est déjà utilisé.")
+        else:
+            user = form.build_user()
+            db.session.add(user)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                form.username.errors.append(
+                    "Une erreur est survenue, merci de réessayer.")
+            else:
+                login_user(user)
+                next_url = form.next.data or url_for("index",
+                                                     name=user.username)
+                return redirect(next_url)
+
+    return render_template("register.html", form=form)
+
+@app.route("/logout/")
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+# ==================== CAMPAGNES ====================
 
 @app.route('/add_campagne/', methods=['GET', 'POST'])
 def add_campagne():
@@ -135,31 +200,15 @@ def add_campagne():
         message_type=message_type)
 
 
-
-@app.route('/dashboard/set_budget/', methods=(
-    'GET',
-    'POST',
-))
+@app.route("/campagnes/")
 @login_required
-def set_budget():
-    unForm = BudgetForm()
-    if not unForm.is_submitted():
-        unForm.next.data = request.args.get('next')
-    elif unForm.validate_on_submit():
-        unBudget = unForm.build_budget()
-        db.session.add(unBudget)
-        try:
-            db.session.commit()
-        except (IntegrityError, DataError):
-            db.session.rollback()
-            unForm.budget_mensuel.errors.append(
-                "Une erreur est survenue, merci de réessayer.")
-        else:
-            return redirect(unForm.next.data or url_for('index'))
-    return render_template('set_budget.html',
-                           title='Définir le budget',
-                           current_page='budget',
-                           form=unForm)
+def liste_campagnes():
+    campagnes = CAMPAGNE.query.all()
+    return render_template("liste_campagnes.html",
+                           title="Liste des campagnes",
+                           current_page="campagne",
+                           campagnes=campagnes)
+
 
 
 @app.route('/campagnes/<int:idCampagne>/view/')
@@ -175,14 +224,6 @@ def view_campagnes(idCampagne):
                            campagne=campagne,
                            upload_form=upload_form)
 
-@app.route("/campagnes/")
-@login_required
-def liste_campagnes():
-    campagnes = CAMPAGNE.query.all()
-    return render_template("liste_campagnes.html",
-                           title="Liste des campagnes",
-                           current_page="campagne",
-                           campagnes=campagnes)
 
 @app.route('/campagnes/<int:idCampagne>/supprimer/')
 @login_required
@@ -194,7 +235,7 @@ def supprimer_campagne(idCampagne):
         db.session.delete(campagne)
         db.session.commit()
     return redirect(url_for('liste_campagnes'))
-    
+
 
 @app.route('/campagnes/<int:idCampagne>/view/associer-fichier', methods=(
     'POST',))
@@ -243,25 +284,59 @@ def associer_fichier(idCampagne):
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
 
 
-@app.route("/plateformes/")
+# ==================== LIEUX ====================
+
+@app.route("/lieux/")
 @login_required
-def liste_plateformes():
-    plateformes = PLATEFORME.query.all()
-    return render_template("liste_plateformes.html",
-                           title="Liste des plateformes",
-                           current_page="plateformes",
-                           plateformes=plateformes)
+def liste_lieux():
+    lieux = LIEU_FOUILLE.query.all()
+    error = request.args.get('error')
+    success = request.args.get('success')
+    return render_template("liste_lieux.html",
+                           title="Liste des lieux",
+                           current_page="lieux",
+                           lieux=lieux,
+                           error=error,
+                           success=success)
 
 
-@app.route("/plateformes/<int:idPlateforme>/supprimer/")
+@app.route('/lieux/ajouter/', methods=['GET', 'POST'])
 @login_required
-def supprimer_plateforme(idPlateforme):
-    plateforme = PLATEFORME.query.filter_by(idPlateforme=idPlateforme).first()
-    if plateforme:
-        db.session.delete(plateforme)
-        db.session.commit()
-    return redirect(url_for('liste_plateformes'))
+def ajouter_lieu():
+    unForm = LieuForm()
 
+    if unForm.validate_on_submit():
+        unLieu = unForm.build_lieu()
+        db.session.add(unLieu)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unForm.nom.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
+
+    return render_template('add_lieu.html',
+                           title='Ajouter un lieu',
+                           current_page='lieux',
+                           form=unForm)
+
+
+@app.route('/lieux/<int:idLieu>/supprimer/')
+@login_required
+def supprimer_lieu(idLieu):
+    lieu = db.session.get(LIEU_FOUILLE, idLieu)
+    if lieu is None:
+        return render_template('404.html', message="Lieu non trouvé"), 404
+    if lieu.campagnes:
+        return redirect(url_for('liste_lieux', error='Suppression impossible : campagnes associées'))
+    db.session.delete(lieu)
+    db.session.commit()
+    return redirect(url_for('liste_lieux'))
+
+
+# ==================== PERSONNELS ====================
 
 @app.route("/personnels/")
 @login_required
@@ -271,6 +346,13 @@ def liste_personnels():
                            title="Liste des personnels",
                            current_page="personnels",
                            personnels=personnels)
+
+
+@app.route("/personnels/ajouter/")
+@login_required
+def ajouter_personnel():
+    # TODO
+    return "Ajouter un personnel - Fonctionnalité à implémenter"
 
 
 @app.route("/personnels/<string:username>/supprimer/")
@@ -283,12 +365,35 @@ def supprimer_personnel(username):
     return redirect(url_for('liste_personnels'))
 
 
-@app.route("/personnels/ajouter/")
-@login_required
-def ajouter_personnel():
-    # TODO
-    return "Ajouter un personnel - Fonctionnalité à implémenter"
+# ==================== BUDGET ====================
 
+@app.route('/dashboard/set_budget/', methods=(
+    'GET',
+    'POST',
+))
+@login_required
+def set_budget():
+    unForm = BudgetForm()
+    if not unForm.is_submitted():
+        unForm.next.data = request.args.get('next')
+    elif unForm.validate_on_submit():
+        unBudget = unForm.build_budget()
+        db.session.add(unBudget)
+        try:
+            db.session.commit()
+        except (IntegrityError, DataError):
+            db.session.rollback()
+            unForm.budget_mensuel.errors.append(
+                "Une erreur est survenue, merci de réessayer.")
+        else:
+            return redirect(unForm.next.data or url_for('index'))
+    return render_template('set_budget.html',
+                           title='Définir le budget',
+                           current_page='budget',
+                           form=unForm)
+
+
+# ==================== MAINTENANCE ====================
 
 @app.route('/maintenance/', methods=['GET', 'POST'])
 def maintenance():
@@ -304,8 +409,9 @@ def maintenance():
         form.process(formdata=request.form)
         if form.validate():
             try:
+                id_plateforme = int(form.idPlateforme.data)
                 erreur_chevauchement = verifier_chevauchement_campagne(
-                    int(form.idPlateforme.data),
+                    id_plateforme,
                     form.dateDebut.data,
                     form.duree.data
                 )
@@ -313,11 +419,20 @@ def maintenance():
                     message = erreur_chevauchement
                     message_type = 'error'
                 else:
-                    new_maintenance = form.build_maintenance()
-                    db.session.add(new_maintenance)
-                    db.session.commit()
-                    message = 'Maintenance créée avec succès !'
-                    message_type = 'success'
+                    erreur_maintenance = verifier_chevauchement_maintenance(
+                        id_plateforme,
+                        form.dateDebut.data,
+                        form.duree.data
+                    )
+                    if erreur_maintenance:
+                        message = erreur_maintenance
+                        message_type = 'error'
+                    else:
+                        new_maintenance = form.build_maintenance()
+                        db.session.add(new_maintenance)
+                        db.session.commit()
+                        message = 'Maintenance créée avec succès !'
+                        message_type = 'success'
             except ValueError as e:
                 message = f'Erreur de validation : {str(e)}'
                 message_type = 'error'
@@ -344,196 +459,7 @@ def maintenance():
     )
 
 
-@app.route("/lieux/")
-@login_required
-def liste_lieux():
-    lieux = LIEU_FOUILLE.query.all()
-    error = request.args.get('error')
-    success = request.args.get('success')
-    return render_template("liste_lieux.html",
-                           title="Liste des lieux",
-                           current_page="lieux",
-                           lieux=lieux,
-                           error=error,
-                           success=success)
-
-@app.route('/lieux/<int:idLieu>/supprimer/')
-@login_required
-def supprimer_lieu(idLieu):
-    lieu = db.session.get(LIEU_FOUILLE, idLieu)
-    if lieu is None:
-        return render_template('404.html', message="Lieu non trouvé"), 404
-    if lieu.campagnes:
-        return redirect(url_for('liste_lieux', error='Suppression impossible : campagnes associées'))
-    db.session.delete(lieu)
-    db.session.commit()
-    return redirect(url_for('liste_lieux'))
-
-@app.route('/lieux/ajouter/', methods=['GET', 'POST'])
-@login_required
-def ajouter_lieu():
-    unForm = LieuForm()
-
-    if unForm.validate_on_submit():
-        unLieu = unForm.build_lieu()
-        db.session.add(unLieu)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            unForm.nom.errors.append(
-                "Une erreur est survenue, merci de réessayer.")
-        else:
-            return redirect(url_for('liste_lieux', success='Lieu ajouté avec succès !'))
-
-    return render_template('add_lieu.html',
-                           title='Ajouter un lieu',
-                           current_page='lieux',
-                           form=unForm)
-
-
-@app.route("/materiels/")
-@login_required
-def liste_materiels():
-    materiels = MATERIEL.query.all()
-    return render_template(
-        "liste_materiels.html",
-        title="Liste des matériels",
-        current_page="materiels",
-        materiels=materiels,
-    )
-
-
-@app.route("/materiels/<int:idMateriel>/supprimer/")
-@login_required
-def supprimer_materiel(idMateriel: int):
-    materiel = db.session.get(MATERIEL, idMateriel)
-    if materiel:
-        db.session.delete(materiel)
-        db.session.commit()
-    return redirect(url_for('liste_materiels'))
-
-
-@app.route("/login/", methods=(
-    "GET",
-    "POST",
-))
-def login():
-    unForm = LoginForm()
-    unUser = None
-
-    if not unForm.is_submitted():
-        unForm.next.data = request.args.get('next')
-    elif unForm.validate_on_submit():
-        unUser = unForm.get_authenticated_user()
-
-    if unUser:
-        login_user(unUser)
-        next = unForm.next.data or url_for("index", name=unUser.username)
-        return redirect(next)
-    return render_template("login.html", form=unForm)
-
-
-@app.route("/register/", methods=("GET","POST"))
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    form = RegisterForm()
-    role_choices = [('', 'Sélectionner un rôle')
-                    ] + [(role.value, role.value) for role in role_labo_enum]
-    form.role_labo.choices = role_choices
-
-    if not form.is_submitted():
-        form.next.data = request.args.get('next')
-
-    if form.validate_on_submit():
-        if PERSONNE.query.get(form.username.data):
-            form.username.errors.append("Cet identifiant est déjà utilisé.")
-        else:
-            user = form.build_user()
-            db.session.add(user)
-            try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-                form.username.errors.append(
-                    "Une erreur est survenue, merci de réessayer.")
-            else:
-                login_user(user)
-                next_url = form.next.data or url_for("index",
-                                                     name=user.username)
-                return redirect(next_url)
-
-    return render_template("register.html", form=form)
-
-@app.route("/logout/")
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.route("/add_personne/", methods=("GET", "POST"))
-def add_personne():
-    
-    if current_user.is_authenticated:
-    
-        form_pers = FormPersonne()
-
-        role_choices = [('', 'Sélectionner un rôle')] + [
-            (role.value, role.value) for role in role_labo_enum
-        ]
-        form_pers.role_labo.choices = role_choices
-
-        if form_pers.validate_on_submit():
-
-            username = form_pers.username.data
-            personne_existe = PERSONNE.query.get(username)
-
-
-
-            if not personne_existe:        
-                habiliter = None
-                nouvelle_personne = PERSONNE(nom= form_pers.nom.data,
-                                             prenom= form_pers.prenom.data,
-                                             username= form_pers.username.data,
-                                             password= form_pers.password.data,
-                                             role_labo= form_pers.role_labo.data)
-                db.session.add(nouvelle_personne)
-                db.session.commit()
-                for item in form_pers.habilitations.data:
-                    match item:
-                        case "electrique":
-                            habiliter = HABILITER(idHabilitation=1, username=form_pers.username.data)
-                            db.session.add(habiliter)
-                            db.session.commit()
-                        case "chimique":
-                            habiliter = HABILITER(idHabilitation=2, username=form_pers.username.data)
-                            db.session.add(habiliter)
-                            db.session.commit()
-                        case "biologique":
-                            habiliter = HABILITER(idHabilitation=3, username=form_pers.username.data)
-                            db.session.add(habiliter)
-                            db.session.commit()
-                        case "radiations":
-                            habiliter = HABILITER(idHabilitation=4, username=form_pers.username.data)
-                            db.session.add(habiliter)
-                            db.session.commit()
-
-                return redirect(url_for('index'))
-            else:
-                return render_template("add_personne.html", form_personne=form_pers, message_type='error', message="Le pseudo est déjà utilisé")
-
-        if request.method == 'POST':
-            return render_template(
-                "add_personne.html",
-                form_personne=form_pers,
-                message_type='error')
-
-        return render_template("add_personne.html", form_personne=form_pers)
-    else:
-        return redirect(url_for('register'))
-#===================== PARTIE ADN  ====================
+# ==================== ADN - UTILITAIRES ====================
 
 DOSSIER_BASE = Path(__file__).resolve().parents[1]
 DOSSIER_ADN = DOSSIER_BASE / "algo" / "data"
@@ -578,9 +504,7 @@ def charger_sequence_fichier(nom_fichier: str) -> str:
     return chemin.read_text().strip().upper()
 
 
-
-
-#============== GERER ADN ==============
+# ==================== ADN - GESTION FICHIERS ====================
 
 
 @app.route('/gerer_adn/', methods=['GET', 'POST'])
@@ -651,7 +575,7 @@ def gerer_adn():
 
 
 
-#============== TRAITEMEMENTS  ADN ==============
+# ==================== ADN - TRAITEMENTS ====================
 
 
 @app.route('/traitements_adn/', methods=['GET', 'POST'])
