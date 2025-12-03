@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block main %}
+<div
+    class="h-full w-full bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)] flex items-center justify-center drop-shadow-button">
+    <div class="bg-gray-div p-8 rounded-[40px] shadow-lg w-full max-w-[1000px] border-green-button border text-white">
+        <div class="flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-3xl font-bold">Campagne {{ campagne.idCampagne }}</h2>
+                <a href="{{ url_for('liste_campagnes') }}"
+                    class="px-4 py-2 rounded-lg border border-green-button text-green-button hover:text-black hover:bg-green-button transition-colors text-sm font-semibold">Retour</a>
+            </div>
+
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+                <div class="space-y-6 lg:w-1/2 lg:border-r lg:pr-6">
+                    <section class="space-y-4">
+                        <h3 class="text-xl font-semibold text-green-button">Informations generales</h3>
+                        <dl class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <div class="rounded-lg bg-black/40 p-4">
+                                <dt class="text-sm uppercase tracking-wide text-green-button">Date de debut</dt>
+                                <dd class="text-lg font-medium">
+                                    {{ campagne.dateDebut.strftime('%d/%m/%Y') if campagne.dateDebut else 'Non renseignée'
+                                    }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-black/40 p-4">
+                                <dt class="text-sm uppercase tracking-wide text-green-button">Duree (jours)</dt>
+                                <dd class="text-lg font-medium">{{ campagne.duree or 'Non renseignée' }}</dd>
+                            </div>
+                            <div class="rounded-lg bg-black/40 p-4">
+                                <dt class="text-sm uppercase tracking-wide text-green-button">Lieu Fouille</dt>
+                                <dd class="text-lg font-medium">
+                                    {{ campagne.lieu.nomLieu if campagne.lieu else 'Non renseigné' }}
+                                </dd>
+                            </div>
+                            <div class="rounded-lg bg-black/40 p-4">
+                                <dt class="text-sm uppercase tracking-wide text-green-button">Plateforme</dt>
+                                {% for planification in campagne.planifier %}
+                                <dd class="text-lg font-medium">{{ planification.plateforme.nom }}</dd>
+                                {% endfor %}
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section class="space-y-4">
+                        <h3 class="text-xl font-semibold text-green-button">Participants</h3>
+                        <div class="max-h-80 overflow-y-auto pr-2">
+                            {% if campagne.participer %}
+                            <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                {% for participation in campagne.participer %}
+                                <li class="rounded-lg bg-black/40 p-4">
+                                    <p class="text-lg font-medium">
+                                        {{ participation.personne.prenom }} {{ participation.personne.nom }}
+                                    </p>
+                                    <p class="text-sm text-green-button">{{ participation.personne.role_labo.value }}</p>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-sm text-white/70">Aucun participant pour le moment.</p>
+                            {% endif %}
+                        </div>
+                    </section>
+                </div>
+                <section class="space-y-6 lg:w-1/2">
+                    <h3 class="text-xl font-semibold text-green-button">Associer Fichiers D'échantillon</h3>
+                    <form id="dropZone" method="POST" action="{{ url_for('associer_fichier', idCampagne=campagne.idCampagne) }}" enctype="multipart/form-data" class="space-y-4">
+                        {{ upload_form.hidden_tag() }}
+                        <label for="fileInput"
+                            class="flex cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-green-button/50 rounded-2xl bg-black/30 p-8 text-center hover:border-green-button hover:bg-black/40 transition-all duration-200">
+                            <i class="fas fa-arrow-up-from-bracket mb-3 text-4xl"></i>
+                            <p class="font-semibold text-green-button">Déposez vos fichiers d'échantillon ici</p>
+                            <p class="text-sm text-white/70">ou cliquez pour parcourir</p>
+                            {{ upload_form.file(class_='hidden', id='fileInput', accept=".adn,.txt") }}
+                        </label>
+                        {% if upload_form.file.errors %}
+                        <ul class="space-y-1 text-left text-sm text-red-400">
+                            {% for error in upload_form.file.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        <ul class="space-y-2 text-left text-sm text-white/80" id="previewFichier"></ul>
+                        {{ upload_form.submit(class_='w-full bg-green-button-menu text-white font-semibold py-2 px-4 rounded-md hover:bg-green-button-menu-hover transition-colors') }}
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/dad-function.js') }}"></script>
+{% endblock %}

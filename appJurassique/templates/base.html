@@ -1,0 +1,144 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    {% block navbar %}
+    {% if not current_user.is_authenticated %}
+    <nav class="fixed z-50 w-full bg-black">
+        <div class="grid grid-cols-3 py-4 px-6 items-center">
+            <div class="flex justify-start">
+                <p class="text-white font-exo text-4xl font-bold">DINOTRACK</p>
+            </div>
+            <div class="flex justify-center">
+                <ul class="flex gap-8">
+                    <li><a href="#"
+                            class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">Home</a>
+                    </li>
+                    <li><a href="#"
+                            class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">About</a>
+                    </li>
+                    <li><a href="#"
+                            class="bg-green-button px-[18px] py-[10px] rounded-lg hover:bg-green-button-hover transition-colors">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex justify-end gap-4 items-center">
+                <a href="{{ url_for('login') }}"
+                    class="px-4 py-2 text-white hover:text-opacity-80 transition-colors">Sign In</a>
+                <a href="{{ url_for('register') }}"
+                    class="px-4 py-2 border-[1px] border-white border-solid rounded-lg text-white hover:border-opacity-80 transition-colors">Sign
+                    Up</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    {% endblock %}
+    {% block content %}
+    {% if current_user.is_authenticated %}
+    <div class="flex min-h-screen">
+        <div id="sidenav" class="fixed top-0 left-0 h-screen w-64 bg-black text-white flex flex-col overflow-hidden transition-all duration-300">
+            <div class="flex items-center h-16 px-[18px] ">
+                <p class="text-white font-exo text-4xl font-bold">DINOTRACK</p>
+            </div>
+            <nav class="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+                <a href="{{ url_for('dashboard') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'dashboard' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-house w-6 text-center"></i>
+                    <span class="font-medium">Tableau de bord</span>
+                </a>
+                <a href="{{ url_for('liste_campagnes') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'campagne' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-calendar w-6 text-center"></i>
+                    <span class="font-medium">Campagnes</span>
+                </a>
+                <a href="{{ url_for('liste_plateformes') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'plateformes' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-suitcase w-6 text-center"></i>
+                    <span class="font-medium">Plateforme</span>
+                </a>
+                <a href="{{ url_for('liste_personnels') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'personnels' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-user-group w-6 text-center"></i>
+                    <span class="font-medium">Personnels</span>
+                </a>
+                <a href="{{ url_for('liste_materiels') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'materiels' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-hammer w-6 text-center"></i>
+                    <span class="font-medium">Matériels</span>
+                </a>
+                <a href="{{ url_for('liste_lieux') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'lieux' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-map w-6 text-center"></i>
+                    <span class="font-medium">Lieux</span>
+                </a>
+                <a href="{{ url_for('set_budget') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'budget' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-sack-dollar w-6 text-center"></i>
+                    <span class="font-medium">Budget</span>
+                </a>
+                <a href="{{ url_for('maintenance') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'maintenances' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-wrench w-6 text-center"></i>
+                    <span class="font-medium">Maintenances</span>
+                </a>
+                <a href="{{ url_for('gerer_adn') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-md border-solid border-[1px] border-transparent drop-shadow-button hover:border-green-button {{ 'bg-green-button text-black' if current_page == 'echantillonAdn' else 'text-green-button' }}">
+                    <i class="text-2xl fas fa-flask w-6 text-center"></i>
+                    <span class="font-medium">Echantillon ADN</span>
+                </a>
+            </nav>
+            <div class="mt-auto w-full flex justify-center items-center mb-4">
+                <button id="close-button">
+                    <i class="text-4xl fas fa-arrows-left-right"></i>
+                </button>
+            </div>
+            <div class="mb-4 w-full flex justify-center items-center">
+                <a class="text-green-button text-3xl hover:text-green-button-hover transition-colors"
+                    href="{{ url_for ('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col {% if current_user.is_authenticated %}ml-64{% endif %}">
+    {% endif %}
+            <main role="main" class="{% if current_user.is_authenticated %}flex-1{% else %}pt-10{% endif %}">
+                {% block main %}{% endblock %}
+            </main>
+    {% if current_user.is_authenticated %}
+        </div>
+    </div>
+    {% endif %}
+    {% endblock %}
+</body>
+
+<script>
+    const closeButton = document.getElementById("close-button");
+    if (closeButton) {
+        closeButton.addEventListener("click", function () {
+            var sidenav = document.getElementById("sidenav");
+            var mainContent = sidenav.nextElementSibling;
+            if (sidenav.classList.contains("w-20")) {
+                sidenav.classList.replace("w-20", "w-64");
+                if (mainContent) {
+                    mainContent.classList.remove("ml-20");
+                    mainContent.classList.add("ml-64");
+                }
+            } else {
+                sidenav.classList.replace("w-64", "w-20");
+                if (mainContent) {
+                    mainContent.classList.remove("ml-64");
+                    mainContent.classList.add("ml-20");
+                }
+            }
+        });
+    }
+</script>
+
+</html>

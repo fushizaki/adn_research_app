@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class="h-full w-full flex items-center justify-center min-h-screen bg-[radial-gradient(circle_at_center,theme(colors.green-ext-radial)_0%,theme(colors.green-center-radial)_20%,theme(colors.black)_50%)]">
+  <div class="rounded-4xl bg-gray-div shadow-md p-10 mt-2 border border-green-500 w-full mx-4 space-y-8 max-w-3xl max-h-[calc(100vh-120px)] overflow-y-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Résultats des traitements ADN</h1>
+        <p class="text-green-300 text-sm">
+          Visualisez les mutations appliquées, la séquence finale et les distances calculées.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="{{ url_for('gerer_adn') }}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-black text-green-200 border border-green-button/60 hover:bg-gray-900 transition">
+          Gérer les fichiers ADN
+        </a>
+        <a href="{{ url_for('traitements_adn') }}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-green-button text-black font-semibold hover:bg-green-button-hover transition">
+          Nouveaux traitements
+        </a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="space-y-2" aria-label="Notifications">
+      {% for category, message in messages %}
+      <div
+        class="px-4 py-3 rounded-lg text-sm {% if category == 'erreur' %}bg-red-900/40 border border-red-500 text-red-200{% elif category == 'succes' %}bg-green-900/40 border border-green-500 text-green-200{% else %}bg-gray-800 text-white{% endif %}"
+        role="status">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if resultat %}
+    <div class="rounded-3xl border border-green-button/30 bg-black/40 p-6 space-y-4">
+      <h2 class="text-xl font-semibold text-white">1. Informations générales</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-green-100">
+        <div>
+          <p><span class="font-semibold text-green-300">Fichier de base :</span> {{ resultat.fichier_base }}</p>
+          {% if fichier_base_info %}
+          <p class="mt-1 text-xs text-gray-300">
+            Taille : {{ fichier_base_info.taille }} bases – Aperçu : {{ fichier_base_info.apercu }}
+          </p>
+          {% endif %}
+        </div>
+        <div>
+          <p><span class="font-semibold text-green-300">Probabilité utilisée :</span> {{ resultat.probabilite }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-3xl border border-green-button/30 bg-black/40 p-6 space-y-4">
+      <h2 class="text-xl font-semibold text-white">2. Mutations appliquées</h2>
+      {% if resultat.mutations %}
+      <div class="space-y-4">
+        <div class="text-sm text-green-100">
+          <p class="mb-1">
+            <span class="font-semibold text-green-300">Compteur global :</span>
+          </p>
+          <ul class="list-disc list-inside text-xs text-gray-200">
+            <li>Remplacement : {{ resultat.compte_mutations.remplacement }}</li>
+            <li>Insertion : {{ resultat.compte_mutations.insertion }}</li>
+            <li>Déletion : {{ resultat.compte_mutations.deletion }}</li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          {% for mut in resultat.mutations %}
+          <div class="border border-green-button/40 rounded-2xl p-4 bg-gray-900/60 text-sm text-green-100">
+            <h3 class="font-semibold text-white">{{ mut.nom }}</h3>
+            <p class="text-xs text-gray-300 mt-1">
+              Taille avant : {{ mut.taille_avant }} bases – Taille après : {{ mut.taille_apres }} bases –
+            </p>
+            {% if mut.sequence %}
+            <details class="mt-2 text-xs">
+              <summary class="cursor-pointer text-green-300 hover:text-green-200">Voir la séquence après cette mutation
+              </summary>
+              <pre
+                class="mt-2 whitespace-pre-wrap break-all bg-black/60 rounded-lg p-3 text-[11px] text-green-100">{{ mut.sequence }}</pre>
+            </details>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-200">
+        Aucune mutation n’a été appliquée pour ce traitement.
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="rounded-3xl border border-green-button/30 bg-black/40 p-6 space-y-4">
+      <h2 class="text-xl font-semibold text-white">3. Séquence finale</h2>
+      {% if resultat.sequence_finale %}
+      <div class="space-y-2 text-sm text-green-100">
+        <p>
+          <span class="font-semibold text-green-300">Longueur :</span> {{ resultat.sequence_finale|length }} bases
+        </p>
+        <pre
+          class="whitespace-pre-wrap break-all bg-gray-900/70 rounded-xl p-4 text-[11px] text-green-100 border border-green-button/40">
+{{ resultat.sequence_finale }}
+            </pre>
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-200">
+        Aucune séquence finale disponible.
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="rounded-3xl border border-green-button/30 bg-black/40 p-6 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-semibold text-white">4. Distance de Levenshtein</h2>
+          <p class="text-sm text-green-200">
+            Résumé de la distance calculée entre deux fichiers ADN sélectionnés.
+          </p>
+        </div>
+        <div class="text-xs text-gray-300">
+          <p>Les fichiers et distances peuvent être retrouvés via cette page de résultats.</p>
+        </div>
+      </div>
+
+      {% if distance_info and distance_info.valeur is not none %}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-green-100">
+        <div class="border border-green-button/40 rounded-2xl p-4 bg-gray-900/60">
+          <p class="font-semibold text-green-300 text-xs uppercase tracking-wide mb-1">Fichier 1</p>
+          <p>{{ distance_info.fichiera }}</p>
+        </div>
+        <div class="border border-green-button/40 rounded-2xl p-4 bg-gray-900/60">
+          <p class="font-semibold text-green-300 text-xs uppercase tracking-wide mb-1">Fichier 2</p>
+          <p>{{ distance_info.fichierb }}</p>
+        </div>
+        <div class="border border-green-button/40 rounded-2xl p-4 bg-gray-900/60">
+          <p class="font-semibold text-green-300 text-xs uppercase tracking-wide mb-1">Distance</p>
+          <p>{{ distance_info.valeur }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-200">
+        Aucune distance n’a été calculée pour ce traitement.
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+      <div class="flex flex-wrap gap-2">
+        <a <div class="flex flex-wrap gap-2">
+          <a href="{{ url_for('traitements_adn') }}"
+            class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-green-button text-black font-semibold hover:bg-green-button-hover transition">
+            Refaire un traitement
+          </a>
+      </div>
+    </div>
+    {% else %}
+    <div class="rounded-3xl border border-green-button/30 bg-black/40 p-6 space-y-4">
+      <h2 class="text-xl font-semibold text-white">Aucun résultat</h2>
+      <p class="text-sm text-gray-200">
+        Aucun résultat de traitement n’a été trouvé en session. Lancez d’abord un traitement sur la page dédiée.
+      </p>
+      <div class="mt-4">
+        <a href="{{ url_for('traitements_adn') }}"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-green-button text-black font-semibold hover:bg-green-button-hover transition">
+          Aller à la page des traitements
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
