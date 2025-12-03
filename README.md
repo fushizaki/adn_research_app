@@ -71,12 +71,12 @@ flask --debug run
 L'application sera accessible à l'adresse : http://127.0.0.1:5000
 
 
-### Compilation Tailwind CSS (développement)
+### Compilation Tailwind CSS (développement, obligatoire de la faire une fois)
 
 Pour recompiler les styles CSS lors du développement :
 ```bash
 cd appJurassique
-npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch
+npm run build:css
 ```
 
 ### Lancement de l'application Gestion ADN
