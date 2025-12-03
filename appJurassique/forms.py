@@ -118,6 +118,32 @@ class AssociateFilesForm(FlaskForm):
     file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
     submit = SubmitField('Associer les fichiers')
 
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+class FormPersonne(FlaskForm):
+    idPersonne = HiddenField()
+    nom = StringField('nom', validators=[DataRequired()])
+    prenom = StringField('prenom', validators=[DataRequired()])
+    username = StringField('username', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
+    role_labo = SelectField(
+        'Rôle dans le labo',
+        choices=[],
+        validators=[DataRequired()],
+    )
+    habilitations = MultiCheckboxField('Habilitations', choices=[
+        ('electrique', 'Electrique'),
+        ('chimique', 'Chimique'),
+        ('biologique', 'Biologique'),
+        ('radiation', 'Radiation')
+    ])
+        
+    def validate_habilitations(self, field):
+        if not field.data:
+            raise ValidationError("Sélectionnez au moins une habilitation")
+    
 
 class CampagneForm(FlaskForm):
 
