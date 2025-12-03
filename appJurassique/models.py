@@ -9,8 +9,10 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    plateforme = db.relationship('UTILISER', back_populates='materiel')
+    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
     habilitations = db.relationship('HABILITATION', back_populates='materiel')
+    utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
@@ -41,6 +43,7 @@ class HABILITATION(db.Model):
     idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
     materiel = db.relationship('MATERIEL', back_populates='habilitations')
     habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER', back_populates='habilitation', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -66,6 +69,14 @@ class LIEU_FOUILLE(db.Model):
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
 
+class role_labo_enum(enum.Enum):
+    DIRECTION = "DIRECTION"
+    TECHNICIEN = "TECHNICIEN"
+    ADMINISTRATION = "ADMINISTRATION"
+    CHERCHEUR = "CHERCHEUR"
+    
+    def get_roles():
+        return [role.value for role in role_labo_enum]
 
 class PERSONNE(UserMixin, db.Model):
     __tablename__ = 'PERSONNE'
@@ -73,7 +84,7 @@ class PERSONNE(UserMixin, db.Model):
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role_labo = db.Column(db.String(100), nullable=False)
+    role_labo = db.Column(db.Enum(role_labo_enum), nullable=False)
     participer = db.relationship('PARTICIPER', back_populates='personne', cascade='all, delete-orphan')
     habiliter = db.relationship('HABILITER', back_populates='personne', cascade='all, delete-orphan')
 
@@ -83,7 +94,7 @@ class PERSONNE(UserMixin, db.Model):
     @login_manager.user_loader
     def load_user(username):
         return PERSONNE.query.get(username)
-    #a rajouter des liaisons
+    
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
 
@@ -99,8 +110,6 @@ class CAMPAGNE(db.Model):
     planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
     sejourner = db.relationship('SEJOURNER', back_populates='campagne', cascade='all, delete-orphan')
     rapporter = db.relationship('RAPPORTER', back_populates='campagne', cascade='all, delete-orphan')
-
-    #pareil
 
     def __repr__(self):
         return f"<CAMPAGNE ({self.idCampagne}) {self.dateDebut}>"
@@ -136,7 +145,6 @@ class PLANIFIER(db.Model):
         return f"<PLANIFIER Plateforme {self.idPlateforme} for Campagne {self.idCampagne}>"
 
 
-# Entree campagne et lieu
 class SEJOURNER(db.Model):
     __tablename__ = 'SEJOURNER'
     idCampagne = db.Column(db.Integer,
@@ -155,8 +163,8 @@ class SEJOURNER(db.Model):
 class ECHANTILLON(db.Model):
     __tablename__ = 'ECHANTILLON'
     idEchantillon = db.Column(db.Integer, primary_key=True)
-    seqNucleotides = db.Column(db.String(1000), nullable=False)
-    commentairesEnchatillion = db.Column(db.String(500))
+    fichierAdn = db.Column(db.String(100))
+    commentairesEchantillion = db.Column(db.String(500))
     appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
     rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
 
@@ -228,11 +236,12 @@ class UTILISER(db.Model):
     idPlateforme = db.Column(db.Integer,
                              db.ForeignKey('PLATEFORME.idPlateforme'),
                              primary_key=True)
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
-    plateforme = db.relationship('PLATEFORME', back_populates='materiel')
+    quantite = db.Column(db.Integer)
+    materiel = db.relationship('MATERIEL', back_populates='utilisations')
+    plateforme = db.relationship('PLATEFORME', back_populates='utilisations')
 
     def __repr__(self):
-        return f"<UTILISER Plateforme {self.idPlateforme} in Campagne {self.idCampagne}>"
+        return f"<UTILISER Materiel {self.idMateriel} sur Plateforme {self.idPlateforme}>"
 
 
 class NECESSITER(db.Model):
@@ -243,6 +252,8 @@ class NECESSITER(db.Model):
     idMateriel = db.Column(db.Integer,
                            db.ForeignKey('MATERIEL.idMateriel'),
                            primary_key=True)
+    materiel = db.relationship('MATERIEL', back_populates='necessites')
+    habilitation = db.relationship('HABILITATION', back_populates='necessites')
 
     def __repr__(self):
         return f"<NECESSITER Habilitation {self.idHabilitation} for Materiel {self.idMateriel}>"
@@ -266,3 +277,17 @@ class MAINTENANCE(db.Model):
 
     def __repr__(self):
         return f"<MAINTENANCE {self.idMaintenance} on {self.dateMaintenance}>"
+
+class HISTORIQUE(db.Model):
+    __tablename__ = 'HISTORIQUE'
+    idHistorique = db.Column(db.Integer, primary_key=True)
+    nom_fichier_base = db.Column(db.String(255))
+    proba = db.Column(db.Float)
+    nb_remplacement = db.Column(db.Integer)
+    nb_insertion = db.Column(db.Integer)
+    nb_deletion = db.Column(db.Integer)
+    note = db.Column(db.String(255))
+    date_enregistrement = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"<HISTORIQUE {self.idHistorique} {self.nom_fichier_base}>"

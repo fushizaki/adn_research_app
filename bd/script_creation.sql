@@ -4,102 +4,106 @@ use Jurassique;
 
 CREATE TABLE
     CAMPAGNE (
-        PRIMARY KEY (id_campagne),
-        id_campagne int NOT NULL AUTO_INCREMENT,
-        date_debut date NOT NULL,
-        duree int NOT NULL
+        PRIMARY KEY (idCampagne),
+        idCampagne int NOT NULL AUTO_INCREMENT,
+        dateDebut date NOT NULL,
+        duree int NOT NULL,
+        idLieu int
     );
 
 CREATE TABLE
     PERSONNE (
-        PRIMARY KEY (id_personne),
-        id_personne int NOT NULL AUTO_INCREMENT,
-        nom varchar(30) NOT NULL,
-        prenom varchar(30) NOT NULL,
-        role_labo varchar(30) NOT NULL
+        PRIMARY KEY (username),
+        username varchar(50) NOT NULL,
+        nom varchar(100) NOT NULL,
+        prenom varchar(100) NOT NULL,
+        password varchar(255) NOT NULL,
+        role_labo ENUM('DIRECTION', 'TECHNICIEN', 'ADMINISTRATION', 'CHERCHEUR') NOT NULL
     );
 
 CREATE TABLE
     PARTICIPER (
-        PRIMARY KEY (id_campagne, id_personne),
-        id_campagne int NOT NULL,
-        id_personne int NOT NULL
+        PRIMARY KEY (idCampagne, username),
+        idCampagne int NOT NULL,
+        username varchar(50) NOT NULL
     );
 
 CREATE TABLE
     HABILITATION (
-        PRIMARY KEY (id_habilitation),
-        id_habilitation int NOT NULL AUTO_INCREMENT,
-        nom_habilitation varchar(30) NOT NULL,
-        description_hab varchar(30)
+        PRIMARY KEY (idHabilitation),
+        idHabilitation int NOT NULL AUTO_INCREMENT,
+        nom_habilitation varchar(100) NOT NULL,
+        description varchar(500),
+        idMateriel int
     );
 
 CREATE TABLE
     PLATEFORME (
-        PRIMARY KEY (id_plateforme),
-        id_plateforme int NOT NULL AUTO_INCREMENT,
-        nom varchar(48),
-        min_nb_personne int NOT NULL CHECK (min_nb_personne > 0),
-        cout_journalier decimal(6, 2) NOT NULL,
-        intervalle_maintenance int NOT NULL CHECK (intervalle_maintenance > 0)
+        PRIMARY KEY (idPlateforme),
+        idPlateforme int NOT NULL AUTO_INCREMENT,
+        nom varchar(100) NOT NULL,
+        min_nb_personne int CHECK (min_nb_personne > 0),
+        cout_journalier decimal(10, 2),
+        intervalle_maintenance int CHECK (intervalle_maintenance > 0),
+        idMateriel int
     );
 
 CREATE TABLE
     PLANIFIER (
-        PRIMARY KEY (id_plateforme, id_campagne),
-        id_plateforme int NOT NULL,
-        id_campagne int NOT NULL
+        PRIMARY KEY (idPlateforme, idCampagne),
+        idPlateforme int NOT NULL,
+        idCampagne int NOT NULL
     );
 
 CREATE TABLE
-    LIEU (
-        PRIMARY KEY (id_lieu),
-        id_lieu int NOT NULL AUTO_INCREMENT,
-        nomLieu varchar(48) NOT NULL
+    LIEU_FOUILLE (
+        PRIMARY KEY (idLieu),
+        idLieu int NOT NULL AUTO_INCREMENT,
+        nomLieu varchar(100) NOT NULL
     );
 
 CREATE TABLE
     SEJOURNER (
-        PRIMARY KEY (id_campagne, id_lieu),
-        id_campagne int NOT NULL,
-        id_lieu int NOT NULL
+        PRIMARY KEY (idCampagne, idLieu),
+        idCampagne int NOT NULL,
+        idLieu int NOT NULL
     );
 
 CREATE TABLE
     ECHANTILLON (
-        PRIMARY KEY (id_echant),
-        id_echant int NOT NULL AUTO_INCREMENT,
-        seq_nucleotides varchar(500) NOT NULL,
-        commentaires_echant varchar(500)
+        PRIMARY KEY (idEchantillon),
+        idEchantillon int NOT NULL AUTO_INCREMENT,
+        fichierAdn varchar(100),
+        commentairesEchantillion varchar(500)
     );
 
 CREATE TABLE
     ESPECE (
-        PRIMARY KEY (id_espece),
-        id_espece int NOT NULL AUTO_INCREMENT,
-        nom_espece varchar(48) NOT NULL,
-        caracteristiques_esp varchar(48)
+        PRIMARY KEY (idEspece),
+        idEspece int NOT NULL AUTO_INCREMENT,
+        nomEspece varchar(100) NOT NULL,
+        caracteristiques varchar(500)
     );
 
 CREATE TABLE
     APPARTENIR (
-        PRIMARY KEY (id_espece, id_echant),
-        id_espece int NOT NULL,
-        id_echant int NOT NULL
+        PRIMARY KEY (idEchantillon, idEspece),
+        idEchantillon int NOT NULL,
+        idEspece int NOT NULL
     );
 
 CREATE TABLE
     HABILITER (
-        PRIMARY KEY (id_personne, id_habilitation),
-        id_personne int NOT NULL,
-        id_habilitation int NOT NULL
+        PRIMARY KEY (username, idHabilitation),
+        username varchar(50) NOT NULL,
+        idHabilitation int NOT NULL
     );
 
 CREATE TABLE
     RAPPORTER (
-        PRIMARY KEY (id_echant, id_campagne),
-        id_echant int NOT NULL,
-        id_campagne int NOT NULL
+        PRIMARY KEY (idEchantillon, idCampagne),
+        idEchantillon int NOT NULL,
+        idCampagne int NOT NULL
     );
 
 CREATE TABLE
@@ -110,77 +114,90 @@ CREATE TABLE
         budget decimal(10, 2) NOT NULL
     );
 
+
+
 CREATE TABLE
-    LOGIN (
-        PRIMARY KEY (id_personne),
-        username varchar(30) NOT NULL,
-        password varchar(30) NOT NULL,
-        id_personne int NOT NULL
+    HISTORIQUE (
+        PRIMARY KEY (idHistorique),
+        idHistorique int NOT NULL AUTO_INCREMENT,
+        nom_fichier_base varchar(255),
+        proba float,
+        nb_remplacement int,
+        nb_insertion int,
+        nb_deletion int,
+        note varchar(255),
+        date_enregistrement datetime DEFAULT CURRENT_TIMESTAMP
     );
+
+
 
 CREATE TABLE
     MATERIEL (
-        PRIMARY KEY (id_materiel),
-        id_materiel int NOT NULL AUTO_INCREMENT,
-        nom_materiel varchar(50) NOT NULL,
-        description_materiel varchar(255)
+        PRIMARY KEY (idMateriel),
+        idMateriel int NOT NULL AUTO_INCREMENT,
+        nom varchar(100) NOT NULL,
+        description varchar(500)
     );
 
 CREATE TABLE
     UTILISER (
-        PRIMARY KEY (id_materiel, id_plateforme),
-        id_materiel int NOT NULL,
-        id_plateforme int NOT NULL,
-        quantite int NOT NULL CHECK (quantite > 0)
+        PRIMARY KEY (idMateriel, idPlateforme),
+        idMateriel int NOT NULL,
+        idPlateforme int NOT NULL,
+        quantite int CHECK (quantite > 0)
     );
 
 CREATE TABLE
     NECESSITER (
-        PRIMARY KEY (id_materiel, id_habilitation),
-        id_materiel INT NOT NULL,
-        id_habilitation INT NOT NULL
+        PRIMARY KEY (idMateriel, idHabilitation),
+        idMateriel INT NOT NULL,
+        idHabilitation INT NOT NULL
     );
 
 CREATE TABLE
     MAINTENANCE (
-        PRIMARY KEY (id_maintenance),
-        id_maintenance int NOT NULL AUTO_INCREMENT,
-        id_plateforme int NOT NULL,
-        date_maintenance date NOT NULL,
+        PRIMARY KEY (idMaintenance),
+        idMaintenance int NOT NULL AUTO_INCREMENT,
+        idPlateforme int NOT NULL,
+        dateMaintenance date NOT NULL,
         duree_maintenance int NOT NULL DEFAULT 1,
-        statut ENUM('planifiée', 'en_cours', 'terminée') DEFAULT 'planifiée'
+        statut ENUM('PLANIFIEE', 'EN_COURS', 'TERMINEE') DEFAULT 'PLANIFIEE'
     );
 
-ALTER TABLE NECESSITER ADD FOREIGN KEY (id_materiel) REFERENCES MATERIEL (id_materiel);
+ALTER TABLE NECESSITER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
 
-ALTER TABLE NECESSITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
+ALTER TABLE NECESSITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
 
-ALTER TABLE UTILISER ADD FOREIGN KEY (id_materiel) REFERENCES MATERIEL (id_materiel);
+ALTER TABLE UTILISER ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
 
-ALTER TABLE UTILISER ADD FOREIGN KEY (id_plateforme) REFERENCES PLATEFORME (id_plateforme);
+ALTER TABLE UTILISER ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
 
-ALTER TABLE APPARTENIR ADD FOREIGN KEY (id_espece) REFERENCES ESPECE (id_espece);
+ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEchantillon) REFERENCES ECHANTILLON (idEchantillon);
 
-ALTER TABLE RAPPORTER ADD FOREIGN KEY (id_echant) REFERENCES ECHANTILLON (id_echant);
+ALTER TABLE APPARTENIR ADD FOREIGN KEY (idEspece) REFERENCES ESPECE (idEspece);
 
-ALTER TABLE RAPPORTER ADD FOREIGN KEY (id_campagne) REFERENCES CAMPAGNE (id_campagne);
+ALTER TABLE RAPPORTER ADD FOREIGN KEY (idEchantillon) REFERENCES ECHANTILLON (idEchantillon);
 
-ALTER TABLE SEJOURNER ADD FOREIGN KEY (id_campagne) REFERENCES CAMPAGNE (id_campagne);
+ALTER TABLE RAPPORTER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampagne);
 
-ALTER TABLE SEJOURNER ADD FOREIGN KEY (id_lieu) REFERENCES LIEU (id_lieu);
+ALTER TABLE SEJOURNER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampagne);
 
-ALTER TABLE PLANIFIER ADD FOREIGN KEY (id_campagne) REFERENCES CAMPAGNE (id_campagne);
+ALTER TABLE SEJOURNER ADD FOREIGN KEY (idLieu) REFERENCES LIEU_FOUILLE (idLieu);
 
-ALTER TABLE PLANIFIER ADD FOREIGN KEY (id_plateforme) REFERENCES PLATEFORME (id_plateforme);
+ALTER TABLE PLANIFIER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampagne);
 
-ALTER TABLE PARTICIPER ADD FOREIGN KEY (id_campagne) REFERENCES CAMPAGNE (id_campagne);
+ALTER TABLE PLANIFIER ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
 
-ALTER TABLE PARTICIPER ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_personne);
+ALTER TABLE PARTICIPER ADD FOREIGN KEY (idCampagne) REFERENCES CAMPAGNE (idCampagne);
 
-ALTER TABLE HABILITER ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_personne);
+ALTER TABLE PARTICIPER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username);
 
-ALTER TABLE HABILITER ADD FOREIGN KEY (id_habilitation) REFERENCES HABILITATION (id_habilitation);
+ALTER TABLE CAMPAGNE ADD FOREIGN KEY (idLieu) REFERENCES LIEU_FOUILLE (idLieu);
 
-ALTER TABLE LOGIN ADD FOREIGN KEY (id_personne) REFERENCES PERSONNE (id_personne);
+ALTER TABLE HABILITER ADD FOREIGN KEY (username) REFERENCES PERSONNE (username);
 
-ALTER TABLE MAINTENANCE ADD FOREIGN KEY (id_plateforme) REFERENCES PLATEFORME (id_plateforme);
+ALTER TABLE HABILITER ADD FOREIGN KEY (idHabilitation) REFERENCES HABILITATION (idHabilitation);
+
+ALTER TABLE MAINTENANCE ADD FOREIGN KEY (idPlateforme) REFERENCES PLATEFORME (idPlateforme);
+
+ALTER TABLE PLATEFORME ADD FOREIGN KEY (idMateriel) REFERENCES MATERIEL (idMateriel);
