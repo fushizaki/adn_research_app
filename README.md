@@ -63,6 +63,7 @@ DB_NAME="jurassique_db"
 #### Mettre les insertions pour tester l'application
 
 ```bash
+flask syncdb
 mysql -u root -p
 use jurassique_db;
 source bd/script_insert.sql
