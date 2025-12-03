@@ -369,6 +369,28 @@ def ajouter_lieu():
                            form=unForm)
 
 
+@app.route("/materiels/")
+@login_required
+def liste_materiels():
+    materiels = MATERIEL.query.all()
+    return render_template(
+        "liste_materiels.html",
+        title="Liste des matériels",
+        current_page="materiels",
+        materiels=materiels,
+    )
+
+
+@app.route("/materiels/<int:idMateriel>/supprimer/")
+@login_required
+def supprimer_materiel(idMateriel: int):
+    materiel = db.session.get(MATERIEL, idMateriel)
+    if materiel:
+        db.session.delete(materiel)
+        db.session.commit()
+    return redirect(url_for('liste_materiels'))
+
+
 @app.route("/login/", methods=(
     "GET",
     "POST",
