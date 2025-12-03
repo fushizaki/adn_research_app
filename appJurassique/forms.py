@@ -118,6 +118,41 @@ class AssociateFilesForm(FlaskForm):
     file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
     submit = SubmitField('Associer les fichiers')
 
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+    
+class Form_plateforme(FlaskForm):
+    id_plateforme = HiddenField('id_plateforme')
+    nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
+    cout_journalier = IntegerField('cout_journalier', validators = [DataRequired()], render_kw={"min": "1"})
+    minimum_personnes = IntegerField('minimum_personnes', validators = [DataRequired()], render_kw={"min": "1"})
+    intervalle_maintenance = IntegerField('intervalle_maintenance', validators = [DataRequired()], render_kw={"min": "1"})
+
+    
+
+class FormPersonne(FlaskForm):
+    idPersonne = HiddenField()
+    nom = StringField('nom', validators=[DataRequired()])
+    prenom = StringField('prenom', validators=[DataRequired()])
+    username = StringField('username', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
+    role_labo = SelectField(
+        'Rôle dans le labo',
+        choices=[],
+        validators=[DataRequired()],
+    )
+    habilitations = MultiCheckboxField('Habilitations', choices=[
+        ('electrique', 'Electrique'),
+        ('chimique', 'Chimique'),
+        ('biologique', 'Biologique'),
+        ('radiation', 'Radiation')
+    ])
+        
+    def validate_habilitations(self, field):
+        if not field.data:
+            raise ValidationError("Sélectionnez au moins une habilitation")
+    
 
 class CampagneForm(FlaskForm):
 

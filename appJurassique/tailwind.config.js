@@ -26,5 +26,10 @@ module.exports = {
       },
     },
   },
+  
+  fontFamily: {
+        'nunito': ['Nunito', 'sans-serif'],
+        'exo': ['Exo', 'sans-serif']
+      },
   plugins: [],
 }

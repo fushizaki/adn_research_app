@@ -25,11 +25,11 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    idMateriel = db.Column(db.Integer, db.ForeignKey('MATERIEL.idMateriel'))
-    materiel = db.relationship('MATERIEL', back_populates='plateforme')
+    materiel = db.relationship('UTILISER', back_populates='plateforme')
     planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
     maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
-    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
+
+    #manque des trucs jsp
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"

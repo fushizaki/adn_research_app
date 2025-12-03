@@ -7,6 +7,7 @@ from algo.main import *
 from pathlib import Path
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
+from .utils import creer_campagne, obtenir_membres_compatibles
 from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
@@ -207,6 +208,7 @@ def liste_campagnes():
                            title="Liste des campagnes",
                            current_page="campagne",
                            campagnes=campagnes)
+
 
 
 @app.route('/campagnes/<int:idCampagne>/view/')
@@ -693,9 +695,35 @@ def traitements_adn():
         notifier('Traitements appliqués.', 'succes')
         return redirect(url_for('resultat'))
 
-    return render_template('traitements_adn.html',
-                           title='Traitements ADN',
-                           current_page='traitements_adn',
-                           fichiers=fichiers_adn,
-                           preselection=preselection,
-                           form_traitement=form_traitement)
+@app.route('/add_plateforme/', methods=['GET', 'POST'])
+def add_plateforme():   
+    
+    if current_user.is_authenticated:
+        form = Form_plateforme()
+
+        if form.validate_on_submit():
+            plateforme_existe = PLATEFORME.query.filter(PLATEFORME.nom == form.nom_plateforme.data).first()
+            print(plateforme_existe)
+
+            if not plateforme_existe:
+                nouvelle_plateforme = PLATEFORME(
+                    nom=form.nom_plateforme.data,
+                    cout_journalier=form.cout_journalier.data,
+                    min_nb_personne=form.minimum_personnes.data,
+                    intervalle_maintenance=form.intervalle_maintenance.data
+                )
+
+                db.session.add(nouvelle_plateforme)
+                db.session.commit()
+
+                return redirect(url_for('index'))
+            else:
+                return render_template("add_plateforme.html", form_plateforme=form, message="Une plateforme avec le même nom existe déjà", message_type='error') 
+
+        return render_template("add_plateforme.html", form_plateforme=form)
+    else:
+        return redirect(url_for('register'))
+    
+
+if __name__ == "__main__":
+    app.run()
