@@ -59,8 +59,10 @@ class BudgetForm(FlaskForm):
                      format='%Y-%m',
                      validators=[DataRequired()],
                      render_kw={'type': 'month'})
-    budget_mensuel = DecimalField('Montant du budget',
-                                  validators=[DataRequired(), NumberRange(min=0, max=99999.99)])
+    budget_mensuel = DecimalField(
+        'Montant du budget',
+        validators=[DataRequired(),
+                    NumberRange(min=0, max=99999.99)])
     next = HiddenField()
 
     def build_budget(self):
@@ -72,16 +74,23 @@ class BudgetForm(FlaskForm):
 
 
 class DashboardPeriodForm(FlaskForm):
+
     class Meta:
         csrf = False
-    
-    month = IntegerField('Mois', validators=[DataRequired(), NumberRange(min=1, max=12)])
-    year = IntegerField('Année', validators=[DataRequired(), NumberRange(min=1900, max=2100)])
+
+    month = IntegerField(
+        'Mois', validators=[DataRequired(),
+                            NumberRange(min=1, max=12)])
+    year = IntegerField(
+        'Année', validators=[DataRequired(),
+                             NumberRange(min=1900, max=2100)])
     submit = SubmitField('Mettre à jour')
-      
+
 
 class GenererSequenceForm(FlaskForm):
-    longueur = IntegerField('Longueur', validators=[DataRequired(), NumberRange(min=1, max=5000)])
+    longueur = IntegerField(
+        'Longueur', validators=[DataRequired(),
+                                NumberRange(min=1, max=5000)])
     nom_fichier = StringField('Nom du fichier', validators=[DataRequired()])
     submit_generer = SubmitField('Generer et sauvegarder')
 
@@ -93,19 +102,29 @@ class ChargerSequenceForm(FlaskForm):
 
 
 class ChoisirSequenceForm(FlaskForm):
-    sequences = SelectMultipleField('Fichiers ADN', choices=[], validators=[DataRequired()])
+    sequences = SelectMultipleField('Fichiers ADN',
+                                    choices=[],
+                                    validators=[DataRequired()])
     submit_traitements = SubmitField('Acceder aux traitements')
 
 
 class TraitementAdnForm(FlaskForm):
-    sequence_base = SelectField('Sequence de base', choices=[], validators=[DataRequired()])
-    proba = FloatField('Probabilite p', validators=[DataRequired(), NumberRange(min=0, max=1)])
+    sequence_base = SelectField('Sequence de base',
+                                choices=[],
+                                validators=[DataRequired()])
+    proba = FloatField('Probabilite p',
+                       validators=[DataRequired(),
+                                   NumberRange(min=0, max=1)])
     mutation_remplacement = BooleanField('Mutation remplacement')
     mutation_insertion = BooleanField('Mutation insertion')
     mutation_deletion = BooleanField('Mutation deletion')
     calcul_levenshtein = BooleanField('Calculer distance Levenshtein')
-    sequence_lev_a = SelectField('Sequence A', choices=[], validators=[Optional()])
-    sequence_lev_b = SelectField('Sequence B', choices=[], validators=[Optional()])
+    sequence_lev_a = SelectField('Sequence A',
+                                 choices=[],
+                                 validators=[Optional()])
+    sequence_lev_b = SelectField('Sequence B',
+                                 choices=[],
+                                 validators=[Optional()])
     submit_traiter = SubmitField('Appliquer les traitements')
 
 
@@ -113,32 +132,43 @@ class SauvegarderSequenceForm(FlaskForm):
     nom_sequence = StringField('Nom du fichier', validators=[DataRequired()])
     submit_sauvegarder = SubmitField('Sauvegarder la sequence')
 
+
 class ResultatTraitemement(FlaskForm):
-    telecharger_resultat =BooleanField('Télécharger les résultats')
-    telecharger_sequences_mutees = BooleanField('Sauvegarder les séquences mutées')
+    telecharger_resultat = BooleanField('Télécharger les résultats')
+    telecharger_sequences_mutees = BooleanField(
+        'Sauvegarder les séquences mutées')
     note = StringField('Note', validators=[Optional()])
     submit_historique = SubmitField('Ajouter a l\'historique')
+
 
 class ReinitialiserResultatForm(FlaskForm):
     submit_reinitialiser = SubmitField('Reinitialiser les resultats')
 
-    
+
 class AssociateFilesForm(FlaskForm):
-    file = MultipleFileField("Fichiers d'échantillon", validators=[DataRequired()])
+    file = MultipleFileField("Fichiers d'échantillon",
+                             validators=[DataRequired()])
     submit = SubmitField('Associer les fichiers')
+
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
-    
+
+
 class Form_plateforme(FlaskForm):
     id_plateforme = HiddenField('id_plateforme')
-    nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
-    cout_journalier = IntegerField('cout_journalier', validators = [DataRequired()], render_kw={"min": "1"})
-    minimum_personnes = IntegerField('minimum_personnes', validators = [DataRequired()], render_kw={"min": "1"})
-    intervalle_maintenance = IntegerField('intervalle_maintenance', validators = [DataRequired()], render_kw={"min": "1"})
+    nom_plateforme = StringField('nom_plateforme', validators=[DataRequired()])
+    cout_journalier = IntegerField('cout_journalier',
+                                   validators=[DataRequired()],
+                                   render_kw={"min": "1"})
+    minimum_personnes = IntegerField('minimum_personnes',
+                                     validators=[DataRequired()],
+                                     render_kw={"min": "1"})
+    intervalle_maintenance = IntegerField('intervalle_maintenance',
+                                          validators=[DataRequired()],
+                                          render_kw={"min": "1"})
 
-    
 
 class FormPersonne(FlaskForm):
     idPersonne = HiddenField()
@@ -151,35 +181,34 @@ class FormPersonne(FlaskForm):
         choices=[],
         validators=[DataRequired()],
     )
-    
-    habilitations = MultiCheckboxField('Habilitations', choices=[
-        ('electrique', 'Électrique'),
-        ('chimique', 'Chimique'),
-        ('biologique', 'Biologique'),
-        ('radiations', 'Radiations')
-    ])
-        
+
+    habilitations = MultiCheckboxField('Habilitations',
+                                       choices=[('electrique', 'Électrique'),
+                                                ('chimique', 'Chimique'),
+                                                ('biologique', 'Biologique'),
+                                                ('radiations', 'Radiations')])
+
     def validate_habilitations(self, field):
         if not field.data:
             raise ValidationError("Sélectionnez au moins une habilitation")
-        
+
+
 class Form_materiel(FlaskForm):
     idMateriel = HiddenField()
     idPlateforme = HiddenField()
     nom_materiel = StringField('nom_materiel', validators=[DataRequired()])
     description_mat = StringField('description_mat')
-    quantite_mat = IntegerField('quantite_mat', validators=[DataRequired()])                     
-    habilitations = MultiCheckboxField('Habilitations', choices=[
-        ('electrique', 'Électrique'),
-        ('chimique', 'Chimique'),
-        ('biologique', 'Biologique'),
-        ('radiations', 'Radiations')
-    ])
-        
+    quantite_mat = IntegerField('quantite_mat', validators=[DataRequired()])
+    habilitations = MultiCheckboxField('Habilitations',
+                                       choices=[('electrique', 'Électrique'),
+                                                ('chimique', 'Chimique'),
+                                                ('biologique', 'Biologique'),
+                                                ('radiations', 'Radiations')])
+
     def validate_habilitations(self, field):
         if not field.data:
             raise ValidationError("Sélectionnez au moins une habilitation")
-    
+
 
 class CampagneForm(FlaskForm):
 
@@ -193,14 +222,17 @@ class CampagneForm(FlaskForm):
         "Durée en jours",
         validators=[
             DataRequired(message="La durée est obligatoire."),
-            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+            NumberRange(min=1,
+                        message="La durée doit être d'au moins 1 jour."),
         ],
     )
     idLieu = SelectField(
         "Lieu de fouille",
         choices=[],
         coerce=str,
-        validators=[DataRequired(message="Le lieu de fouille est obligatoire.")],
+        validators=[
+            DataRequired(message="Le lieu de fouille est obligatoire.")
+        ],
     )
     idPlateforme = SelectField(
         "Plateforme",
@@ -213,17 +245,15 @@ class CampagneForm(FlaskForm):
         choices=[],
         coerce=str,
     )
-    
+
 
 class LieuForm(FlaskForm):
-    
+
     nomLieu = StringField("Nom du lieu", validators=[DataRequired()])
     next = HiddenField()
-    
+
     def build_lieu(self):
-        return LIEU_FOUILLE(
-            nomLieu=self.nomLieu.data
-        )
+        return LIEU_FOUILLE(nomLieu=self.nomLieu.data)
 
 
 class MaintenanceForm(FlaskForm):
@@ -238,7 +268,8 @@ class MaintenanceForm(FlaskForm):
         "Durée (en jours)",
         validators=[
             DataRequired(message="La durée est obligatoire."),
-            NumberRange(min=1, message="La durée doit être d'au moins 1 jour."),
+            NumberRange(min=1,
+                        message="La durée doit être d'au moins 1 jour."),
         ],
     )
 

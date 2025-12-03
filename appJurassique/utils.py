@@ -1,8 +1,8 @@
-
 from datetime import timedelta
 from .app import db
 from .models import *
 from appJurassique.models import UTILISER
+
 
 def calculer_date_fin(date_debut, duree_jours):
 
@@ -16,22 +16,25 @@ def periodes_se_chevauchent(debut_a, fin_a, debut_b, fin_b):
 
     return not (fin_a < debut_b or fin_b < debut_a)
 
+
 def verifier_chevauchement_campagne(id_plateforme, date_debut, duree_jours):
     """
     Vérifie si une maintenance chevauche une campagne existante sur la même plateforme.
     Retourne un message d'erreur si chevauchement, None sinon.
     """
     date_fin_maintenance = calculer_date_fin(date_debut, duree_jours)
-    
+
     campagnes_plateforme = db.session.query(CAMPAGNE).join(
         PLANIFIER, CAMPAGNE.idCampagne == PLANIFIER.idCampagne).filter(
-        PLANIFIER.idPlateforme == id_plateforme).all()
-    
+            PLANIFIER.idPlateforme == id_plateforme).all()
+
     for campagne in campagnes_plateforme:
-        date_fin_campagne = calculer_date_fin(campagne.dateDebut, campagne.duree)
-        if periodes_se_chevauchent(date_debut, date_fin_maintenance, campagne.dateDebut, date_fin_campagne):
+        date_fin_campagne = calculer_date_fin(campagne.dateDebut,
+                                              campagne.duree)
+        if periodes_se_chevauchent(date_debut, date_fin_maintenance,
+                                   campagne.dateDebut, date_fin_campagne):
             return f"Conflit avec une campagne existante"
-    
+
     return None
 
 
@@ -43,24 +46,33 @@ def verifier_chevauchement_maintenance(id_plateforme, date_debut, duree_jours):
     maintenances_plateforme = MAINTENANCE.query.filter_by(
         idPlateforme=id_plateforme).all()
     for maintenance in maintenances_plateforme:
-        date_fin_existante = calculer_date_fin(maintenance.dateMaintenance, maintenance.duree_maintenance)
-        if periodes_se_chevauchent(date_debut, date_fin_maintenance, maintenance.dateMaintenance, date_fin_existante):
+        date_fin_existante = calculer_date_fin(maintenance.dateMaintenance,
+                                               maintenance.duree_maintenance)
+        if periodes_se_chevauchent(date_debut, date_fin_maintenance,
+                                   maintenance.dateMaintenance,
+                                   date_fin_existante):
             return f"Conflit avec une maintenance existante"
-    
+
     return None
+
 
 def verifier_nombre_membres(plateforme, membres):
     """Vérifie que le nombre de membres est suffisant pour la plateforme."""
-    if plateforme.min_nb_personne and len(membres) < plateforme.min_nb_personne:
+    if plateforme.min_nb_personne and len(
+            membres) < plateforme.min_nb_personne:
         return False, (
             f"La plateforme '{plateforme.nom}' nécessite au minimum "
             f"{plateforme.min_nb_personne} personnes, mais seulement {len(membres)} "
-            f"ont été sélectionnées."
-        )
+            f"ont été sélectionnées.")
     return True, None
 
 
-def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisateurs_membres, titre=None):
+def creer_campagne(date_debut,
+                   duree_jours,
+                   id_lieu,
+                   id_plateforme,
+                   noms_utilisateurs_membres,
+                   titre=None):
     """
     Crée une nouvelle campagne avec toutes les validations nécessaires.
     """
@@ -68,11 +80,12 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
         plateforme = PLATEFORME.query.get(id_plateforme)
         if not plateforme:
             return None, f"Plateforme avec l'ID {id_plateforme} introuvable."
-        
-        membres = PERSONNE.query.filter(PERSONNE.username.in_(noms_utilisateurs_membres)).all()
+
+        membres = PERSONNE.query.filter(
+            PERSONNE.username.in_(noms_utilisateurs_membres)).all()
         if len(membres) != len(noms_utilisateurs_membres):
             return None, "Un ou plusieurs membres n'ont pas été trouvés."
-        
+
         ok, erreur = verifier_nombre_membres(plateforme, membres)
         if not ok:
             return None, erreur
@@ -94,30 +107,23 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
         # if not ok:
         #     return None, erreur
 
-        nouvelle_campagne = CAMPAGNE(
-            dateDebut=date_debut,
-            duree=duree_jours
-        )
+        nouvelle_campagne = CAMPAGNE(dateDebut=date_debut,
+                                     duree=duree_jours,
+                                     idLieu=id_lieu)
         db.session.add(nouvelle_campagne)
         db.session.flush()
 
         for membre in membres:
-            participation = PARTICIPER(
-                username=membre.username,
-                idCampagne=nouvelle_campagne.idCampagne
-            )
+            participation = PARTICIPER(username=membre.username,
+                                       idCampagne=nouvelle_campagne.idCampagne)
             db.session.add(participation)
 
-        planification = PLANIFIER(
-            idPlateforme=id_plateforme,
-            idCampagne=nouvelle_campagne.idCampagne
-        )
+        planification = PLANIFIER(idPlateforme=id_plateforme,
+                                  idCampagne=nouvelle_campagne.idCampagne)
         db.session.add(planification)
 
-        sejour = SEJOURNER(
-            idCampagne=nouvelle_campagne.idCampagne,
-            idLieu=id_lieu
-        )
+        sejour = SEJOURNER(idCampagne=nouvelle_campagne.idCampagne,
+                           idLieu=id_lieu)
         db.session.add(sejour)
         db.session.commit()
 
@@ -128,8 +134,8 @@ def creer_campagne(date_debut, duree_jours, id_lieu, id_plateforme, noms_utilisa
         raise e
 
 
-
 #====== fonctions qui verifient. elles sont commentées car pas assez d'insert  ======
+
 
 def verifier_disponibilite_plateforme(id_plateforme, date_debut, date_fin):
     """Vérifie que la plateforme n'est pas déjà utilisée sur la période."""
@@ -198,7 +204,6 @@ def verifier_maintenance_plateforme(plateforme, date_debut, date_fin):
     return True, None
 
 
-
 #==== getters
 
 
@@ -212,62 +217,68 @@ def obtenir_membres_compatibles(id_plateforme, date_debut=None, date_fin=None):
     Returns:
         list: liste de tuples (PERSONNE, bool)
     """
-    
+
     try:
         plateforme = PLATEFORME.query.get(id_plateforme)
         if not plateforme:
             return []
-        
+
         tous_membres = PERSONNE.query.all()
-        utilisations = UTILISER.query.filter_by(idPlateforme=id_plateforme).all()
-        
+        utilisations = UTILISER.query.filter_by(
+            idPlateforme=id_plateforme).all()
+
         if not utilisations:
             materiels_ids = []
         else:
             materiels_ids = [u.idMateriel for u in utilisations]
-        
+
         if materiels_ids:
             habilitations_requises = db.session.query(HABILITATION).join(
-                NECESSITER, HABILITATION.idHabilitation == NECESSITER.idHabilitation
-            ).filter(NECESSITER.idMateriel.in_(materiels_ids)).all()
+                NECESSITER, HABILITATION.idHabilitation ==
+                NECESSITER.idHabilitation).filter(
+                    NECESSITER.idMateriel.in_(materiels_ids)).all()
         else:
             habilitations_requises = []
-        
-        habilitations_requises_ids = set([h.idHabilitation for h in habilitations_requises])
-        
+
+        habilitations_requises_ids = set(
+            [h.idHabilitation for h in habilitations_requises])
+
         membres_compatibles = []
         for membre in tous_membres:
             if hasattr(membre, 'habiliter') and membre.habiliter:
-                habilitations_membre_ids = set([h.idHabilitation for h in membre.habiliter])
+                habilitations_membre_ids = set(
+                    [h.idHabilitation for h in membre.habiliter])
             else:
                 habilitations_membre_ids = set()
-            
-            habilite = habilitations_requises_ids.issubset(habilitations_membre_ids)
-            
+
+            habilite = habilitations_requises_ids.issubset(
+                habilitations_membre_ids)
+
             disponible = True
             if date_debut and date_fin:
-                campagnes = (CAMPAGNE.query
-                            .join(PARTICIPER, PARTICIPER.idCampagne == CAMPAGNE.idCampagne)
-                            .filter(PARTICIPER.username == membre.username)
-                            .all())
+                campagnes = (CAMPAGNE.query.join(
+                    PARTICIPER,
+                    PARTICIPER.idCampagne == CAMPAGNE.idCampagne).filter(
+                        PARTICIPER.username == membre.username).all())
                 for campagne in campagnes:
-                    fin_existante = calculer_date_fin(campagne.dateDebut, campagne.duree)
-                    if periodes_se_chevauchent(date_debut, date_fin, campagne.dateDebut, fin_existante):
+                    fin_existante = calculer_date_fin(campagne.dateDebut,
+                                                      campagne.duree)
+                    if periodes_se_chevauchent(date_debut, date_fin,
+                                               campagne.dateDebut,
+                                               fin_existante):
                         disponible = False
                         break
-            
+
             compatible = habilite and disponible
             membres_compatibles.append((membre, compatible))
-        
+
         return membres_compatibles
-    
+
     except Exception as e:
         print(f"erreur dans la fonction obtenir_membres_compatibles: {str(e)}")
         import traceback
         traceback.print_exc()
         return []
-    
-
 
 
 def obtenir_plateformes_disponibles(date_debut, duree_jours):
@@ -286,17 +297,19 @@ def obtenir_plateformes_disponibles(date_debut, duree_jours):
         date_fin = calculer_date_fin(date_debut, duree_jours)
         toutes_plateformes = PLATEFORME.query.all()
         plateformes_disponibles = []
-        
+
         for plateforme in toutes_plateformes:
-            ok, _ = verifier_disponibilite_plateforme(plateforme.idPlateforme, date_debut, date_fin)
+            ok, _ = verifier_disponibilite_plateforme(plateforme.idPlateforme,
+                                                      date_debut, date_fin)
             if not ok:
                 continue
-            ok, _ = verifier_maintenance_plateforme(plateforme, date_debut, date_fin)
+            ok, _ = verifier_maintenance_plateforme(plateforme, date_debut,
+                                                    date_fin)
             if not ok:
                 continue
             plateformes_disponibles.append(plateforme.idPlateforme)
         return plateformes_disponibles
-    
+
     except Exception as e:
         print(f"Erreur dans obtenir_plateformes_disponibles: {str(e)}")
         return []
@@ -306,10 +319,8 @@ def recuperer_budget_mensuel(date_objet):
 
     if not date_objet:
         return None
-    return BUDGET_MENSUEL.query.filter_by(
-        annee=date_objet.year,
-        mois=date_objet.month
-    ).first()
+    return BUDGET_MENSUEL.query.filter_by(annee=date_objet.year,
+                                          mois=date_objet.month).first()
 
 
 def estimer_cout_campagne(plateforme, duree_jours):
@@ -321,21 +332,24 @@ def estimer_cout_campagne(plateforme, duree_jours):
 
 
 def update_qte(qte, idMat, idPlat):
-    
-    materiel_deja_utilise = db.session.query(UTILISER).filter(UTILISER.idMateriel == idMat, UTILISER.idPlateforme == idPlat).first()
-    
+
+    materiel_deja_utilise = db.session.query(UTILISER).filter(
+        UTILISER.idMateriel == idMat, UTILISER.idPlateforme == idPlat).first()
+
     print(materiel_deja_utilise)
-    
+
     if materiel_deja_utilise != None:
         new_qte = materiel_deja_utilise.quantite + qte
         if new_qte >= 0:
-            db.session.query(UTILISER).filter(UTILISER.idMateriel == idMat, UTILISER.idPlateforme == idPlat).update({UTILISER.quantite: UTILISER.quantite + qte})
+            db.session.query(UTILISER).filter(
+                UTILISER.idMateriel == idMat,
+                UTILISER.idPlateforme == idPlat).update(
+                    {UTILISER.quantite: UTILISER.quantite + qte})
             db.session.commit()
             return True
     else:
-            utilise = UTILISER(idMateriel= idMat, idPlateforme=idPlat, quantite= qte)
-            db.session.add(utilise)
-            db.session.commit()
-            return True
+        utilise = UTILISER(idMateriel=idMat, idPlateforme=idPlat, quantite=qte)
+        db.session.add(utilise)
+        db.session.commit()
+        return True
     return False
-

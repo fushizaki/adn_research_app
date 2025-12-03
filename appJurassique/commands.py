@@ -15,9 +15,11 @@ def syncdb():
             ("radiations", "Radiations"),
         ]
         for key, label in defaults:
-            db.session.add(HABILITATION(nom_habilitation=label, description=key))
+            db.session.add(
+                HABILITATION(nom_habilitation=label, description=key))
         db.session.commit()
     lg.warning('Database synchronized!')
+
 
 @app.cli.command()
 def dropdb():

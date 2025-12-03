@@ -291,7 +291,7 @@ def associer_fichier(idCampagne):
 
     upload_folder = current_app.config.get('ECHANTILLON_UPLOAD_FOLDER')
     if not upload_folder:
-        upload_folder = Path(current_app.root_path) / 'data' / 'adn'
+        upload_folder = Path(current_app.root_path).parent / 'algo' / 'data'
 
     try:
         for storage in form.file.data:
@@ -360,8 +360,7 @@ def add_plateforme():
                     nom=form.nom_plateforme.data,
                     cout_journalier=form.cout_journalier.data,
                     min_nb_personne=form.minimum_personnes.data,
-                    intervalle_maintenance=form.intervalle_maintenance.data,
-                    current_page="plateformes")
+                    intervalle_maintenance=form.intervalle_maintenance.data)
 
                 db.session.add(nouvelle_plateforme)
                 db.session.commit()
@@ -410,6 +409,8 @@ def supprimer_materiel(idMateriel):
 def add_materiel(idPlateforme):
 
     mat_dispo = db.session.query(MATERIEL).all()
+    message = None
+    message_type = None
 
     la_plateforme = PLATEFORME.query.get(idPlateforme)
 
