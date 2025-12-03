@@ -137,6 +137,7 @@ def dashboard():
     elif budget_restant is None:
         budget_status = 'undefined'
 
+    # récupération des maintenances planifiées pour le mois
     maintenances = (MAINTENANCE.query
                     .filter(MAINTENANCE.dateMaintenance >= month_start)
                     .filter(MAINTENANCE.dateMaintenance <= month_end)
@@ -144,6 +145,7 @@ def dashboard():
                     .order_by(MAINTENANCE.dateMaintenance.asc())
                     .all())
 
+    # préparation des items de maintenance
     maintenance_items = []
     for maintenance in maintenances:
         jours_restant = (maintenance.dateMaintenance - today).days
