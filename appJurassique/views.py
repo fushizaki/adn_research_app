@@ -19,7 +19,6 @@ from appJurassique.utils import *
 
 # ==================== ACCUEIL ====================
 
-
 MONTH_NAMES_FR = [
     None,
     "Janvier",
@@ -43,6 +42,7 @@ def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return render_template('index.html', title='Accueil', current_page='index')
+
 
 # ==================== AUTHENTIFICATION ====================
 
@@ -360,7 +360,8 @@ def add_plateforme():
                     nom=form.nom_plateforme.data,
                     cout_journalier=form.cout_journalier.data,
                     min_nb_personne=form.minimum_personnes.data,
-                    intervalle_maintenance=form.intervalle_maintenance.data)
+                    intervalle_maintenance=form.intervalle_maintenance.data,
+                    current_page="plateformes")
 
                 db.session.add(nouvelle_plateforme)
                 db.session.commit()
@@ -373,9 +374,12 @@ def add_plateforme():
                     "add_plateforme.html",
                     form_plateforme=form,
                     message="Une plateforme avec le même nom existe déjà",
-                    message_type='error')
+                    message_type='error',
+                    current_page="plateformes")
 
-        return render_template("add_plateforme.html", form_plateforme=form)
+        return render_template("add_plateforme.html",
+                               form_plateforme=form,
+                               current_page="plateformes")
     else:
         return redirect(url_for('login'))
 
@@ -418,7 +422,8 @@ def add_materiel(idPlateforme):
             'Erreur lors du chargement de la plateforme veuillez réessayer',
             plateforme=la_plateforme,
             materiel_dispo=mat_dispo,
-            materiel_plateforme=mat_plat)
+            materiel_plateforme=mat_plat,
+            current_page="plateformes")
 
     mat_plat = mat_plat = db.session.query(UTILISER).filter(
         UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
@@ -497,7 +502,8 @@ def add_materiel(idPlateforme):
                                message_type=message_type,
                                plateforme=la_plateforme,
                                materiel_dispo=mat_dispo,
-                               materiel_plateforme=mat_plat)
+                               materiel_plateforme=mat_plat,
+                               current_page="plateformes")
 
     return render_template("add_materiel.html",
                            plateforme=la_plateforme,
@@ -505,7 +511,8 @@ def add_materiel(idPlateforme):
                            materiel_dispo=mat_dispo,
                            materiel_plateforme=mat_plat,
                            message=message,
-                           message_type=message_type)
+                           message_type=message_type,
+                           current_page="plateformes")
 
 
 # ==================== LIEUX ====================
@@ -752,7 +759,8 @@ def maintenance():
                            plateformes=plateformes,
                            form=form,
                            message=message,
-                           message_type=message_type)
+                           message_type=message_type,
+                           current_page='maintenances')
 
 
 # ==================== ADN - UTILITAIRES ====================
@@ -882,13 +890,13 @@ def gerer_adn():
 
     return render_template('gerer_adn.html',
                            title='Gerer les fichiers ADN',
-                           current_page='gerer_adn',
                            fichiers=fichiers_adn,
                            form_generer=form_generer,
                            form_charger=form_charger,
                            form_choisir=form_choisir,
                            sequence_creee=sequence_creee,
-                           fichier_charge=fichier_charge)
+                           fichier_charge=fichier_charge,
+                           current_page='echantillonAdn')
 
 
 # ==================== ADN - TRAITEMENTS ====================
@@ -1025,10 +1033,10 @@ def traitements_adn():
 
     return render_template('traitements_adn.html',
                            title='Traitements ADN',
-                           current_page='traitements_adn',
                            fichiers=fichiers_adn,
                            preselection=preselection,
-                           form_traitement=form_traitement)
+                           form_traitement=form_traitement,
+                           current_page='echantillonAdn')
 
 
 @app.route("/view_resultats/", methods=["GET"])
@@ -1051,13 +1059,17 @@ def resultat():
         return render_template(
             "view_resultats.html",
             title="Résultats ADN",
-            currentpage="resultatsadn",
             resultat=resultat,
             fichier_base_info=fichier_base_info,
             distance_info=distance_info,
+            current_page='echantillonAdn',
         )
     else:
         return redirect(url_for('register'))
+
+
+# ==================== DASHBOARD ====================
+
 
 @app.route('/dashboard/', methods=['GET', 'POST'])
 @login_required
@@ -1099,7 +1111,10 @@ def dashboard():
 
     previous_date = month_start - timedelta(days=1)
     next_date = month_end + timedelta(days=1)
-    previous_period = {'month': previous_date.month, 'year': previous_date.year}
+    previous_period = {
+        'month': previous_date.month,
+        'year': previous_date.year
+    }
     next_period = {'month': next_date.month, 'year': next_date.year}
 
     def format_currency(value):
@@ -1123,7 +1138,8 @@ def dashboard():
     # calcul des personne dispo
     total_personnel = PERSONNE.query.count()
     total_personnel_occupe = len(active_personnel)
-    total_personnel_disponible = max(0, total_personnel - total_personnel_occupe)
+    total_personnel_disponible = max(0,
+                                     total_personnel - total_personnel_occupe)
 
     budget_record = BUDGET_MENSUEL.query.filter_by(
         annee=selected_year, mois=selected_month).first()
@@ -1144,9 +1160,10 @@ def dashboard():
             if plateforme and plateforme.cout_journalier:
                 budget_depense += float(plateforme.cout_journalier) * overlap
 
-    budget_restant = (budget_initial - budget_depense
-                      if budget_initial is not None else None)
-    budget_restant = round(budget_restant, 2) if budget_restant is not None else None
+    budget_restant = (budget_initial -
+                      budget_depense if budget_initial is not None else None)
+    budget_restant = round(budget_restant,
+                           2) if budget_restant is not None else None
     budget_depense = round(budget_depense, 2)
 
     budget_status = 'ok'
@@ -1156,12 +1173,11 @@ def dashboard():
         budget_status = 'undefined'
 
     # récupération des maintenances planifiées pour le mois
-    maintenances = (MAINTENANCE.query
-                    .filter(MAINTENANCE.dateMaintenance >= month_start)
-                    .filter(MAINTENANCE.dateMaintenance <= month_end)
-                    .filter(MAINTENANCE.statut == statut.PLANIFIEE)
-                    .order_by(MAINTENANCE.dateMaintenance.asc())
-                    .all())
+    maintenances = (MAINTENANCE.query.filter(
+        MAINTENANCE.dateMaintenance >= month_start).filter(
+            MAINTENANCE.dateMaintenance <= month_end).filter(
+                MAINTENANCE.statut == statut.PLANIFIEE).order_by(
+                    MAINTENANCE.dateMaintenance.asc()).all())
 
     # préparation des items de maintenance
     maintenance_items = []
@@ -1174,13 +1190,20 @@ def dashboard():
         else:
             relative = f"il y a {abs(jours_restant)} jours"
         maintenance_items.append({
-            'id': maintenance.idMaintenance,
-            'plateforme': maintenance.plateforme.nom if maintenance.plateforme else 'Plateforme inconnue',
-            'date': maintenance.dateMaintenance,
-            'date_label': maintenance.dateMaintenance.strftime('%d/%m/%Y'),
-            'relative': relative,
+            'id':
+            maintenance.idMaintenance,
+            'plateforme':
+            maintenance.plateforme.nom
+            if maintenance.plateforme else 'Plateforme inconnue',
+            'date':
+            maintenance.dateMaintenance,
+            'date_label':
+            maintenance.dateMaintenance.strftime('%d/%m/%Y'),
+            'relative':
+            relative,
         })
-     selected_period_label = f"{MONTH_NAMES_FR[selected_month]} {selected_year}"
+
+    selected_period_label = f"{MONTH_NAMES_FR[selected_month]} {selected_year}"
 
     return render_template(
         'dashboard.html',
@@ -1201,17 +1224,27 @@ def dashboard():
         },
         active_campaigns_count=len(active_campagnes),
         budget_summary={
-            'initial': budget_initial,
-            'spent': budget_depense,
-            'remaining': budget_restant,
-            'remaining_label': format_currency(budget_restant) if budget_restant is not None else None,
-            'initial_label': format_currency(budget_initial) if budget_initial is not None else None,
-            'spent_label': format_currency(budget_depense),
-            'status': budget_status,
+            'initial':
+            budget_initial,
+            'spent':
+            budget_depense,
+            'remaining':
+            budget_restant,
+            'remaining_label':
+            format_currency(budget_restant)
+            if budget_restant is not None else None,
+            'initial_label':
+            format_currency(budget_initial)
+            if budget_initial is not None else None,
+            'spent_label':
+            format_currency(budget_depense),
+            'status':
+            budget_status,
         },
         maintenance_items=maintenance_items,
     )
-    
+
+
 @app.route("/gerer_materiel/<idPlateforme>/", methods=("GET", "POST"))
 def gerer_materiel(idPlateforme):
 
@@ -1220,7 +1253,6 @@ def gerer_materiel(idPlateforme):
     la_plateforme = PLATEFORME.query.get(idPlateforme)
 
     form_mat = Form_materiel()
-
 
     if la_plateforme is None:
         return render_template(
@@ -1236,7 +1268,6 @@ def gerer_materiel(idPlateforme):
     mat_plat = db.session.query(UTILISER).filter(
         UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
 
-
     if request.form.get("mat_id"):
         id_mat = request.form.get("mat_id", type=int)
         quantite_add = request.form.get("mat_qte", type=int)
@@ -1244,10 +1275,10 @@ def gerer_materiel(idPlateforme):
             update_qte(quantite_add, id_mat, la_plateforme.idPlateforme)
             db.session.commit()
             return render_template("gerer_materiel.html",
-                               plateforme=la_plateforme,
-                               form_materiel=form_mat,
-                               materiel_dispo=mat_dispo,
-                               materiel_plateforme=mat_plat)
+                                   plateforme=la_plateforme,
+                                   form_materiel=form_mat,
+                                   materiel_dispo=mat_dispo,
+                                   materiel_plateforme=mat_plat)
 
     elif request.form.get("mat_delete_id"):
         id_mat = request.form.get("mat_delete_id", type=int)
@@ -1256,12 +1287,12 @@ def gerer_materiel(idPlateforme):
             message = "Matériel introuvable ou déjà supprimé."
             message_type = 'error'
             return render_template("gerer_materiel.html",
-                               plateforme=la_plateforme,
-                               form_materiel=form_mat,
-                               materiel_dispo=mat_dispo,
-                               materiel_plateforme=mat_plat,
-                               message=message,
-                               message_type=message_type)
+                                   plateforme=la_plateforme,
+                                   form_materiel=form_mat,
+                                   materiel_dispo=mat_dispo,
+                                   materiel_plateforme=mat_plat,
+                                   message=message,
+                                   message_type=message_type)
         else:
             db.session.delete(mat_delete)
             db.session.commit()
@@ -1314,7 +1345,7 @@ def gerer_materiel(idPlateforme):
                            quantite=form_mat.quantite_mat.data)
         db.session.add(utilise)
         db.session.commit()
-        
+
         mat_dispo = db.session.query(MATERIEL).all()
         mat_plat = db.session.query(UTILISER).filter(
             UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
@@ -1338,8 +1369,6 @@ def gerer_materiel(idPlateforme):
                            form_materiel=form_mat,
                            materiel_dispo=mat_dispo,
                            materiel_plateforme=mat_plat)
-    
-      
 
 
 if __name__ == "__main__":
