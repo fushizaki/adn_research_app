@@ -282,6 +282,15 @@ def associer_fichier(idCampagne):
         db.session.rollback()
 
     return redirect(url_for('view_campagnes', idCampagne=idCampagne))
+# ==================== MATERIELS ====================
+@app.route("/materiels/")
+@login_required
+def liste_materiels():
+    materiels = MATERIEL.query.all()
+    return render_template("liste_materiels.html",
+                           title="Liste des matériels",
+                           current_page="materiels",
+                           materiels=materiels)
 
 
 # ==================== LIEUX ====================
@@ -716,7 +725,7 @@ def add_plateforme():
                 db.session.add(nouvelle_plateforme)
                 db.session.commit()
 
-                return redirect(url_for('index'))
+                return redirect(url_for('add_materiel, idPlateforme=nouvelle_plateforme.idPlateforme'))
             else:
                 return render_template("add_plateforme.html", form_plateforme=form, message="Une plateforme avec le même nom existe déjà", message_type='error') 
 

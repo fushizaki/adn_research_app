@@ -47,7 +47,13 @@
                                 <td class="px-6 py-5">{{ plateforme.min_nb_personne if plateforme.min_nb_personne else '-' }}</td>
                                 <td class="px-6 py-5 text-green-button font-semibold">{{ '%.2f €'|format(plateforme.cout_journalier) if plateforme.cout_journalier else '-' }}</td>
                                 <td class="px-6 py-5 text-white/70">{{ plateforme.intervalle_maintenance if plateforme.intervalle_maintenance else '-' }}</td>
-                                <td class="px-6 py-5">{{ plateforme.materiel.nom if plateforme.materiel else '-' }}</td>
+                                <td class="px-6 py-5">
+                                    {% if plateforme.materiels %}
+                                        {{ plateforme.materiels | map(attribute='nom') | join(', ') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4 text-base">
                                         <a href="{{ url_for('supprimer_plateforme', idPlateforme=plateforme.idPlateforme) }}"
