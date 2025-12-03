@@ -1247,6 +1247,7 @@ def dashboard():
 
 
 @app.route("/gerer_materiel/<idPlateforme>/", methods=("GET", "POST"))
+@login_required
 def gerer_materiel(idPlateforme):
 
     mat_dispo = db.session.query(MATERIEL).all()
@@ -1371,6 +1372,68 @@ def gerer_materiel(idPlateforme):
                            materiel_dispo=mat_dispo,
                            materiel_plateforme=mat_plat)
 
+@app.route("/create_materiel/", methods=("GET", "POST"))
+@login_required
+def create_materiel():
+    if current_user.is_authenticated:
+
+        form_mat = Form_materiel()
+
+        if form_mat.validate_on_submit():
+
+            nom_materiel = form_mat.nom_materiel.data
+            materiel_existe = MATERIEL.query.filter(
+                MATERIEL.nom == nom_materiel).first()
+
+            if not materiel_existe:
+                nouveau_mat = MATERIEL(
+                    nom=form_mat.nom_materiel.data,
+                    description=form_mat.description_mat.data,
+                )
+                db.session.add(nouveau_mat)
+                db.session.commit()
+
+
+
+                for item in form_mat.habilitations.data:
+                     match item:
+                        case "electrique":
+                            necessite = NECESSITER(idHabilitation=1,
+                                                   idMateriel=nouveau_mat.idMateriel)
+                            db.session.add(necessite)
+                            db.session.commit()
+                        case "chimique":
+                            necessite = NECESSITER(idHabilitation=2,
+                                                   idMateriel=nouveau_mat.idMateriel)
+                            db.session.add(necessite)
+                            db.session.commit()
+                        case "biologique":
+                            necessite = NECESSITER(idHabilitation=3,
+                                                   idMateriel=nouveau_mat.idMateriel)
+                            db.session.add(necessite)
+                            db.session.commit()
+                        case "radiations":
+                            necessite = NECESSITER(idHabilitation=4,
+                                                   idMateriel=nouveau_mat.idMateriel)
+                            db.session.add(necessite)
+                            db.session.commit()
+
+                return redirect(url_for('liste_materiels'))
+            else:
+                return render_template(
+                    "create_materiel.html",
+                    form_materiel=form_mat,
+                    message_type='error',
+                    message="Un matériel avec ce nom existe déjà")
+
+        if request.method == 'POST':
+            return render_template("create_materiel.html",
+                                   form_materiel=form_mat,
+                                   message_type='error')
+
+        return render_template("create_materiel.html", form_materiel=form_mat)
+    else:
+        return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run()
