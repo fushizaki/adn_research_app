@@ -292,6 +292,16 @@ def liste_materiels():
                            title="Liste des matériels",
                            current_page="materiels",
                            materiels=materiels)
+    
+@app.route('/materiels/<int:idMateriel>/supprimer/')
+@login_required
+def supprimer_materiel(idMateriel):
+    materiel = db.session.get(MATERIEL, idMateriel)
+    if materiel is None:
+        return render_template('404.html', message="Matériel non trouvé"), 404
+    db.session.delete(materiel)
+    db.session.commit()
+    return redirect(url_for('liste_materiels'))
 
 
 # ==================== LIEUX ====================
