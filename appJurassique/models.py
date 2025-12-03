@@ -9,9 +9,13 @@ class MATERIEL(db.Model):
     idMateriel = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    utilisations = db.relationship('UTILISER', back_populates='materiel', cascade='all, delete-orphan')
-    necessites = db.relationship('NECESSITER', back_populates='materiel', cascade='all, delete-orphan')
-    
+    utilisations = db.relationship('UTILISER',
+                                   back_populates='materiel',
+                                   cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER',
+                                 back_populates='materiel',
+                                 cascade='all, delete-orphan')
+
     def __repr__(self):
         return f"<MATERIEL {self.nom}>"
 
@@ -23,9 +27,15 @@ class PLATEFORME(db.Model):
     min_nb_personne = db.Column(db.Integer)
     cout_journalier = db.Column(db.Float)
     intervalle_maintenance = db.Column(db.Integer)
-    utilisations = db.relationship('UTILISER', back_populates='plateforme', cascade='all, delete-orphan')
-    planifier = db.relationship('PLANIFIER', back_populates='plateforme', cascade='all, delete-orphan')
-    maintenance = db.relationship('MAINTENANCE', back_populates='plateforme', cascade='all, delete-orphan')
+    utilisations = db.relationship('UTILISER',
+                                   back_populates='plateforme',
+                                   cascade='all, delete-orphan')
+    planifier = db.relationship('PLANIFIER',
+                                back_populates='plateforme',
+                                cascade='all, delete-orphan')
+    maintenance = db.relationship('MAINTENANCE',
+                                  back_populates='plateforme',
+                                  cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<PLATEFORME {self.nom}>"
@@ -36,8 +46,12 @@ class HABILITATION(db.Model):
     idHabilitation = db.Column(db.Integer, primary_key=True)
     nom_habilitation = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500))
-    habiliter = db.relationship('HABILITER', back_populates='habilitation', cascade='all, delete-orphan')
-    necessites = db.relationship('NECESSITER', back_populates='habilitation', cascade='all, delete-orphan')
+    habiliter = db.relationship('HABILITER',
+                                back_populates='habilitation',
+                                cascade='all, delete-orphan')
+    necessites = db.relationship('NECESSITER',
+                                 back_populates='habilitation',
+                                 cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<HABILITATION {self.nom_habilitation}>"
@@ -58,19 +72,23 @@ class LIEU_FOUILLE(db.Model):
     idLieu = db.Column(db.Integer, primary_key=True)
     nomLieu = db.Column(db.String(100), nullable=False)
     campagnes = db.relationship('CAMPAGNE', back_populates='lieu')
-    sejourner = db.relationship('SEJOURNER', back_populates='lieu', cascade='all, delete-orphan')
+    sejourner = db.relationship('SEJOURNER',
+                                back_populates='lieu',
+                                cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<LIEU_FOUILLE {self.nomLieu}>"
+
 
 class role_labo_enum(enum.Enum):
     DIRECTION = "DIRECTION"
     TECHNICIEN = "TECHNICIEN"
     ADMINISTRATION = "ADMINISTRATION"
     CHERCHEUR = "CHERCHEUR"
-    
+
     def get_roles():
         return [role.value for role in role_labo_enum]
+
 
 class PERSONNE(UserMixin, db.Model):
     __tablename__ = 'PERSONNE'
@@ -79,16 +97,20 @@ class PERSONNE(UserMixin, db.Model):
     prenom = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role_labo = db.Column(db.Enum(role_labo_enum), nullable=False)
-    participer = db.relationship('PARTICIPER', back_populates='personne', cascade='all, delete-orphan')
-    habiliter = db.relationship('HABILITER', back_populates='personne', cascade='all, delete-orphan')
+    participer = db.relationship('PARTICIPER',
+                                 back_populates='personne',
+                                 cascade='all, delete-orphan')
+    habiliter = db.relationship('HABILITER',
+                                back_populates='personne',
+                                cascade='all, delete-orphan')
 
     def get_id(self):
         return self.username
-    
+
     @login_manager.user_loader
     def load_user(username):
         return PERSONNE.query.get(username)
-    
+
     def __repr__(self):
         return f"<PERSONNE {self.prenom} {self.nom}>"
 
@@ -98,12 +120,22 @@ class CAMPAGNE(db.Model):
     idCampagne = db.Column(db.Integer, primary_key=True)
     dateDebut = db.Column(db.Date, nullable=False)
     duree = db.Column(db.Integer, nullable=False)
-    idLieu = db.Column(db.Integer, db.ForeignKey('LIEU_FOUILLE.idLieu'), nullable=False)
+    idLieu = db.Column(db.Integer,
+                       db.ForeignKey('LIEU_FOUILLE.idLieu'),
+                       nullable=False)
     lieu = db.relationship('LIEU_FOUILLE', back_populates='campagnes')
-    participer = db.relationship('PARTICIPER', back_populates='campagne', cascade='all, delete-orphan')
-    planifier = db.relationship('PLANIFIER', back_populates='campagne', cascade='all, delete-orphan')
-    sejourner = db.relationship('SEJOURNER', back_populates='campagne', cascade='all, delete-orphan')
-    rapporter = db.relationship('RAPPORTER', back_populates='campagne', cascade='all, delete-orphan')
+    participer = db.relationship('PARTICIPER',
+                                 back_populates='campagne',
+                                 cascade='all, delete-orphan')
+    planifier = db.relationship('PLANIFIER',
+                                back_populates='campagne',
+                                cascade='all, delete-orphan')
+    sejourner = db.relationship('SEJOURNER',
+                                back_populates='campagne',
+                                cascade='all, delete-orphan')
+    rapporter = db.relationship('RAPPORTER',
+                                back_populates='campagne',
+                                cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<CAMPAGNE ({self.idCampagne}) {self.dateDebut}>"
@@ -159,8 +191,12 @@ class ECHANTILLON(db.Model):
     idEchantillon = db.Column(db.Integer, primary_key=True)
     fichierAdn = db.Column(db.String(100))
     commentairesEchantillion = db.Column(db.String(500))
-    appartenir = db.relationship('APPARTENIR', back_populates='echantillon', cascade='all, delete-orphan')
-    rapporter = db.relationship('RAPPORTER', back_populates='echantillon', cascade='all, delete-orphan')
+    appartenir = db.relationship('APPARTENIR',
+                                 back_populates='echantillon',
+                                 cascade='all, delete-orphan')
+    rapporter = db.relationship('RAPPORTER',
+                                back_populates='echantillon',
+                                cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<ECHANTILLON {self.idEchantillon}>"
@@ -171,7 +207,9 @@ class ESPECE(db.Model):
     idEspece = db.Column(db.Integer, primary_key=True)
     nomEspece = db.Column(db.String(100), nullable=False)
     caracteristiques = db.Column(db.String(500))
-    appartenir = db.relationship('APPARTENIR', back_populates='espece', cascade='all, delete-orphan')
+    appartenir = db.relationship('APPARTENIR',
+                                 back_populates='espece',
+                                 cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<ESPECE {self.nomEspece}>"
@@ -271,6 +309,7 @@ class MAINTENANCE(db.Model):
 
     def __repr__(self):
         return f"<MAINTENANCE {self.idMaintenance} on {self.dateMaintenance}>"
+
 
 class HISTORIQUE(db.Model):
     __tablename__ = 'HISTORIQUE'
