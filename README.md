@@ -12,6 +12,8 @@
 
 ```bash
 cd SAE_Dev_Web
+virtualenv -p python3 venv
+source venv/bin/activate
 pip install -r requirements.txt
 cd appJurassique
 npm install
@@ -57,6 +59,14 @@ DB_NAME="jurassique_db"
 ```
 
 ### Lancement de l'application Web Flask
+
+#### Mettre les insertions pour tester l'application
+
+```bash
+mysql -u root -p
+use jurassique_db;
+source bd/script_insert.sql
+```
 
 ```bash
 cd SAE_Dev_Web
@@ -113,3 +123,5 @@ coverage report -m
 # Rapport HTML
 coverage html
 ```
+
+Après les tests il faut refaire la commande flask syncdb et remettre les insertions
