@@ -33,8 +33,7 @@ CREATE TABLE
         PRIMARY KEY (idHabilitation),
         idHabilitation int NOT NULL AUTO_INCREMENT,
         nom_habilitation varchar(100) NOT NULL,
-        description varchar(500),
-        idMateriel int
+        description varchar(500)
     );
 
 CREATE TABLE
@@ -44,8 +43,7 @@ CREATE TABLE
         nom varchar(100) NOT NULL,
         min_nb_personne int CHECK (min_nb_personne > 0),
         cout_journalier decimal(10, 2),
-        intervalle_maintenance int CHECK (intervalle_maintenance > 0),
-        idMateriel int
+        intervalle_maintenance int CHECK (intervalle_maintenance > 0)
     );
 
 CREATE TABLE
@@ -149,9 +147,9 @@ CREATE TABLE
 
 CREATE TABLE
     NECESSITER (
-        PRIMARY KEY (idMateriel, idHabilitation),
-        idMateriel INT NOT NULL,
-        idHabilitation INT NOT NULL
+        PRIMARY KEY (idHabilitation, idMateriel),
+        idHabilitation INT NOT NULL,
+        idMateriel INT NOT NULL
     );
 
 CREATE TABLE

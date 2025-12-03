@@ -7,21 +7,11 @@ from algo.main import *
 from pathlib import Path
 from .app import app, db
 from flask_login import login_user, logout_user, login_required, current_user
-<<<<<<< HEAD
 from .utils import creer_campagne, obtenir_membres_compatibles
 from sqlalchemy.exc import IntegrityError, DataError
 from appJurassique.forms import *
 from appJurassique.models import *
 from appJurassique.utils import *
-=======
-from sqlalchemy.exc import IntegrityError
-from appJurassique.forms import (LoginForm, RegisterForm, BudgetForm,
-                                 AssociateFilesForm, Form_materiel)
-from appJurassique.models import (CAMPAGNE, PERSONNE, role_labo_enum,
-                                  ECHANTILLON, RAPPORTER, MATERIEL, UTILISER, PLATEFORME, NECESSITER)
-from pathlib import Path
-from .utils import update_qte
->>>>>>> feature/page-ajout-materiel
 
 
 # ==================== ACCUEIL ====================
@@ -96,6 +86,7 @@ def logout():
 # ==================== CAMPAGNES ====================
 
 @app.route('/add_campagne/', methods=['GET', 'POST'])
+@login_required
 def add_campagne():
     """Crée une nouvelle campagne."""
     lieux = LIEU_FOUILLE.query.all()
@@ -415,6 +406,7 @@ def set_budget():
 # ==================== MAINTENANCE ====================
 
 @app.route('/maintenance/', methods=['GET', 'POST'])
+@login_required
 def maintenance():
     plateformes = PLATEFORME.query.all()
     form = MaintenanceForm()
@@ -527,6 +519,7 @@ def charger_sequence_fichier(nom_fichier: str) -> str:
 
 
 @app.route('/gerer_adn/', methods=['GET', 'POST'])
+@login_required
 def gerer_adn():
     fichiers_adn = lister_fichiers_adn()
     choix_fichiers = [(f['nom'], f"{f['nom']} ({f['taille']} bases)") for f in fichiers_adn]
@@ -598,6 +591,7 @@ def gerer_adn():
 
 
 @app.route('/traitements_adn/', methods=['GET', 'POST'])
+@login_required
 def traitements_adn():
     fichiers_adn = lister_fichiers_adn()
     choix_fichiers = [(f['nom'], f['nom']) for f in fichiers_adn]
@@ -715,6 +709,7 @@ def traitements_adn():
         return redirect(url_for('resultat'))
 
 @app.route('/add_plateforme/', methods=['GET', 'POST'])
+@login_required
 def add_plateforme():   
     
     if current_user.is_authenticated:
@@ -735,15 +730,14 @@ def add_plateforme():
                 db.session.add(nouvelle_plateforme)
                 db.session.commit()
 
-                return redirect(url_for('add_materiel, idPlateforme=nouvelle_plateforme.idPlateforme'))
+                return redirect(url_for('add_materiel', idPlateforme=nouvelle_plateforme.idPlateforme))
             else:
                 return render_template("add_plateforme.html", form_plateforme=form, message="Une plateforme avec le même nom existe déjà", message_type='error') 
 
         return render_template("add_plateforme.html", form_plateforme=form)
     else:
-        return redirect(url_for('register'))
+        return redirect(url_for('login'))
     
-
 
 @app.route("/add_materiel/<idPlateforme>/", methods=("GET", "POST"))
 def add_materiel(idPlateforme):
@@ -752,9 +746,17 @@ def add_materiel(idPlateforme):
     
     la_plateforme = PLATEFORME.query.get(idPlateforme)
     
-    mat_plat = mat_plat = db.session.query(UTILISER).filter(UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
+    if la_plateforme is None:
+        return render_template(
+            "add_materiel.html",
+            form_materiel=form_mat,
+            message_type='error',
+            message='Erreur lors du chargement de la plateforme veuillez réessayer',
+            plateforme=la_plateforme,
+            materiel_dispo= mat_dispo,
+            materiel_plateforme=mat_plat)
     
-    print(mat_plat)
+    mat_plat = mat_plat = db.session.query(UTILISER).filter(UTILISER.idPlateforme == la_plateforme.idPlateforme).all()
     
     form_mat = Form_materiel()
     
@@ -774,6 +776,9 @@ def add_materiel(idPlateforme):
         )
         db.session.add(nouveau_mat)
         db.session.commit()
+        
+        hab = db.session.query(HABILITATION).all()
+        print(hab)    
         
         necessite = None
         for item in form_mat.habilitations.data:
@@ -800,7 +805,7 @@ def add_materiel(idPlateforme):
         db.session.add(utilise)
         db.session.commit()
 
-        
+        print("ble ble ble")
         return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
     if not request.form.get("mat_id") and request.method == 'POST':
         return render_template(
@@ -814,5 +819,70 @@ def add_materiel(idPlateforme):
     return render_template("add_materiel.html", plateforme=la_plateforme, form_materiel=form_mat, materiel_dispo= mat_dispo, materiel_plateforme=mat_plat)
     
     
+    
+@app.route("/add_personne/", methods=("GET", "POST"))
+@login_required
+def add_personne():
+    
+    if current_user.is_authenticated:
+    
+        form_pers = FormPersonne()
+
+        role_choices = [('', 'Sélectionner un rôle')] + [
+            (role.value, role.value) for role in role_labo_enum
+        ]
+        form_pers.role_labo.choices = role_choices
+
+        if form_pers.validate_on_submit():
+
+            username = form_pers.username.data
+            personne_existe = PERSONNE.query.get(username)
+
+
+
+            if not personne_existe:        
+                habiliter = None
+                nouvelle_personne = PERSONNE(nom= form_pers.nom.data,
+                                             prenom= form_pers.prenom.data,
+                                             username= form_pers.username.data,
+                                             password= form_pers.password.data,
+                                             role_labo= form_pers.role_labo.data)
+                db.session.add(nouvelle_personne)
+                db.session.commit()
+                for item in form_pers.habilitations.data:
+                    match item:
+                        case "electrique":
+                            habiliter = HABILITER(idHabilitation=1, username=form_pers.username.data)
+                            db.session.add(habiliter)
+                            db.session.commit()
+                        case "chimique":
+                            habiliter = HABILITER(idHabilitation=2, username=form_pers.username.data)
+                            db.session.add(habiliter)
+                            db.session.commit()
+                        case "biologique":
+                            habiliter = HABILITER(idHabilitation=3, username=form_pers.username.data)
+                            db.session.add(habiliter)
+                            db.session.commit()
+                        case "radiations":
+                            habiliter = HABILITER(idHabilitation=4, username=form_pers.username.data)
+                            db.session.add(habiliter)
+                            db.session.commit()
+
+                return redirect(url_for('index'))
+            else:
+                return render_template("add_personne.html", form_personne=form_pers, message_type='error', message="Le pseudo est déjà utilisé")
+
+        if request.method == 'POST':
+            return render_template(
+                "add_personne.html",
+                form_personne=form_pers,
+                message_type='error')
+
+        return render_template("add_personne.html", form_personne=form_pers)
+    else:
+        return redirect(url_for('login'))
+    
+    
+
 if __name__ == "__main__":
-    app.run()    
+    app.run()

@@ -122,7 +122,6 @@ class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
     
-<<<<<<< HEAD
 class Form_plateforme(FlaskForm):
     id_plateforme = HiddenField('id_plateforme')
     nom_plateforme = StringField('nom_plateforme', validators = [DataRequired()])
@@ -143,26 +142,35 @@ class FormPersonne(FlaskForm):
         choices=[],
         validators=[DataRequired()],
     )
-=======
+    
+    habilitations = MultiCheckboxField('Habilitations', choices=[
+        ('electrique', 'Électrique'),
+        ('chimique', 'Chimique'),
+        ('biologique', 'Biologique'),
+        ('radiations', 'Radiations')
+    ])
+        
+    def validate_habilitations(self, field):
+        if not field.data:
+            raise ValidationError("Sélectionnez au moins une habilitation")
+        
 class Form_materiel(FlaskForm):
     idMateriel = HiddenField()
     idPlateforme = HiddenField()
     nom_materiel = StringField('nom_materiel', validators=[DataRequired()])
     description_mat = StringField('description_mat')
     quantite_mat = IntegerField('quantite_mat', validators=[DataRequired()])                     
->>>>>>> feature/page-ajout-materiel
     habilitations = MultiCheckboxField('Habilitations', choices=[
-        ('electrique', 'Electrique'),
+        ('electrique', 'Électrique'),
         ('chimique', 'Chimique'),
         ('biologique', 'Biologique'),
-        ('radiation', 'Radiation')
+        ('radiations', 'Radiations')
     ])
         
     def validate_habilitations(self, field):
         if not field.data:
             raise ValidationError("Sélectionnez au moins une habilitation")
     
-<<<<<<< HEAD
 
 class CampagneForm(FlaskForm):
 
@@ -245,6 +253,3 @@ class MaintenanceForm(FlaskForm):
             idPlateforme=int(self.idPlateforme.data),
             statut=statut.PLANIFIEE,
         )
-=======
-        
->>>>>>> feature/page-ajout-materiel
