@@ -436,6 +436,7 @@ def traitements_adn():
 from datetime import datetime  # si ce n'est pas déjà importé
 
 @app.route("/view_resultats/", methods=["GET"])
+@login_required
 def resultat():
     if current_user.is_authenticated:
     
